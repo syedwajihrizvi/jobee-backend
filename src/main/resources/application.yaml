@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: Autohub
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
+  jwt:
+    secret: ${JWT_SECRET}
+    accessTokenExpiration: 86400000 # 1 day in milliseconds
+    refreshTokenExpiration: 604800000 # 7 days in milliseconds
+  jpa:
+    show-sql: true

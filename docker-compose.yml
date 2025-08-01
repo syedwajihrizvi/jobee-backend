@@ -1,0 +1,25 @@
+services:
+  db:
+    image: postgres:16
+    container_name: postgres_db
+    ports:
+      - 5432:5432
+    volumes:
+      - autohub:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: autohub
+      POSTGRES_USER: abrizvi
+      POSTGRES_PASSWORD: Password!
+  backend:
+    build: .
+    container_name: springboot_backend
+    ports:
+      - 8080:8080
+    volumes:
+      - .:/app
+    environment:
+      DATABASE_URL: jdbc:postgresql://localhost:5432/autohub
+      DATABASE_USER: abrizvi
+      DATABASE_PASSWORD: Password!
+volumes:
+  autohub:
