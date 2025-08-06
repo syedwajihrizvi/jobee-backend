@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.rizvi</groupId>
-	<artifactId>Autohub</artifactId>
+	<artifactId>jobee</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Autohub</name>
-	<description>Autohub Backend</description>
+	<name>NFL</name>
+	<description>jobee Backend</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -94,11 +94,6 @@
 			<version>1.6.3</version>
 		</dependency>
 		<dependency>
-			<groupId>org.mapstruct</groupId>
-			<artifactId>mapstruct-processor</artifactId>
-			<version>1.6.3</version>
-		</dependency>
-		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-impl</artifactId>
 			<version>0.12.6</version>
@@ -125,7 +120,7 @@
 				<groupId>org.flywaydb</groupId>
 				<artifactId>flyway-maven-plugin</artifactId>
 				<configuration>
-					<url>jdbc:postgresql://localhost:5432/autohub</url>
+					<url>jdbc:postgresql://localhost:5432/jobee</url>
 					<user>abrizvi</user>
 					<password>Password!</password>
 				</configuration>
@@ -147,9 +142,6 @@
 							<version>1.5.5.Final</version>
 						</path>
 					</annotationProcessorPaths>
-					<compilerArgs>
-						<arg>-Amapstruct.defaultComponentModel=spring</arg>
-					</compilerArgs>
 				</configuration>
 			</plugin>
 		</plugins>

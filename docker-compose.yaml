@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: jobee
+      POSTGRES_USER: abrizvi
+      POSTGRES_PASSWORD: Password!
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - jobee-network
+    container_name: jobee_postgres_db
+  backend:
+    build: .
+    environment:
+      DATABASE_URL: jdbc:postgresql://db:5432/jobee
+      DATABASE_USER: abrizvi
+      DATABASE_PASSWORD: Password!
+      JWT_SECRET: 06d508be1f0e59cb5bfde3e8f5f3872c34f48dbf14df9f2cc3c5c510e4988246
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+    networks:
+      - jobee-network
+    container_name: jobee_backend
+networks:
+  jobee-network:
+    driver: bridge
+volumes:
+  postgres_data:

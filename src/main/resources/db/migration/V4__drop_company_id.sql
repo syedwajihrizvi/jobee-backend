@@ -1,0 +1,5 @@
+ALTER TABLE jobs
+DROP COLUMN IF EXISTS company_id;
+
+ALTER TABLE jobs
+DROP CONSTRAINT IF EXISTS fk_jobs_company_id;

@@ -1,4 +1,5 @@
-# springboot-starter
-Contains basic pom.xml file along with everthing needed for User/Profiles.
-Login, Register routes are in place and all maven repos needed to entities and connection to PostGres are
-included as well.
+# Jobee Backend
+Springboot backend for Jobee. Contains docker-compose file for easy deployement.
+Simple have Docker installed on your PC and run 
+docker-compose up
+from the project directory

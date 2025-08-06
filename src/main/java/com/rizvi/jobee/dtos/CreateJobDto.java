@@ -1,0 +1,10 @@
+package com.rizvi.jobee.dtos;
+
+import lombok.Data;
+
+@Data
+public class CreateJobDto {
+    private String title;
+    private String description;
+    private Long businessAccountId;
+}
