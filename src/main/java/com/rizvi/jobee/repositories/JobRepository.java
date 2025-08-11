@@ -20,4 +20,7 @@ public interface JobRepository extends JpaRepository<Job, Long> {
             or lower(c.name) like lower(concat('%', :search, '%'))
             """)
     List<Job> findBySearch(@Param("search") String search);
+
+    @EntityGraph(attributePaths = { "businessAccount", "businessAccount.company", "tags" })
+    List<Job> findAll();
 }

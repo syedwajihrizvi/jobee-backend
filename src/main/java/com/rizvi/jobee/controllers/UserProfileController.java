@@ -1,6 +1,8 @@
 package com.rizvi.jobee.controllers;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +14,7 @@ import com.rizvi.jobee.dtos.UserProfileSummaryDto;
 import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.mappers.UserMapper;
+import com.rizvi.jobee.principals.CustomPrincipal;
 import com.rizvi.jobee.repositories.UserAccountRepository;
 import com.rizvi.jobee.repositories.UserProfileRepository;
 
@@ -25,11 +28,21 @@ public class UserProfileController {
         private final UserProfileRepository userProfileRepository;
         private final UserMapper userMapper;
 
+        @GetMapping("/me")
+        public ResponseEntity<UserProfileSummaryDto> getMyProfile(
+                        @AuthenticationPrincipal CustomPrincipal principal) {
+                System.out.println("Retrieving profile for user ID: " + principal.getId());
+                var userProfile = userProfileRepository.findByAccountId(principal.getId())
+                                .orElseThrow(() -> new AccountNotFoundException("User profile not found"));
+                var userProfileDto = userMapper.toProfileSummaryDto(userProfile);
+                System.out.println("Retrieved user profile: " + userProfileDto);
+                return ResponseEntity.ok(userProfileDto);
+        }
+
         @PostMapping()
         public ResponseEntity<UserProfileSummaryDto> createUserProfile(
                         @RequestBody CreateUserProfileDto request,
                         UriComponentsBuilder uriComponentsBuilder) throws RuntimeException {
-                System.out.println(request.getAccountId());
                 var userAccount = userAccountRepository.findById(request.getAccountId()).orElse(null);
                 if (userAccount == null) {
                         throw new AccountNotFoundException(
@@ -47,4 +60,5 @@ public class UserProfileController {
                 var userProfileDto = userMapper.toProfileSummaryDto(savedProfile);
                 return ResponseEntity.created(uri).body(userProfileDto);
         }
+
 }

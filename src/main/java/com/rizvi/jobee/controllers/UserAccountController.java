@@ -16,11 +16,13 @@ import com.rizvi.jobee.dtos.RegisterUserAccountDto;
 import com.rizvi.jobee.dtos.UserAccountSummaryDto;
 import com.rizvi.jobee.mappers.UserMapper;
 import com.rizvi.jobee.entities.UserAccount;
+import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.enums.Roles;
 import com.rizvi.jobee.exceptions.IncorrectEmailOrPasswordException;
 import com.rizvi.jobee.repositories.UserAccountRepository;
 import com.rizvi.jobee.services.JwtService;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
@@ -35,11 +37,15 @@ public class UserAccountController {
     private final JwtService jwtService;
 
     @PostMapping("/register")
+    @Transactional
     public ResponseEntity<UserAccountSummaryDto> registerUser(
             @RequestBody RegisterUserAccountDto request,
             UriComponentsBuilder uriComponentsBuilder) {
         var password = passwordEncoder.encode(request.getPassword());
         var userAccount = UserAccount.builder().email(request.getEmail()).password(password).build();
+        var userProfile = UserProfile.builder().firstName(request.getFirstName())
+                .lastName(request.getLastName()).age(request.getAge()).account(userAccount).build();
+        userAccount.setProfile(userProfile);
         userAccountRepository.save(userAccount);
         var userAccountDto = userMapper.toSummaryDto(userAccount);
         var uri = uriComponentsBuilder.path("/accounts/users/{id}")

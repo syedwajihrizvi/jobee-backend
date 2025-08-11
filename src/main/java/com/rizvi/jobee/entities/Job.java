@@ -4,14 +4,20 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.rizvi.jobee.enums.EmploymentType;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -43,6 +49,19 @@ public class Job {
     @Column(name = "created_at", nullable = true, insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "location", nullable = true)
+    private String location;
+
+    @Enumerated(value = EnumType.STRING)
+    @Column(name = "employment_type", nullable = true)
+    private EmploymentType employmentType;
+
+    @Column(name = "min_salary", nullable = true)
+    private Integer minSalary;
+
+    @Column(name = "max_salary", nullable = true)
+    private Integer maxSalary;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "business_account_id", nullable = false)
     private BusinessAccount businessAccount;
@@ -54,6 +73,11 @@ public class Job {
     @OneToMany(mappedBy = "job", orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @Builder.Default
     private Set<Interview> interviews = new HashSet<>();
+
+    @Builder.Default
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(name = "job_tags", joinColumns = @JoinColumn(name = "job_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    private Set<Tag> tags = new HashSet<>();
 
     public void setBusinessAccount(BusinessAccount businessAccount) {
         this.businessAccount = businessAccount;

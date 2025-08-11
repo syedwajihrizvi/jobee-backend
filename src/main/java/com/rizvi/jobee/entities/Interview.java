@@ -6,6 +6,8 @@ import com.rizvi.jobee.enums.InterviewStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -37,6 +39,7 @@ public class Interview {
     @Column(name = "description", nullable = false)
     private String description;
 
+    @Enumerated(value = EnumType.STRING)
     @Column(name = "status", nullable = false)
     private InterviewStatus status;
 

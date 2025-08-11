@@ -1,43 +1,43 @@
 package com.rizvi.jobee.entities;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
 @Getter
 @Setter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "user_accounts")
-public class UserAccount {
+@AllArgsConstructor
+@Entity
+@Table(name = "tags")
+public class Tag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", updatable = false, nullable = false)
+    @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "email", nullable = false)
-    private String email;
+    @Column(name = "name", nullable = false, unique = true)
+    private String name;
 
-    @Column(name = "password", nullable = false)
-    private String password;
+    @Column(name = "description", nullable = true)
+    private String description;
 
     @Column(name = "created_at", nullable = true, insertable = false, updatable = false)
     private LocalDate createdAt;
 
-    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
-    private UserProfile profile;
+    @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY)
+    private Set<Job> jobs = new HashSet<>();
 }

@@ -53,6 +53,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(c -> c.disable())
                 .authorizeHttpRequests(c -> c
+                        .requestMatchers(HttpMethod.GET, "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**")
+                        .permitAll()
                         .requestMatchers(HttpMethod.POST, "/business-accounts/register", "/business-accounts/login")
                         .permitAll()
                         .requestMatchers(HttpMethod.POST, "/accounts/register", "/accounts/login")
@@ -68,7 +70,8 @@ public class SecurityConfig {
                 .exceptionHandling(c -> {
                     c.authenticationEntryPoint(
                             new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
-                    c.accessDeniedHandler((_, response, _) -> response.setStatus(HttpStatus.FORBIDDEN.value()));
+                    c.accessDeniedHandler(
+                            (_, response, _) -> response.setStatus(HttpStatus.FORBIDDEN.value()));
                 });
         return http.build();
     }
