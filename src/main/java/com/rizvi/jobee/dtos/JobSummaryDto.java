@@ -15,5 +15,6 @@ public class JobSummaryDto {
     private String employmentType;
     private Integer minSalary;
     private Integer maxSalary;
+    private Integer experience;
     private List<TagDto> tags;
 }

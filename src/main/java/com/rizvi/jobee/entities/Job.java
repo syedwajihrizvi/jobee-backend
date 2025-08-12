@@ -62,6 +62,9 @@ public class Job {
     @Column(name = "max_salary", nullable = true)
     private Integer maxSalary;
 
+    @Column(name = "experience", nullable = false)
+    private Integer experience;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "business_account_id", nullable = false)
     private BusinessAccount businessAccount;

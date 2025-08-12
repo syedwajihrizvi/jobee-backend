@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,8 +18,10 @@ import com.rizvi.jobee.dtos.JobSummaryDto;
 import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.exceptions.BusinessNotFoundException;
 import com.rizvi.jobee.mappers.JobMapper;
+import com.rizvi.jobee.queries.JobQuery;
 import com.rizvi.jobee.repositories.BusinessAccountRepository;
 import com.rizvi.jobee.repositories.JobRepository;
+import com.rizvi.jobee.specifications.JobSpecifications;
 
 import lombok.AllArgsConstructor;
 
@@ -32,13 +35,11 @@ public class JobController {
 
     @GetMapping
     public ResponseEntity<List<JobSummaryDto>> getJobs(
+            @ModelAttribute JobQuery jobQuery,
             @RequestParam(required = false) String search) {
         List<Job> jobs = new ArrayList<>();
-        if (search == null) {
-            jobs = jobRepository.findAll();
-        } else {
-            jobs = jobRepository.findBySearch(search.toLowerCase().trim());
-        }
+        System.out.println(jobQuery);
+        jobs = jobRepository.findAll(JobSpecifications.withFilters(jobQuery));
         var jobDtos = jobs.stream()
                 .map(jobMapper::toSummaryDto)
                 .toList();
