@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +18,7 @@ import com.rizvi.jobee.dtos.CreateJobDto;
 import com.rizvi.jobee.dtos.JobSummaryDto;
 import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.exceptions.BusinessNotFoundException;
+import com.rizvi.jobee.exceptions.JobNotFoundException;
 import com.rizvi.jobee.mappers.JobMapper;
 import com.rizvi.jobee.queries.JobQuery;
 import com.rizvi.jobee.repositories.BusinessAccountRepository;
@@ -44,6 +46,15 @@ public class JobController {
                 .map(jobMapper::toSummaryDto)
                 .toList();
         return ResponseEntity.ok(jobDtos);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<JobSummaryDto> getJobById(@PathVariable("id") Long id) {
+        var job = jobRepository.findById(id).orElse(null);
+        if (job == null) {
+            throw new JobNotFoundException("Job not found with ID: " + id);
+        }
+        return ResponseEntity.ok(jobMapper.toSummaryDto(job));
     }
 
     @PostMapping
