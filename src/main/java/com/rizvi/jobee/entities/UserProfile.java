@@ -42,6 +42,9 @@ public class UserProfile {
     @Column(name = "age", nullable = false)
     private Integer age;
 
+    @Column(name = "summary", nullable = true)
+    private String summary;
+
     @OneToOne(optional = false)
     @JoinColumn(name = "account_id", nullable = false, unique = true)
     private UserAccount account;
@@ -49,6 +52,10 @@ public class UserProfile {
     @OneToMany(mappedBy = "candidate", orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @Builder.Default
     private Set<Interview> interviews = new HashSet<>();
+
+    @OneToMany(mappedBy = "user", orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @Builder.Default
+    private Set<UserDocument> documents = new HashSet<>();
 
     public void setAccount(UserAccount account) {
         this.account = account;

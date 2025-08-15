@@ -1,5 +1,7 @@
 package com.rizvi.jobee.controllers;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +29,17 @@ public class UserProfileController {
         private final UserAccountRepository userAccountRepository;
         private final UserProfileRepository userProfileRepository;
         private final UserMapper userMapper;
+
+        // TODO: Only ADMIN can accedd this endpoint - Update SecurityConfig
+        @GetMapping()
+        public ResponseEntity<List<UserProfileSummaryDto>> getAllProfiles() {
+                var userProfiles = userProfileRepository.findAll();
+                var userProfileDtos = userProfiles.stream()
+                                .map(userMapper::toProfileSummaryDto)
+                                .toList();
+                return ResponseEntity.ok(userProfileDtos);
+
+        }
 
         @GetMapping("/me")
         public ResponseEntity<UserProfileSummaryDto> getMyProfile(
