@@ -31,7 +31,7 @@ import lombok.Setter;
 public class UserDocument {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "document_type", nullable = false)

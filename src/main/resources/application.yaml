@@ -9,7 +9,14 @@ spring:
     password: ${DATABASE_PASSWORD:Password!}
   jwt:
     secret: ${JWT_SECRET:06d508be1f0e59cb5bfde3e8f5f3872c34f48dbf14df9f2cc3c5c510e4988246}
-    accessTokenExpiration: 86400000 # 1 day in milliseconds
-    refreshTokenExpiration: 604800000 # 7 days in milliseconds
+    # TODO: Change to proper expiration times
+    accessTokenExpiration: 604800000 # 7 days in milliseconds
+    refreshTokenExpiration: 2592000000 # 30 days in milliseconds
+cloud:
+  aws:
+    region: ${AWS_REGION:us-west-2}
+    bucket: ${AWS_S3_BUCKET:jobee-backend}
+    accessKey: ${AWS_ACCESS_KEY_ID:your-access-key-id}
+    secretKey: ${AWS_SECRET_ACCESS_KEY:your-secret-access-key}
   jpa:
     show-sql: true

@@ -44,11 +44,9 @@ public class UserProfileController {
         @GetMapping("/me")
         public ResponseEntity<UserProfileSummaryDto> getMyProfile(
                         @AuthenticationPrincipal CustomPrincipal principal) {
-                System.out.println("Retrieving profile for user ID: " + principal.getId());
                 var userProfile = userProfileRepository.findByAccountId(principal.getId())
                                 .orElseThrow(() -> new AccountNotFoundException("User profile not found"));
                 var userProfileDto = userMapper.toProfileSummaryDto(userProfile);
-                System.out.println("Retrieved user profile: " + userProfileDto);
                 return ResponseEntity.ok(userProfileDto);
         }
 

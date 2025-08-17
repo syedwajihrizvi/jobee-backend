@@ -39,6 +39,9 @@ public class UserProfile {
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
+    @Column(name = "title", nullable = true)
+    private String title;
+
     @Column(name = "age", nullable = false)
     private Integer age;
 
