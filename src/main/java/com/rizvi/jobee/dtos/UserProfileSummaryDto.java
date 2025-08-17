@@ -11,6 +11,7 @@ public class UserProfileSummaryDto {
     private Integer age;
     private String summary;
     private String title;
+    private String profileImageUrl;
     private List<UserDocumentDto> documents;
     private UserAccountSummaryDto account;
     private Boolean profileComplete;

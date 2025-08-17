@@ -62,6 +62,7 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers(HttpMethod.POST, "/user-documents").permitAll()
                         .requestMatchers(HttpMethod.GET, "/profiles/**").permitAll()
+                        .requestMatchers(HttpMethod.PATCH, "/profiles/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/jobs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/interviews").permitAll()
                         .requestMatchers(HttpMethod.GET, "/applications").permitAll()

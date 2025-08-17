@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
+import com.rizvi.jobee.exceptions.AmazonS3Exception;
 import com.rizvi.jobee.exceptions.CompanyNotFoundException;
 import com.rizvi.jobee.exceptions.IncorrectEmailOrPasswordException;
 
@@ -33,5 +34,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleIncorrectEmailOrPasswordException(
             IncorrectEmailOrPasswordException ex) {
         return ResponseEntity.badRequest().body(Map.of("Error", "Incorrect email or password: " + ex.getMessage()));
+    }
+
+    @ExceptionHandler(AmazonS3Exception.class)
+    public ResponseEntity<Map<String, String>> handleAmazonS3Exception(AmazonS3Exception ex) {
+        return ResponseEntity.internalServerError().body(Map.of("Error", "Amazon S3 error: " + ex.getMessage()));
     }
 }

@@ -48,6 +48,9 @@ public class UserProfile {
     @Column(name = "summary", nullable = true)
     private String summary;
 
+    @Column(name = "profile_image_url", nullable = true)
+    private String profileImageUrl;
+
     @OneToOne(optional = false)
     @JoinColumn(name = "account_id", nullable = false, unique = true)
     private UserAccount account;

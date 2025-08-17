@@ -27,7 +27,6 @@ public class UserDocumentController {
     public ResponseEntity<Void> createUserDocumentViaFile(
             @RequestParam("document") MultipartFile document,
             @RequestParam("documentType") String documentType) {
-        System.out.println("Document Data: " + document.getOriginalFilename());
         userDocumentService.uploadDocument(1L, document, UserDocumentType.valueOf(documentType));
         // Example document type
         // Get the user profile from principal and validate it exists
