@@ -11,6 +11,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -63,11 +65,33 @@ public class UserProfile {
     @Builder.Default
     private Set<UserDocument> documents = new HashSet<>();
 
+    @Builder.Default
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(name = "user_favorite_jobs", joinColumns = @JoinColumn(name = "user_profile_id"), inverseJoinColumns = @JoinColumn(name = "job_id"))
+    private Set<Job> favoriteJobs = new HashSet<>();
+
     public void setAccount(UserAccount account) {
         this.account = account;
     }
 
     public String getFullName() {
         return firstName + " " + lastName;
+    }
+
+    public void toggleFavoriteJob(Job job) {
+        if (job != null) {
+            if (this.favoriteJobs.contains(job)) {
+                this.favoriteJobs.remove(job);
+            } else {
+                this.favoriteJobs.add(job);
+            }
+        }
+    }
+
+    public void addDocument(UserDocument document) {
+        if (document != null) {
+            this.documents.add(document);
+            document.setUser(this);
+        }
     }
 }

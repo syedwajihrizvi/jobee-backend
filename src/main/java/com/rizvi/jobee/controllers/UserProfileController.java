@@ -1,7 +1,6 @@
 package com.rizvi.jobee.controllers;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,8 +19,10 @@ import com.rizvi.jobee.dtos.UserProfileSummaryDto;
 import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.AmazonS3Exception;
+import com.rizvi.jobee.exceptions.JobNotFoundException;
 import com.rizvi.jobee.mappers.UserMapper;
 import com.rizvi.jobee.principals.CustomPrincipal;
+import com.rizvi.jobee.repositories.JobRepository;
 import com.rizvi.jobee.repositories.UserAccountRepository;
 import com.rizvi.jobee.repositories.UserProfileRepository;
 import com.rizvi.jobee.services.S3Service;
@@ -35,6 +36,7 @@ import lombok.AllArgsConstructor;
 public class UserProfileController {
         private final UserAccountRepository userAccountRepository;
         private final UserProfileRepository userProfileRepository;
+        private final JobRepository jobRepository;
         private final UserMapper userMapper;
         private final S3Service s3Service;
 
@@ -102,5 +104,19 @@ public class UserProfileController {
                         throw new AmazonS3Exception(e.getMessage());
                 }
                 return ResponseEntity.ok().body(userMapper.toProfileSummaryDto(userProfile));
+        }
+
+        @PostMapping("/favorite-jobs")
+        public ResponseEntity<?> addFavoriteJob(
+                        @RequestParam Long jobId,
+                        @AuthenticationPrincipal CustomPrincipal principal) {
+                var userId = principal.getId();
+                var userProfile = userProfileRepository.findByAccountId(userId)
+                                .orElseThrow(() -> new AccountNotFoundException("User profile not found"));
+                var job = jobRepository.findById(jobId)
+                                .orElseThrow(() -> new JobNotFoundException("Job with ID " + jobId + " not found"));
+                userProfile.toggleFavoriteJob(job);
+                userProfileRepository.save(userProfile);
+                return ResponseEntity.ok().build();
         }
 }

@@ -12,14 +12,13 @@ import lombok.AllArgsConstructor;
 public class UserDocumentService {
     private final S3Service s3Service;
 
-    public boolean uploadDocument(
+    public String uploadDocument(
             Long userId, MultipartFile document, UserDocumentType documentType) {
-        System.out.println(document);
         try {
-            s3Service.uploadDocument(userId, document, documentType);
-            return true;
+            var result = s3Service.uploadDocument(userId, document, documentType);
+            return result;
         } catch (Exception e) {
-            return false;
+            return null;
         }
     }
 }

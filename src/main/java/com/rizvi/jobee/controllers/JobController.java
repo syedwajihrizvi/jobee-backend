@@ -17,12 +17,14 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.rizvi.jobee.dtos.CreateJobDto;
 import com.rizvi.jobee.dtos.JobSummaryDto;
 import com.rizvi.jobee.entities.Job;
+import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.BusinessNotFoundException;
 import com.rizvi.jobee.exceptions.JobNotFoundException;
 import com.rizvi.jobee.mappers.JobMapper;
 import com.rizvi.jobee.queries.JobQuery;
 import com.rizvi.jobee.repositories.BusinessAccountRepository;
 import com.rizvi.jobee.repositories.JobRepository;
+import com.rizvi.jobee.repositories.UserProfileRepository;
 import com.rizvi.jobee.specifications.JobSpecifications;
 
 import lombok.AllArgsConstructor;
@@ -33,6 +35,7 @@ import lombok.AllArgsConstructor;
 public class JobController {
     private final JobRepository jobRepository;
     private final BusinessAccountRepository businessAccountRepository;
+    private final UserProfileRepository userProfileRepository;
     private final JobMapper jobMapper;
 
     @GetMapping
@@ -43,6 +46,19 @@ public class JobController {
         System.out.println(jobQuery);
         jobs = jobRepository.findAll(JobSpecifications.withFilters(jobQuery));
         var jobDtos = jobs.stream()
+                .map(jobMapper::toSummaryDto)
+                .toList();
+        return ResponseEntity.ok(jobDtos);
+    }
+
+    @GetMapping("/favorites")
+    public ResponseEntity<List<JobSummaryDto>> getFavoriteJobs(
+            @RequestParam String userId) {
+        var userProfile = userProfileRepository.findByAccountId(Long.valueOf(userId))
+                .orElseThrow(() -> new AccountNotFoundException("User profile not found"));
+        List<Long> favoriteJobs = userProfile.getFavoriteJobs().stream().map((job) -> job.getId()).toList();
+        List<Job> jobs = jobRepository.findJobWithIdList(favoriteJobs);
+        List<JobSummaryDto> jobDtos = jobs.stream()
                 .map(jobMapper::toSummaryDto)
                 .toList();
         return ResponseEntity.ok(jobDtos);

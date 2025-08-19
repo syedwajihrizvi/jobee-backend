@@ -6,6 +6,7 @@ import lombok.Data;
 
 @Data
 public class UserProfileSummaryDto {
+    private Long id;
     private String firstName;
     private String lastName;
     private Integer age;
@@ -13,6 +14,7 @@ public class UserProfileSummaryDto {
     private String title;
     private String profileImageUrl;
     private List<UserDocumentDto> documents;
+    private List<JobIdDto> favoriteJobs;
     private UserAccountSummaryDto account;
     private Boolean profileComplete;
 }

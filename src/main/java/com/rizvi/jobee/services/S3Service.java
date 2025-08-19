@@ -19,7 +19,7 @@ public class S3Service {
 
         private AWSProperties awsProperties;
 
-        public void uploadDocument(
+        public String uploadDocument(
                         Long userId, MultipartFile document, UserDocumentType documentType) throws IOException {
                 final String key = "user-documents/" + documentType + "/" + userId + "/"
                                 + document.getOriginalFilename();
@@ -31,6 +31,7 @@ public class S3Service {
                                                 .build(),
                                 software.amazon.awssdk.core.sync.RequestBody.fromInputStream(document.getInputStream(),
                                                 document.getSize()));
+                return documentType + "/" + userId + "/" + document.getOriginalFilename();
         }
 
         public void uploadProfileImage(Long userId, MultipartFile profileImage) throws IOException {
