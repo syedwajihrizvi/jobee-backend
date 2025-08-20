@@ -1,0 +1,5 @@
+ALTER TABLE educations
+    DROP COLUMN IF EXISTS from_date,
+    DROP COLUMN IF EXISTS to_date,
+    ADD COLUMN IF NOT EXISTS from_year INT NOT NULL,
+    ADD COLUMN IF NOT EXISTS to_year INT NOT NULL;

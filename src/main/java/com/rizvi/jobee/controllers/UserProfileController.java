@@ -2,10 +2,13 @@ package com.rizvi.jobee.controllers;
 
 import java.util.List;
 
+import jakarta.transaction.Transactional;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.rizvi.jobee.dtos.CreateUserProfileDto;
+import com.rizvi.jobee.dtos.UpdateUserProfileGeneralInfoDto;
 import com.rizvi.jobee.dtos.UserProfileSummaryDto;
 import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
@@ -40,7 +44,6 @@ public class UserProfileController {
         private final UserMapper userMapper;
         private final S3Service s3Service;
 
-        // TODO: Only ADMIN can accedd this endpoint - Update SecurityConfig
         @GetMapping()
         public ResponseEntity<List<UserProfileSummaryDto>> getAllProfiles() {
                 var userProfiles = userProfileRepository.findAll();
@@ -49,6 +52,14 @@ public class UserProfileController {
                                 .toList();
                 return ResponseEntity.ok(userProfileDtos);
 
+        }
+
+        @GetMapping("/{id}")
+        public ResponseEntity<UserProfileSummaryDto> getProfileById(@PathVariable Long id) {
+                var userProfile = userProfileRepository.findById(id)
+                                .orElseThrow(() -> new AccountNotFoundException("User profile not found"));
+                var userProfileDto = userMapper.toProfileSummaryDto(userProfile);
+                return ResponseEntity.ok(userProfileDto);
         }
 
         @GetMapping("/me")
@@ -82,13 +93,25 @@ public class UserProfileController {
                 return ResponseEntity.created(uri).body(userProfileDto);
         }
 
+        @PostMapping("/favorite-jobs")
+        public ResponseEntity<?> addFavoriteJob(
+                        @RequestParam Long jobId,
+                        @AuthenticationPrincipal CustomPrincipal principal) {
+                var userId = principal.getId();
+                var userProfile = userProfileRepository.findByAccountId(userId)
+                                .orElseThrow(() -> new AccountNotFoundException("User profile not found"));
+                var job = jobRepository.findById(jobId)
+                                .orElseThrow(() -> new JobNotFoundException("Job with ID " + jobId + " not found"));
+                userProfile.toggleFavoriteJob(job);
+                userProfileRepository.save(userProfile);
+                return ResponseEntity.ok().build();
+        }
+
         @PatchMapping("/update-profile-image")
         @Operation(summary = "Update profile image")
         public ResponseEntity<UserProfileSummaryDto> updateProfileImage(
                         @RequestParam("profileImage") MultipartFile profileImage,
                         @AuthenticationPrincipal CustomPrincipal principal) throws AmazonS3Exception {
-                System.out.println("Updating profile image for user ID: " + principal.getId());
-                System.out.println(profileImage);
                 if (profileImage.isEmpty()) {
                         throw new IllegalArgumentException("Profile image file is empty");
                 }
@@ -106,17 +129,38 @@ public class UserProfileController {
                 return ResponseEntity.ok().body(userMapper.toProfileSummaryDto(userProfile));
         }
 
-        @PostMapping("/favorite-jobs")
-        public ResponseEntity<?> addFavoriteJob(
-                        @RequestParam Long jobId,
+        @PatchMapping("/update-general-info")
+        @Operation(summary = "Update general information of user profile")
+        @Transactional
+        public ResponseEntity<UserProfileSummaryDto> updateGeneralInfo(
+                        @RequestBody UpdateUserProfileGeneralInfoDto request,
                         @AuthenticationPrincipal CustomPrincipal principal) {
                 var userId = principal.getId();
                 var userProfile = userProfileRepository.findByAccountId(userId)
                                 .orElseThrow(() -> new AccountNotFoundException("User profile not found"));
-                var job = jobRepository.findById(jobId)
-                                .orElseThrow(() -> new JobNotFoundException("Job with ID " + jobId + " not found"));
-                userProfile.toggleFavoriteJob(job);
+                // Update the fields provided in the request
+                if (request.getFirstName() != null)
+                        userProfile.setFirstName(request.getFirstName());
+                if (request.getLastName() != null)
+                        userProfile.setLastName(request.getLastName());
+                if (request.getTitle() != null)
+                        userProfile.setTitle(request.getTitle());
+                if (request.getCompany() != null)
+                        userProfile.setCompany(request.getCompany());
+                if (request.getPhone() != null)
+                        userProfile.setPhoneNumber(request.getPhone());
+                if (request.getCity() != null)
+                        userProfile.setCity(request.getCity());
+                if (request.getCountry() != null)
+                        userProfile.setCountry(request.getCountry());
+                if (request.getEmail() != null) {
+                        var userAccount = userAccountRepository.findById(userId)
+                                        .orElseThrow(() -> new AccountNotFoundException("User account not found"));
+                        userAccount.setEmail(request.getEmail());
+                        userAccountRepository.save(userAccount);
+                }
                 userProfileRepository.save(userProfile);
-                return ResponseEntity.ok().build();
+                return ResponseEntity.ok().body(userMapper.toProfileSummaryDto(userProfile));
         }
+
 }

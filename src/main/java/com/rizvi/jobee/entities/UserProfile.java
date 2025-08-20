@@ -53,6 +53,18 @@ public class UserProfile {
     @Column(name = "profile_image_url", nullable = true)
     private String profileImageUrl;
 
+    @Column(name = "city", nullable = true)
+    private String city;
+
+    @Column(name = "country", nullable = true)
+    private String country;
+
+    @Column(name = "phone_number", nullable = true)
+    private String phoneNumber;
+
+    @Column(name = "company", nullable = true)
+    private String company;
+
     @OneToOne(optional = false)
     @JoinColumn(name = "account_id", nullable = false, unique = true)
     private UserAccount account;
@@ -69,6 +81,14 @@ public class UserProfile {
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(name = "user_favorite_jobs", joinColumns = @JoinColumn(name = "user_profile_id"), inverseJoinColumns = @JoinColumn(name = "job_id"))
     private Set<Job> favoriteJobs = new HashSet<>();
+
+    @OneToMany(mappedBy = "userProfile", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private Set<UserSkill> skills = new HashSet<>();
+
+    @OneToMany(mappedBy = "userProfile", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private Set<Education> education = new HashSet<>();
 
     public void setAccount(UserAccount account) {
         this.account = account;
@@ -92,6 +112,13 @@ public class UserProfile {
         if (document != null) {
             this.documents.add(document);
             document.setUser(this);
+        }
+    }
+
+    public void addSkill(UserSkill userSkill) {
+        if (userSkill != null) {
+            this.skills.add(userSkill);
+            userSkill.setUserProfile(this);
         }
     }
 }

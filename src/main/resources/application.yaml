@@ -1,6 +1,8 @@
 spring:
   flyway:
     enabled: false
+  jpa:
+    show-sql: true
   servlet:
     multipart:
       max-file-size: 10MB
@@ -22,5 +24,3 @@ cloud:
     bucket: ${AWS_S3_BUCKET:jobee-backend}
     accessKey: ${AWS_ACCESS_KEY_ID:your-access-key-id}
     secretKey: ${AWS_SECRET_ACCESS_KEY:your-secret-access-key}
-  jpa:
-    show-sql: true

@@ -11,6 +11,7 @@ import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.AmazonS3Exception;
 import com.rizvi.jobee.exceptions.CompanyNotFoundException;
 import com.rizvi.jobee.exceptions.IncorrectEmailOrPasswordException;
+import com.rizvi.jobee.exceptions.SkillNotFoundException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -39,5 +40,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AmazonS3Exception.class)
     public ResponseEntity<Map<String, String>> handleAmazonS3Exception(AmazonS3Exception ex) {
         return ResponseEntity.internalServerError().body(Map.of("Error", "Amazon S3 error: " + ex.getMessage()));
+    }
+
+    @ExceptionHandler(SkillNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleSkillNotFoundException(SkillNotFoundException ex) {
+        return ResponseEntity.badRequest().body(Map.of("Error", "Skill not found: " + ex.getMessage()));
     }
 }
