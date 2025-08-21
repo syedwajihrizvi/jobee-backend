@@ -3,10 +3,12 @@ package com.rizvi.jobee.mappers;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import com.rizvi.jobee.dtos.EducationDto;
 import com.rizvi.jobee.dtos.SkillDto;
 import com.rizvi.jobee.dtos.UserAccountSummaryDto;
 import com.rizvi.jobee.dtos.UserProfileSummaryDto;
 import com.rizvi.jobee.dtos.UserSkillDto;
+import com.rizvi.jobee.entities.Education;
 import com.rizvi.jobee.entities.Skill;
 import com.rizvi.jobee.entities.UserAccount;
 import com.rizvi.jobee.entities.UserProfile;
@@ -30,4 +32,6 @@ public interface UserMapper {
     UserSkillDto toUserSkillDto(UserSkill userSkill);
 
     SkillDto toSkillDto(Skill skill);
+
+    EducationDto toEducationDto(Education education);
 }

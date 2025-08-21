@@ -1,0 +1,2 @@
+ALTER TABLE educations
+ALTER COLUMN to_year DROP NOT NULL;

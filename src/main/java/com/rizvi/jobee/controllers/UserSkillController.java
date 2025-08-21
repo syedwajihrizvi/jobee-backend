@@ -3,6 +3,7 @@ package com.rizvi.jobee.controllers;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -19,7 +20,6 @@ import com.rizvi.jobee.repositories.UserProfileRepository;
 import com.rizvi.jobee.repositories.UserSkillRepository;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.AllArgsConstructor;
 
 @RestController
@@ -38,12 +38,15 @@ public class UserSkillController {
                         @AuthenticationPrincipal CustomPrincipal principal,
                         UriComponentsBuilder uriComponentsBuilder) throws RuntimeException {
                 var skillId = createUserSkillDto.getSkillId();
+                System.out.println(createUserSkillDto);
                 var userId = principal.getId();
                 var userProfile = userProfileRepository.findUserById(userId)
                                 .orElseThrow(() -> new AccountNotFoundException(
                                                 "User profile not found for user id: " + userId));
+                System.out.println("Skill ID: " + skillId);
                 var skill = skillRepository.findById(skillId)
                                 .orElseThrow(() -> new SkillNotFoundException(skillId));
+                System.out.println("Skill found: " + skill.getName());
                 var userSkill = userSkillRepository.findByUserProfileIdAndSkillId(userId, skillId);
                 if (userSkill != null) {
                         userSkill.setExperience(createUserSkillDto.getExperience());

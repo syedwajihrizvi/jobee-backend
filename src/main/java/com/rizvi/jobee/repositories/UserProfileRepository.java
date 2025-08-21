@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 import com.rizvi.jobee.entities.UserProfile;
 
 public interface UserProfileRepository extends JpaRepository<UserProfile, Long> {
-    @EntityGraph(attributePaths = { "account", "skills", "documents", "favoriteJobs", "education" })
+    @EntityGraph(attributePaths = { "account", "skills", "skills.skill", "documents", "favoriteJobs", "education" })
     @Query("select p from UserProfile p where p.account.id = :accountId")
     Optional<UserProfile> findByAccountId(@Param("accountId") Long accountId);
 

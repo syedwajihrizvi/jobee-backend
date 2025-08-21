@@ -19,6 +19,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.rizvi.jobee.dtos.CreateUserProfileDto;
 import com.rizvi.jobee.dtos.UpdateUserProfileGeneralInfoDto;
+import com.rizvi.jobee.dtos.UpdateUserProfileSummaryDto;
 import com.rizvi.jobee.dtos.UserProfileSummaryDto;
 import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
@@ -159,6 +160,18 @@ public class UserProfileController {
                         userAccount.setEmail(request.getEmail());
                         userAccountRepository.save(userAccount);
                 }
+                userProfileRepository.save(userProfile);
+                return ResponseEntity.ok().body(userMapper.toProfileSummaryDto(userProfile));
+        }
+
+        @PatchMapping("/update-summary")
+        @Operation(summary = "Update summary of user profile")
+        public ResponseEntity<UserProfileSummaryDto> updateSummary(
+                        @RequestBody UpdateUserProfileSummaryDto summaryDto) {
+                var userId = 5L;
+                var userProfile = userProfileRepository.findByAccountId(userId)
+                                .orElseThrow(() -> new AccountNotFoundException("User profile not found"));
+                userProfile.setSummary(summaryDto.getSummary());
                 userProfileRepository.save(userProfile);
                 return ResponseEntity.ok().body(userMapper.toProfileSummaryDto(userProfile));
         }

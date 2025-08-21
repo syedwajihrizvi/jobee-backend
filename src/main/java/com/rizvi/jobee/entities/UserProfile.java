@@ -121,4 +121,11 @@ public class UserProfile {
             userSkill.setUserProfile(this);
         }
     }
+
+    public void addEducation(Education education) {
+        if (education != null) {
+            this.education.add(education);
+            education.setUserProfile(this);
+        }
+    }
 }
