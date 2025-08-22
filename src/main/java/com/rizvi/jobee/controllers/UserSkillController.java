@@ -20,6 +20,7 @@ import com.rizvi.jobee.repositories.UserProfileRepository;
 import com.rizvi.jobee.repositories.UserSkillRepository;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 @RestController
@@ -33,21 +34,25 @@ public class UserSkillController {
 
         @PostMapping
         @Operation(summary = "Add skill to user profile")
+        @Transactional
         public ResponseEntity<UserSkillDto> addSkill(
                         @RequestBody CreateUserSkillDto createUserSkillDto,
                         @AuthenticationPrincipal CustomPrincipal principal,
                         UriComponentsBuilder uriComponentsBuilder) throws RuntimeException {
-                var skillId = createUserSkillDto.getSkillId();
+                var skillName = createUserSkillDto.getSkill();
                 System.out.println(createUserSkillDto);
                 var userId = principal.getId();
                 var userProfile = userProfileRepository.findUserById(userId)
                                 .orElseThrow(() -> new AccountNotFoundException(
                                                 "User profile not found for user id: " + userId));
-                System.out.println("Skill ID: " + skillId);
-                var skill = skillRepository.findById(skillId)
-                                .orElseThrow(() -> new SkillNotFoundException(skillId));
-                System.out.println("Skill found: " + skill.getName());
-                var userSkill = userSkillRepository.findByUserProfileIdAndSkillId(userId, skillId);
+                // Check if a skill with a name similar to the passed skill exists
+                var strippedSkillName = skillName.replace(" ", "").toLowerCase();
+                System.out.println("Stripped skill name: " + strippedSkillName);
+                var skill = skillRepository.findByNameLike(strippedSkillName);
+                if (skill == null) {
+                        throw new SkillNotFoundException("Skill not found with name: " + strippedSkillName);
+                }
+                var userSkill = userSkillRepository.findByUserProfileIdAndSkillId(userId, skill.getId());
                 if (userSkill != null) {
                         userSkill.setExperience(createUserSkillDto.getExperience());
                         userSkillRepository.save(userSkill);

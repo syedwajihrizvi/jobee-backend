@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class CreateUserSkillDto {
-    private Long skillId;
+    private String skill;
     private Long experience;
 }
