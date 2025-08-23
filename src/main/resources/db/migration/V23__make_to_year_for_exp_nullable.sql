@@ -1,0 +1,2 @@
+ALTER TABLE experiences
+ALTER COLUMN to_date DROP NOT NULL;

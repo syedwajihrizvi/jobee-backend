@@ -21,6 +21,7 @@ public class UserProfileSummaryDto {
     private List<JobIdDto> favoriteJobs;
     private List<UserSkillDto> skills;
     private List<EducationDto> education;
+    private List<ExperienceDto> experiences;
     private UserAccountSummaryDto account;
     private Boolean profileComplete;
 }

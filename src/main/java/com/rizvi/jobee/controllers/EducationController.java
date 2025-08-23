@@ -2,7 +2,9 @@ package com.rizvi.jobee.controllers;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,6 +15,7 @@ import com.rizvi.jobee.dtos.CreateEducationDto;
 import com.rizvi.jobee.dtos.EducationDto;
 import com.rizvi.jobee.entities.Education;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
+import com.rizvi.jobee.exceptions.EducationNotFoundException;
 import com.rizvi.jobee.mappers.UserMapper;
 import com.rizvi.jobee.principals.CustomPrincipal;
 import com.rizvi.jobee.repositories.EducationRepository;
@@ -21,7 +24,6 @@ import com.rizvi.jobee.repositories.UserProfileRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 
-// TODO: Implement the methods
 @RestController
 @AllArgsConstructor
 @RequestMapping("/profiles/education")
@@ -51,5 +53,18 @@ public class EducationController {
                 userProfileRepository.save(userProfile);
                 UriComponents uri = uriComponentsBuilder.path("/education/{id}").buildAndExpand(savedEducation.getId());
                 return ResponseEntity.created(uri.toUri()).body(userMapper.toEducationDto(savedEducation));
+        }
+
+        @PutMapping("/{id}")
+        public ResponseEntity<EducationDto> updateEducation(
+                        @PathVariable Long id,
+                        @RequestBody CreateEducationDto updatedEducationDto) throws RuntimeException {
+                var education = educationRepository.findById(id).orElseThrow(() -> new EducationNotFoundException(id));
+                education.setDegree(updatedEducationDto.getDegree());
+                education.setInstitution(updatedEducationDto.getInstitution());
+                education.setFromYear(updatedEducationDto.getFromYear());
+                education.setToYear(updatedEducationDto.getToYear());
+                var updatedEducation = educationRepository.save(education);
+                return ResponseEntity.ok(userMapper.toEducationDto(updatedEducation));
         }
 }

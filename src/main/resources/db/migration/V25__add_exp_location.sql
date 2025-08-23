@@ -1,0 +1,3 @@
+ALTER TABLE experiences
+    DROP COLUMN IF EXISTS location,
+    ADD COLUMN IF NOT EXISTS location VARCHAR(255);
