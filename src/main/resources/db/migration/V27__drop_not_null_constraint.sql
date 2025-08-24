@@ -1,0 +1,2 @@
+ALTER TABLE experiences
+    ALTER COLUMN to_year DROP NOT NULL;

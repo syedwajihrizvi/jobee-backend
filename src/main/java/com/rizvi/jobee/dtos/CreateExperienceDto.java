@@ -3,8 +3,7 @@ package com.rizvi.jobee.dtos;
 import lombok.Data;
 
 @Data
-public class ExperienceDto {
-    private Long id;
+public class CreateExperienceDto {
     private String title;
     private String description;
     private String company;
@@ -12,5 +11,4 @@ public class ExperienceDto {
     private String country;
     private Integer from;
     private Integer to;
-    private Boolean currentlyWorking;
 }

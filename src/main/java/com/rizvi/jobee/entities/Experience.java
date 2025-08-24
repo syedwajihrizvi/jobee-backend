@@ -43,8 +43,11 @@ public class Experience {
     @Column(name = "description", nullable = true)
     private String description;
 
-    @Column(name = "location", nullable = true)
-    private String location;
+    @Column(name = "city", nullable = true)
+    private String city;
+
+    @Column(name = "country", nullable = true)
+    private String country;
 
     @ManyToOne
     @JoinColumn(name = "user_profile_id", nullable = false)
