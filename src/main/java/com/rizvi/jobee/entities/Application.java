@@ -46,8 +46,16 @@ public class Application {
     private Job job;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_account_id", nullable = false)
-    private UserAccount userAccount;
+    @JoinColumn(name = "user_profile_id", nullable = false)
+    private UserProfile userProfile;
+
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "resume_document_id", nullable = false)
+    private UserDocument resumeDocument;
+
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "cover_letter_document_id", nullable = true)
+    private UserDocument coverLetterDocument;
 
     public void setJob(Job job) {
         this.job = job;

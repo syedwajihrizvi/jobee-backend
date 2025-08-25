@@ -16,7 +16,7 @@ import com.rizvi.jobee.entities.UserAccount;
 import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.entities.UserSkill;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = { UserDocumentMapper.class, ApplicationMapper.class })
 public interface UserMapper {
     UserAccountSummaryDto toSummaryDto(UserAccount userAccount);
 

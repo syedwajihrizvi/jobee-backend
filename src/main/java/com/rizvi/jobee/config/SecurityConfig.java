@@ -75,7 +75,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/applications").permitAll()
                         .requestMatchers(HttpMethod.POST, "/jobs").hasAuthority(Roles.BUSINESS.name())
                         .requestMatchers(HttpMethod.DELETE, "/jobs/**").hasAuthority(Roles.BUSINESS.name())
-                        .requestMatchers(HttpMethod.POST, "/applications").hasAuthority(Roles.USER.name())
+                        .requestMatchers(HttpMethod.POST, "/applications").permitAll()
                         .requestMatchers(HttpMethod.POST, "/interviews").hasAuthority(Roles.BUSINESS.name()))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(c -> {

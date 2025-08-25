@@ -22,6 +22,7 @@ public class UserProfileSummaryDto {
     private List<UserSkillDto> skills;
     private List<EducationDto> education;
     private List<ExperienceDto> experiences;
+    private List<UserApplicationDto> applications;
     private UserAccountSummaryDto account;
     private Boolean profileComplete;
 }

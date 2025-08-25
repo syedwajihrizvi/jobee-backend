@@ -94,6 +94,10 @@ public class UserProfile {
     @Builder.Default
     private Set<Experience> experiences = new HashSet<>();
 
+    @OneToMany(mappedBy = "userProfile", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private Set<Application> applications = new HashSet<>();
+
     public void setAccount(UserAccount account) {
         this.account = account;
     }

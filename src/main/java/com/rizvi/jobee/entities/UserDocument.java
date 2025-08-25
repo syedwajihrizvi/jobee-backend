@@ -46,4 +46,13 @@ public class UserDocument {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private UserProfile user;
+
+    public String getFileName() {
+        if (documentUrl == null || !documentUrl.contains("/")) {
+            return documentUrl;
+        }
+        var res = documentUrl.substring(documentUrl.lastIndexOf('/') + 1, documentUrl.lastIndexOf('.'));
+        System.out.println("SYED-DEBUG: " + res);
+        return res;
+    }
 }

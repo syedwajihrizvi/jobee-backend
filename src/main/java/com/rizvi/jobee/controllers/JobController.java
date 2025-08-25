@@ -16,6 +16,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.rizvi.jobee.dtos.CreateJobDto;
 import com.rizvi.jobee.dtos.JobSummaryDto;
+import com.rizvi.jobee.entities.Application;
 import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.BusinessNotFoundException;
@@ -46,6 +47,19 @@ public class JobController {
         System.out.println(jobQuery);
         jobs = jobRepository.findAll(JobSpecifications.withFilters(jobQuery));
         var jobDtos = jobs.stream()
+                .map(jobMapper::toSummaryDto)
+                .toList();
+        return ResponseEntity.ok(jobDtos);
+    }
+
+    @GetMapping("/applied")
+    public ResponseEntity<List<JobSummaryDto>> getAppliedJobs(
+            @RequestParam String userId) {
+        var userProfile = userProfileRepository.findByAccountId(Long.valueOf(userId))
+                .orElseThrow(() -> new AccountNotFoundException("User profile not found"));
+        List<Long> appliedJobs = userProfile.getApplications().stream().map((app) -> app.getJob().getId()).toList();
+        List<Job> jobs = jobRepository.findJobWithIdList(appliedJobs);
+        List<JobSummaryDto> jobDtos = jobs.stream()
                 .map(jobMapper::toSummaryDto)
                 .toList();
         return ResponseEntity.ok(jobDtos);

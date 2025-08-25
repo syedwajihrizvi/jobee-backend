@@ -25,31 +25,32 @@ import lombok.AllArgsConstructor;
 @RequestMapping("/user-documents")
 public class UserDocumentController {
 
-    private final UserDocumentService userDocumentService;
-    private final UserProfileRepository userProfileRepository;
-    private final UserDocumentMapper userDocumentMapper;
+        private final UserDocumentService userDocumentService;
+        private final UserProfileRepository userProfileRepository;
+        private final UserDocumentMapper userDocumentMapper;
 
-    @PostMapping()
-    @Operation(summary = "Create a user document via file")
-    public ResponseEntity<?> createUserDocumentViaFile(
-            @RequestParam("document") MultipartFile document,
-            @RequestParam("documentType") String documentType,
-            @AuthenticationPrincipal CustomPrincipal principal,
-            UriComponentsBuilder uriComponentsBuilder) throws RuntimeException {
-        Long userId = principal.getId();
-        var result = userDocumentService.uploadDocument(userId, document, UserDocumentType.valueOf(documentType));
-        if (result == null) {
-            return ResponseEntity.badRequest().build();
+        @PostMapping()
+        @Operation(summary = "Create a user document via file")
+        public ResponseEntity<?> createUserDocumentViaFile(
+                        @RequestParam("document") MultipartFile document,
+                        @RequestParam("documentType") String documentType,
+                        @AuthenticationPrincipal CustomPrincipal principal,
+                        UriComponentsBuilder uriComponentsBuilder) throws RuntimeException {
+                Long userId = principal.getId();
+                var result = userDocumentService.uploadDocument(userId, document,
+                                UserDocumentType.valueOf(documentType));
+                if (result == null) {
+                        return ResponseEntity.badRequest().build();
+                }
+                var userProfile = userProfileRepository.findById(userId).orElseThrow(
+                                () -> new AccountNotFoundException("User profile not found"));
+                var userDocument = UserDocument.builder().documentType(UserDocumentType.valueOf(documentType))
+                                .documentUrl(result).user(userProfile).build();
+                userProfile.addDocument(userDocument);
+                userProfileRepository.save(userProfile);
+                var uri = uriComponentsBuilder.path("/user-documents/{id}")
+                                .buildAndExpand(userDocument.getId())
+                                .toUri();
+                return ResponseEntity.created(uri).body(userDocumentMapper.toDto(userDocument));
         }
-        var userProfile = userProfileRepository.findById(userId).orElseThrow(
-                () -> new AccountNotFoundException("User profile not found"));
-        var userDocument = UserDocument.builder().documentType(UserDocumentType.valueOf(documentType))
-                .documentUrl(result).user(userProfile).build();
-        userProfile.addDocument(userDocument);
-        userProfileRepository.save(userProfile);
-        var uri = uriComponentsBuilder.path("/user-documents/{id}")
-                .buildAndExpand(userDocument.getId())
-                .toUri();
-        return ResponseEntity.created(uri).body(userDocumentMapper.toDto(userDocument));
-    }
 }
