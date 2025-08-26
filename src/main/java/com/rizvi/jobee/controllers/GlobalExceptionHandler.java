@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
+import com.rizvi.jobee.exceptions.AlreadyRegisteredException;
 import com.rizvi.jobee.exceptions.AmazonS3Exception;
 import com.rizvi.jobee.exceptions.CompanyNotFoundException;
 import com.rizvi.jobee.exceptions.IncorrectEmailOrPasswordException;
@@ -45,5 +46,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(SkillNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleSkillNotFoundException(SkillNotFoundException ex) {
         return ResponseEntity.badRequest().body(Map.of("Error", "Skill not found: " + ex.getMessage()));
+    }
+
+    @ExceptionHandler(AlreadyRegisteredException.class)
+    public ResponseEntity<Map<String, String>> handleAlreadyRegisteredException(AlreadyRegisteredException ex) {
+        return ResponseEntity.badRequest().body(Map.of("Error", "Already registered: " + ex.getMessage()));
     }
 }

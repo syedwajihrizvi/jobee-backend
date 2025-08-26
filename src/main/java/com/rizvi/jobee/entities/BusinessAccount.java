@@ -3,9 +3,13 @@ package com.rizvi.jobee.entities;
 import java.time.LocalDate;
 import java.util.Set;
 
+import com.rizvi.jobee.enums.BusinessType;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -37,6 +41,10 @@ public class BusinessAccount {
 
     @Column(name = "password", nullable = false)
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "account_type", nullable = false)
+    private BusinessType accountType;;
 
     @ManyToOne
     @JoinColumn(name = "company_id", nullable = false)

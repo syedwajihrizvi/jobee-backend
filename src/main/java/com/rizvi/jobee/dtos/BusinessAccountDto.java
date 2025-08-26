@@ -3,8 +3,8 @@ package com.rizvi.jobee.dtos;
 import lombok.Data;
 
 @Data
-public class CreateBusinessAccountDto {
+public class BusinessAccountDto {
+    private Long id;
     private String email;
-    private String password;
     private String companyName;
 }

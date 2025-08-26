@@ -1,5 +1,6 @@
 package com.rizvi.jobee.entities;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import jakarta.persistence.CascadeType;
@@ -33,6 +34,12 @@ public class Company {
     private String name;
 
     @OneToMany(mappedBy = "company", orphanRemoval = true, cascade = CascadeType.ALL)
-    private Set<BusinessAccount> businessAccounts;
+    @Builder.Default
+    private Set<BusinessAccount> businessAccounts = new HashSet<>();
+
+    public void addBusinessAccount(BusinessAccount account) {
+        businessAccounts.add(account);
+        account.setCompany(this);
+    }
 
 }
