@@ -7,4 +7,5 @@ public class BusinessAccountDto {
     private Long id;
     private String email;
     private String companyName;
+    private Long companyId;
 }

@@ -17,4 +17,9 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
     @EntityGraph(attributePaths = { "businessAccount", "businessAccount.company", "tags" })
     @Query("select j from Job j where j.id in :jobIds")
     List<Job> findJobWithIdList(List<Long> jobIds);
+
+    @EntityGraph(attributePaths = { "businessAccount", "businessAccount.company",
+            "applications" })
+    @Query("select j from Job j where j.businessAccount.company.id = :companyId")
+    List<Job> findByCompanyId(Long companyId);
 }

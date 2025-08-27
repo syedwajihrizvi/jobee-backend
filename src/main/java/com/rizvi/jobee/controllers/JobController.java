@@ -16,7 +16,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.rizvi.jobee.dtos.CreateJobDto;
 import com.rizvi.jobee.dtos.JobSummaryDto;
-import com.rizvi.jobee.entities.Application;
+import com.rizvi.jobee.dtos.JobSummaryForBusinessDto;
 import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.BusinessNotFoundException;
@@ -44,7 +44,6 @@ public class JobController {
             @ModelAttribute JobQuery jobQuery,
             @RequestParam(required = false) String search) {
         List<Job> jobs = new ArrayList<>();
-        System.out.println(jobQuery);
         jobs = jobRepository.findAll(JobSpecifications.withFilters(jobQuery));
         var jobDtos = jobs.stream()
                 .map(jobMapper::toSummaryDto)
@@ -63,6 +62,13 @@ public class JobController {
                 .map(jobMapper::toSummaryDto)
                 .toList();
         return ResponseEntity.ok(jobDtos);
+    }
+
+    @GetMapping("/companies/{companyId}")
+    public ResponseEntity<List<JobSummaryForBusinessDto>> getJobsByCompany(@PathVariable Long companyId) {
+        var jobs = jobRepository.findByCompanyId(companyId);
+        var jobDto = jobs.stream().map(jobMapper::toSummaryForBusinessDto).toList();
+        return ResponseEntity.ok(jobDto);
     }
 
     @GetMapping("/favorites")
@@ -107,4 +113,5 @@ public class JobController {
         return ResponseEntity.created(uri).body(jobMapper.toSummaryDto(savedJob));
 
     }
+
 }

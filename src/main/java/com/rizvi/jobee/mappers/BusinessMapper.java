@@ -9,5 +9,6 @@ import com.rizvi.jobee.entities.BusinessAccount;
 @Mapper(componentModel = "spring")
 public interface BusinessMapper {
     @Mapping(target = "companyName", source = "company.name")
+    @Mapping(target = "companyId", source = "company.id")
     BusinessAccountDto toDto(BusinessAccount businessAccount);
 }

@@ -1,8 +1,11 @@
 package com.rizvi.jobee.controllers;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticatedPrincipal;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +23,7 @@ import com.rizvi.jobee.enums.Roles;
 import com.rizvi.jobee.exceptions.AlreadyRegisteredException;
 import com.rizvi.jobee.exceptions.IncorrectEmailOrPasswordException;
 import com.rizvi.jobee.mappers.BusinessMapper;
+import com.rizvi.jobee.principals.CustomPrincipal;
 import com.rizvi.jobee.repositories.BusinessAccountRepository;
 import com.rizvi.jobee.repositories.CompanyRepository;
 import com.rizvi.jobee.services.JwtService;
@@ -76,4 +80,14 @@ public class BusinessAccountController {
         return ResponseEntity.ok(new JwtDto(jwtToken));
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<BusinessAccountDto> getCurrentBusinessAccount(
+            @AuthenticationPrincipal CustomPrincipal principal) {
+        var userId = principal.getId();
+        var businessAccount = businessAccountRepository.findById(userId).orElse(null);
+        if (businessAccount == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(businessMapper.toDto(businessAccount));
+    }
 }
