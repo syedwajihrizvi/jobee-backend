@@ -1,6 +1,7 @@
 package com.rizvi.jobee.repositories;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -22,4 +23,8 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
             "applications" })
     @Query("select j from Job j where j.businessAccount.company.id = :companyId")
     List<Job> findByCompanyId(Long companyId);
+
+    @EntityGraph(attributePaths = { "applications", "applications.userProfile" })
+    @Query("select j from Job j where j.id = :jobId")
+    Optional<Job> findDetailedJobById(Long jobId);
 }

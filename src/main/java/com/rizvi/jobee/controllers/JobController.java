@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.rizvi.jobee.dtos.CreateJobDto;
+import com.rizvi.jobee.dtos.JobDetailedSummaryForBusinessDto;
 import com.rizvi.jobee.dtos.JobSummaryDto;
 import com.rizvi.jobee.dtos.JobSummaryForBusinessDto;
 import com.rizvi.jobee.entities.Job;
@@ -64,11 +65,20 @@ public class JobController {
         return ResponseEntity.ok(jobDtos);
     }
 
-    @GetMapping("/companies/{companyId}")
+    @GetMapping("/companies/{companyId}/jobs")
     public ResponseEntity<List<JobSummaryForBusinessDto>> getJobsByCompany(@PathVariable Long companyId) {
         var jobs = jobRepository.findByCompanyId(companyId);
         var jobDto = jobs.stream().map(jobMapper::toSummaryForBusinessDto).toList();
         return ResponseEntity.ok(jobDto);
+    }
+
+    @GetMapping("/companies/{companyId}/jobs/{jobId}")
+    public ResponseEntity<JobDetailedSummaryForBusinessDto> getDetailedJobForBusiness(
+            @PathVariable Long companyId, @PathVariable Long jobId) {
+        var job = jobRepository.findDetailedJobById(jobId).orElseThrow(
+                () -> new JobNotFoundException("Job not found"));
+        System.out.println("Ran");
+        return ResponseEntity.ok(jobMapper.toDetailedSummaryForBusinessDto(job));
     }
 
     @GetMapping("/favorites")

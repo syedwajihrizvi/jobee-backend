@@ -70,6 +70,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/profiles/skills").permitAll()
                         .requestMatchers(HttpMethod.POST, "/profiles/favorite-jobs").permitAll()
                         .requestMatchers(HttpMethod.POST, "/profiles/education").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/jobs/companies/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/jobs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/jobs/favorites").permitAll()
                         .requestMatchers(HttpMethod.GET, "/interviews").permitAll()
