@@ -11,4 +11,7 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     // Additional query methods can be defined here if needed
     @EntityGraph(attributePaths = { "job", "job.businessAccount", "job.businessAccount.company" })
     List<Application> findByUserProfile(UserProfile userProfile);
+
+    @EntityGraph(attributePaths = { "userProfile", "userProfile.account" })
+    List<Application> findByJobId(Long jobId);
 }

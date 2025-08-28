@@ -24,7 +24,7 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
     @Query("select j from Job j where j.businessAccount.company.id = :companyId")
     List<Job> findByCompanyId(Long companyId);
 
-    @EntityGraph(attributePaths = { "applications", "applications.userProfile" })
+    @EntityGraph(attributePaths = { "applications", "tags" })
     @Query("select j from Job j where j.id = :jobId")
     Optional<Job> findDetailedJobById(Long jobId);
 }

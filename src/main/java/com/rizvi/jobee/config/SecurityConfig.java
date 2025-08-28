@@ -75,6 +75,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/jobs/favorites").permitAll()
                         .requestMatchers(HttpMethod.GET, "/interviews").permitAll()
                         .requestMatchers(HttpMethod.GET, "/applications").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/applications/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/jobs").hasAuthority(Roles.BUSINESS.name())
                         .requestMatchers(HttpMethod.DELETE, "/jobs/**").hasAuthority(Roles.BUSINESS.name())
                         .requestMatchers(HttpMethod.POST, "/applications").permitAll()

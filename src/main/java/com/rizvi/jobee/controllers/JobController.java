@@ -77,7 +77,7 @@ public class JobController {
             @PathVariable Long companyId, @PathVariable Long jobId) {
         var job = jobRepository.findDetailedJobById(jobId).orElseThrow(
                 () -> new JobNotFoundException("Job not found"));
-        System.out.println("Ran");
+
         return ResponseEntity.ok(jobMapper.toDetailedSummaryForBusinessDto(job));
     }
 

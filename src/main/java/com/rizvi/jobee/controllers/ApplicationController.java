@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,11 +13,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.rizvi.jobee.dtos.ApplicantSummaryForBusinessDto;
 import com.rizvi.jobee.dtos.ApplicationDto;
 import com.rizvi.jobee.dtos.CreateApplicationDto;
 import com.rizvi.jobee.dtos.JobApplicationStatusDto;
 import com.rizvi.jobee.entities.Application;
-import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.exceptions.JobNotFoundException;
 import com.rizvi.jobee.exceptions.UserDocumentNotFoundException;
 import com.rizvi.jobee.mappers.ApplicationMapper;
@@ -61,6 +62,14 @@ public class ApplicationController {
         }
         var applications = applicationRepository.findAll();
         var applicationDtos = applications.stream().map(applicationMapper::toDto).toList();
+        return ResponseEntity.ok(applicationDtos);
+    }
+
+    @GetMapping("/job/{id}")
+    public ResponseEntity<List<ApplicantSummaryForBusinessDto>> getApplicationsForJobs(
+            @PathVariable Long id) {
+        var applications = applicationRepository.findByJobId(id);
+        var applicationDtos = applications.stream().map(applicationMapper::toApplicantSummaryForBusinessDto).toList();
         return ResponseEntity.ok(applicationDtos);
     }
 

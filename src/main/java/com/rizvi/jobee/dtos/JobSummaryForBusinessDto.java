@@ -9,9 +9,10 @@ public class JobSummaryForBusinessDto {
     private Long id;
     private String title;
     private String location;
+    private String description;
     private Number applicants;
-    private Number minSalary;
-    private Number maxSalary;
+    private Integer minSalary;
+    private Integer maxSalary;
     private String businessName;
     private String employmentType;
     private LocalDateTime createdAt;

@@ -446,148 +446,247 @@
 -- (99, 99, 'Crest', 'Graham', 33, 'Strategic partnerships director with alliance management.', 'Partnerships Director', '+1-555-0199', 'Seattle', 'USA'),
 -- (100, 100, 'Dawn', 'Sullivan', 29, 'Innovation manager with emerging technology expertise.', 'Innovation Manager', '+1-555-0200', 'Portland', 'USA'); 
 
-INSERT INTO applications (id, job_id, status, created_at, resume_document_id, cover_letter_document_id, user_profile_id) VALUES
--- Job 51 (Software Engineer) - 15 applicants
-(1, 51, 'PENDING', NOW(), 2, 4, 2),
-(2, 51, 'PENDING', NOW(), 2, NULL, 7),
-(3, 51, 'PENDING', NOW(), 2, 4, 23),
-(4, 51, 'PENDING', NOW(), 2, NULL, 47),
-(6, 51, 'PENDING', NOW(), 2, NULL, 55),
-(7, 51, 'PENDING', NOW(), 2, 4, 71),
-(8, 51, 'PENDING', NOW(), 2, NULL, 72),
-(9, 51, 'PENDING', NOW(), 2, 4, 81),
-(10, 51, 'PENDING', NOW(), 2, NULL, 84),
-(11, 51, 'PENDING', NOW(), 2, 4, 88),
-(12, 51, 'PENDING', NOW(), 2, NULL, 89),
-(13, 51, 'PENDING', NOW(), 2, 4, 92),
-(14, 51, 'PENDING', NOW(), 2, NULL, 95),
-(15, 51, 'PENDING', NOW(), 2, 4, 98),
+-- INSERT INTO applications (id, job_id, status, created_at, resume_document_id, cover_letter_document_id, user_profile_id) VALUES
+-- -- Job 51 (Software Engineer) - 15 applicants
+-- (1, 51, 'PENDING', NOW(), 2, 4, 2),
+-- (2, 51, 'PENDING', NOW(), 2, NULL, 7),
+-- (3, 51, 'PENDING', NOW(), 2, 4, 23),
+-- (4, 51, 'PENDING', NOW(), 2, NULL, 47),
+-- (6, 51, 'PENDING', NOW(), 2, NULL, 55),
+-- (7, 51, 'PENDING', NOW(), 2, 4, 71),
+-- (8, 51, 'PENDING', NOW(), 2, NULL, 72),
+-- (9, 51, 'PENDING', NOW(), 2, 4, 81),
+-- (10, 51, 'PENDING', NOW(), 2, NULL, 84),
+-- (11, 51, 'PENDING', NOW(), 2, 4, 88),
+-- (12, 51, 'PENDING', NOW(), 2, NULL, 89),
+-- (13, 51, 'PENDING', NOW(), 2, 4, 92),
+-- (14, 51, 'PENDING', NOW(), 2, NULL, 95),
+-- (15, 51, 'PENDING', NOW(), 2, 4, 98),
 
--- Job 52 (Data Scientist) - 12 applicants
-(16, 52, 'PENDING', NOW(), 2, 4, 2),
-(17, 52, 'PENDING', NOW(), 2, NULL, 10),
-(18, 52, 'PENDING', NOW(), 2, 4, 18),
-(19, 52, 'PENDING', NOW(), 2, NULL, 26),
-(20, 52, 'PENDING', NOW(), 2, 4, 52),
-(21, 52, 'PENDING', NOW(), 2, NULL, 61),
-(22, 52, 'PENDING', NOW(), 2, 4, 62),
-(23, 52, 'PENDING', NOW(), 2, NULL, 69),
-(24, 52, 'PENDING', NOW(), 2, 4, 79),
-(25, 52, 'PENDING', NOW(), 2, NULL, 82),
-(26, 52, 'PENDING', NOW(), 2, 4, 96),
-(27, 52, 'PENDING', NOW(), 2, NULL, 100),
+-- -- Job 52 (Data Scientist) - 12 applicants
+-- (16, 52, 'PENDING', NOW(), 2, 4, 2),
+-- (17, 52, 'PENDING', NOW(), 2, NULL, 10),
+-- (18, 52, 'PENDING', NOW(), 2, 4, 18),
+-- (19, 52, 'PENDING', NOW(), 2, NULL, 26),
+-- (20, 52, 'PENDING', NOW(), 2, 4, 52),
+-- (21, 52, 'PENDING', NOW(), 2, NULL, 61),
+-- (22, 52, 'PENDING', NOW(), 2, 4, 62),
+-- (23, 52, 'PENDING', NOW(), 2, NULL, 69),
+-- (24, 52, 'PENDING', NOW(), 2, 4, 79),
+-- (25, 52, 'PENDING', NOW(), 2, NULL, 82),
+-- (26, 52, 'PENDING', NOW(), 2, 4, 96),
+-- (27, 52, 'PENDING', NOW(), 2, NULL, 100),
 
--- Job 53 (Product Manager) - 18 applicants
-(28, 53, 'PENDING', NOW(), 2, 4, 3),
-(29, 53, 'PENDING', NOW(), 2, NULL, 11),
-(30, 53, 'PENDING', NOW(), 2, 4, 12),
-(31, 53, 'PENDING', NOW(), 2, NULL, 17),
-(32, 53, 'PENDING', NOW(), 2, 4, 18),
-(33, 53, 'PENDING', NOW(), 2, NULL, 53),
-(34, 53, 'PENDING', NOW(), 2, 4, 56),
-(35, 53, 'PENDING', NOW(), 2, NULL, 68),
-(36, 53, 'PENDING', NOW(), 2, 4, 72),
-(37, 53, 'PENDING', NOW(), 2, NULL, 75),
-(38, 53, 'PENDING', NOW(), 2, 4, 77),
-(39, 53, 'PENDING', NOW(), 2, NULL, 78),
-(40, 53, 'PENDING', NOW(), 2, 4, 80),
-(41, 53, 'PENDING', NOW(), 2, NULL, 89),
-(42, 53, 'PENDING', NOW(), 2, 4, 93),
-(43, 53, 'PENDING', NOW(), 2, NULL, 94),
-(44, 53, 'PENDING', NOW(), 2, 4, 97),
-(45, 53, 'PENDING', NOW(), 2, NULL, 99),
+-- -- Job 53 (Product Manager) - 18 applicants
+-- (28, 53, 'PENDING', NOW(), 2, 4, 3),
+-- (29, 53, 'PENDING', NOW(), 2, NULL, 11),
+-- (30, 53, 'PENDING', NOW(), 2, 4, 12),
+-- (31, 53, 'PENDING', NOW(), 2, NULL, 17),
+-- (32, 53, 'PENDING', NOW(), 2, 4, 18),
+-- (33, 53, 'PENDING', NOW(), 2, NULL, 53),
+-- (34, 53, 'PENDING', NOW(), 2, 4, 56),
+-- (35, 53, 'PENDING', NOW(), 2, NULL, 68),
+-- (36, 53, 'PENDING', NOW(), 2, 4, 72),
+-- (37, 53, 'PENDING', NOW(), 2, NULL, 75),
+-- (38, 53, 'PENDING', NOW(), 2, 4, 77),
+-- (39, 53, 'PENDING', NOW(), 2, NULL, 78),
+-- (40, 53, 'PENDING', NOW(), 2, 4, 80),
+-- (41, 53, 'PENDING', NOW(), 2, NULL, 89),
+-- (42, 53, 'PENDING', NOW(), 2, 4, 93),
+-- (43, 53, 'PENDING', NOW(), 2, NULL, 94),
+-- (44, 53, 'PENDING', NOW(), 2, 4, 97),
+-- (45, 53, 'PENDING', NOW(), 2, NULL, 99),
 
--- Job 54 (UX Designer) - 14 applicants
-(46, 54, 'PENDING', NOW(), 2, 4, 7),
-(47, 54, 'PENDING', NOW(), 2, NULL, 13),
-(48, 54, 'PENDING', NOW(), 2, 4, 49),
-(49, 54, 'PENDING', NOW(), 2, NULL, 50),
-(50, 54, 'PENDING', NOW(), 2, 4, 63),
-(51, 54, 'PENDING', NOW(), 2, NULL, 68),
-(52, 54, 'PENDING', NOW(), 2, 4, 73),
-(53, 54, 'PENDING', NOW(), 2, NULL, 83),
-(54, 54, 'PENDING', NOW(), 2, 4, 22),
-(55, 54, 'PENDING', NOW(), 2, NULL, 36),
-(56, 54, 'PENDING', NOW(), 2, 4, 54),
-(57, 54, 'PENDING', NOW(), 2, NULL, 85),
-(58, 54, 'PENDING', NOW(), 2, 4, 87),
-(59, 54, 'PENDING', NOW(), 2, NULL, 97),
+-- -- Job 54 (UX Designer) - 14 applicants
+-- (46, 54, 'PENDING', NOW(), 2, 4, 7),
+-- (47, 54, 'PENDING', NOW(), 2, NULL, 13),
+-- (48, 54, 'PENDING', NOW(), 2, 4, 49),
+-- (49, 54, 'PENDING', NOW(), 2, NULL, 50),
+-- (50, 54, 'PENDING', NOW(), 2, 4, 63),
+-- (51, 54, 'PENDING', NOW(), 2, NULL, 68),
+-- (52, 54, 'PENDING', NOW(), 2, 4, 73),
+-- (53, 54, 'PENDING', NOW(), 2, NULL, 83),
+-- (54, 54, 'PENDING', NOW(), 2, 4, 22),
+-- (55, 54, 'PENDING', NOW(), 2, NULL, 36),
+-- (56, 54, 'PENDING', NOW(), 2, 4, 54),
+-- (57, 54, 'PENDING', NOW(), 2, NULL, 85),
+-- (58, 54, 'PENDING', NOW(), 2, 4, 87),
+-- (59, 54, 'PENDING', NOW(), 2, NULL, 97),
 
--- Job 55 (DevOps Engineer) - 16 applicants
-(60, 55, 'PENDING', NOW(), 2, 4, 8),
-(61, 55, 'PENDING', NOW(), 2, NULL, 25),
-(62, 55, 'PENDING', NOW(), 2, 4, 27),
-(63, 55, 'PENDING', NOW(), 2, NULL, 55),
-(64, 55, 'PENDING', NOW(), 2, 4, 64),
-(65, 55, 'PENDING', NOW(), 2, NULL, 70),
-(66, 55, 'PENDING', NOW(), 2, 4, 74),
-(67, 55, 'PENDING', NOW(), 2, NULL, 78),
-(68, 55, 'PENDING', NOW(), 2, 4, 81),
-(69, 55, 'PENDING', NOW(), 2, NULL, 86),
-(70, 55, 'PENDING', NOW(), 2, 4, 88),
-(71, 55, 'PENDING', NOW(), 2, NULL, 92),
-(72, 55, 'PENDING', NOW(), 2, 4, 95),
-(73, 55, 'PENDING', NOW(), 2, NULL, 51),
-(74, 55, 'PENDING', NOW(), 2, 4, 71),
-(75, 55, 'PENDING', NOW(), 2, NULL, 84),
+-- -- Job 55 (DevOps Engineer) - 16 applicants
+-- (60, 55, 'PENDING', NOW(), 2, 4, 8),
+-- (61, 55, 'PENDING', NOW(), 2, NULL, 25),
+-- (62, 55, 'PENDING', NOW(), 2, 4, 27),
+-- (63, 55, 'PENDING', NOW(), 2, NULL, 55),
+-- (64, 55, 'PENDING', NOW(), 2, 4, 64),
+-- (65, 55, 'PENDING', NOW(), 2, NULL, 70),
+-- (66, 55, 'PENDING', NOW(), 2, 4, 74),
+-- (67, 55, 'PENDING', NOW(), 2, NULL, 78),
+-- (68, 55, 'PENDING', NOW(), 2, 4, 81),
+-- (69, 55, 'PENDING', NOW(), 2, NULL, 86),
+-- (70, 55, 'PENDING', NOW(), 2, 4, 88),
+-- (71, 55, 'PENDING', NOW(), 2, NULL, 92),
+-- (72, 55, 'PENDING', NOW(), 2, 4, 95),
+-- (73, 55, 'PENDING', NOW(), 2, NULL, 51),
+-- (74, 55, 'PENDING', NOW(), 2, 4, 71),
+-- (75, 55, 'PENDING', NOW(), 2, NULL, 84),
 
--- Job 56 (Marketing Manager) - 13 applicants
-(76, 56, 'PENDING', NOW(), 2, 4, 38),
-(77, 56, 'PENDING', NOW(), 2, NULL, 39),
-(78, 56, 'PENDING', NOW(), 2, 4, 40),
-(79, 56, 'PENDING', NOW(), 2, NULL, 43),
-(80, 56, 'PENDING', NOW(), 2, 4, 56),
-(81, 56, 'PENDING', NOW(), 2, NULL, 65),
-(82, 56, 'PENDING', NOW(), 2, 4, 75),
-(83, 56, 'PENDING', NOW(), 2, NULL, 85),
-(84, 56, 'PENDING', NOW(), 2, 4, 87),
-(85, 56, 'PENDING', NOW(), 2, NULL, 15),
-(86, 56, 'PENDING', NOW(), 2, 4, 45),
-(87, 56, 'PENDING', NOW(), 2, NULL, 93),
-(88, 56, 'PENDING', NOW(), 2, 4, 97),
+-- -- Job 56 (Marketing Manager) - 13 applicants
+-- (76, 56, 'PENDING', NOW(), 2, 4, 38),
+-- (77, 56, 'PENDING', NOW(), 2, NULL, 39),
+-- (78, 56, 'PENDING', NOW(), 2, 4, 40),
+-- (79, 56, 'PENDING', NOW(), 2, NULL, 43),
+-- (80, 56, 'PENDING', NOW(), 2, 4, 56),
+-- (81, 56, 'PENDING', NOW(), 2, NULL, 65),
+-- (82, 56, 'PENDING', NOW(), 2, 4, 75),
+-- (83, 56, 'PENDING', NOW(), 2, NULL, 85),
+-- (84, 56, 'PENDING', NOW(), 2, 4, 87),
+-- (85, 56, 'PENDING', NOW(), 2, NULL, 15),
+-- (86, 56, 'PENDING', NOW(), 2, 4, 45),
+-- (87, 56, 'PENDING', NOW(), 2, NULL, 93),
+-- (88, 56, 'PENDING', NOW(), 2, 4, 97),
 
--- Job 57 (Sales Executive) - 11 applicants
-(89, 57, 'PENDING', NOW(), 2, 4, 57),
-(90, 57, 'PENDING', NOW(), 2, NULL, 75),
-(91, 57, 'PENDING', NOW(), 2, 4, 82),
-(92, 57, 'PENDING', NOW(), 2, NULL, 94),
-(93, 57, 'PENDING', NOW(), 2, 4, 99),
-(94, 57, 'PENDING', NOW(), 2, NULL, 11),
-(95, 57, 'PENDING', NOW(), 2, 4, 17),
-(96, 57, 'PENDING', NOW(), 2, NULL, 37),
-(97, 57, 'PENDING', NOW(), 2, 4, 44),
-(98, 57, 'PENDING', NOW(), 2, NULL, 56),
-(99, 57, 'PENDING', NOW(), 2, 4, 61),
+-- -- Job 57 (Sales Executive) - 11 applicants
+-- (89, 57, 'PENDING', NOW(), 2, 4, 57),
+-- (90, 57, 'PENDING', NOW(), 2, NULL, 75),
+-- (91, 57, 'PENDING', NOW(), 2, 4, 82),
+-- (92, 57, 'PENDING', NOW(), 2, NULL, 94),
+-- (93, 57, 'PENDING', NOW(), 2, 4, 99),
+-- (94, 57, 'PENDING', NOW(), 2, NULL, 11),
+-- (95, 57, 'PENDING', NOW(), 2, 4, 17),
+-- (96, 57, 'PENDING', NOW(), 2, NULL, 37),
+-- (97, 57, 'PENDING', NOW(), 2, 4, 44),
+-- (98, 57, 'PENDING', NOW(), 2, NULL, 56),
+-- (99, 57, 'PENDING', NOW(), 2, 4, 61),
 
--- Job 58 (Customer Support Specialist) - 10 applicants
-(100, 58, 'PENDING', NOW(), 2, 4, 6),
-(101, 58, 'PENDING', NOW(), 2, NULL, 14),
-(102, 58, 'PENDING', NOW(), 2, 4, 58),
-(103, 58, 'PENDING', NOW(), 2, NULL, 84),
-(104, 58, 'PENDING', NOW(), 2, 4, 65),
-(105, 58, 'PENDING', NOW(), 2, NULL, 16),
-(106, 58, 'PENDING', NOW(), 2, 4, 20),
-(107, 58, 'PENDING', NOW(), 2, NULL, 66),
-(108, 58, 'PENDING', NOW(), 2, 4, 76),
-(109, 58, 'PENDING', NOW(), 2, NULL, 90),
+-- -- Job 58 (Customer Support Specialist) - 10 applicants
+-- (100, 58, 'PENDING', NOW(), 2, 4, 6),
+-- (101, 58, 'PENDING', NOW(), 2, NULL, 14),
+-- (102, 58, 'PENDING', NOW(), 2, 4, 58),
+-- (103, 58, 'PENDING', NOW(), 2, NULL, 84),
+-- (104, 58, 'PENDING', NOW(), 2, 4, 65),
+-- (105, 58, 'PENDING', NOW(), 2, NULL, 16),
+-- (106, 58, 'PENDING', NOW(), 2, 4, 20),
+-- (107, 58, 'PENDING', NOW(), 2, NULL, 66),
+-- (108, 58, 'PENDING', NOW(), 2, 4, 76),
+-- (109, 58, 'PENDING', NOW(), 2, NULL, 90),
 
--- Job 59 (Content Writer) - 8 applicants
-(110, 59, 'PENDING', NOW(), 2, 4, 9),
-(111, 59, 'PENDING', NOW(), 2, NULL, 15),
-(112, 59, 'PENDING', NOW(), 2, 4, 39),
-(113, 59, 'PENDING', NOW(), 2, NULL, 40),
-(114, 59, 'PENDING', NOW(), 2, 4, 43),
-(115, 59, 'PENDING', NOW(), 2, NULL, 59),
-(116, 59, 'PENDING', NOW(), 2, 4, 65),
-(117, 59, 'PENDING', NOW(), 2, NULL, 73),
+-- -- Job 59 (Content Writer) - 8 applicants
+-- (110, 59, 'PENDING', NOW(), 2, 4, 9),
+-- (111, 59, 'PENDING', NOW(), 2, NULL, 15),
+-- (112, 59, 'PENDING', NOW(), 2, 4, 39),
+-- (113, 59, 'PENDING', NOW(), 2, NULL, 40),
+-- (114, 59, 'PENDING', NOW(), 2, 4, 43),
+-- (115, 59, 'PENDING', NOW(), 2, NULL, 59),
+-- (116, 59, 'PENDING', NOW(), 2, 4, 65),
+-- (117, 59, 'PENDING', NOW(), 2, NULL, 73),
 
--- Job 60 (Financial Analyst) - 9 applicants
-(118, 60, 'PENDING', NOW(), 2, 4, 10),
-(119, 60, 'PENDING', NOW(), 2, NULL, 60),
-(120, 60, 'PENDING', NOW(), 2, 4, 79),
-(121, 60, 'PENDING', NOW(), 2, NULL, 82),
-(122, 60, 'PENDING', NOW(), 2, 4, 91),
-(123, 60, 'PENDING', NOW(), 2, NULL, 96),
-(124, 60, 'PENDING', NOW(), 2, 4, 19),
-(125, 60, 'PENDING', NOW(), 2, NULL, 67),
-(126, 60, 'PENDING', NOW(), 2, 4, 80);
+-- -- Job 60 (Financial Analyst) - 9 applicants
+-- (118, 60, 'PENDING', NOW(), 2, 4, 10),
+-- (119, 60, 'PENDING', NOW(), 2, NULL, 60),
+-- (120, 60, 'PENDING', NOW(), 2, 4, 79),
+-- (121, 60, 'PENDING', NOW(), 2, NULL, 82),
+-- (122, 60, 'PENDING', NOW(), 2, 4, 91),
+-- (123, 60, 'PENDING', NOW(), 2, NULL, 96),
+-- (124, 60, 'PENDING', NOW(), 2, 4, 19),
+-- (125, 60, 'PENDING', NOW(), 2, NULL, 67),
+-- (126, 60, 'PENDING', NOW(), 2, 4, 80);
+
+--   1 | Software Development     | Jobs related to software development and engineering.      | 2025-08-10 21:23:58.842378
+--   2 | Data Science             | Jobs in data analysis and data science.                    | 2025-08-10 21:23:58.842378
+--   3 | Project Management       | Roles focused on managing projects and teams.              | 2025-08-10 21:23:58.842378
+--   4 | Marketing                | Positions in marketing and advertising.                    | 2025-08-10 21:23:58.842378
+--   5 | Sales                    | Jobs in sales and business development.                    | 2025-08-10 21:23:58.842378
+--   6 | Customer Support         | Roles in customer service and support.                     | 2025-08-10 21:23:58.842378
+--   7 | Design                   | Jobs in UX/UI and graphic design.                          | 2025-08-10 21:23:58.842378
+--   8 | DevOps                   | Positions related to DevOps and infrastructure management. | 2025-08-10 21:23:58.842378
+--   9 | Content Creation         | Roles in content writing and creation.                     | 2025-08-10 21:23:58.842378
+--  10 | Finance                  | Jobs in finance and accounting.                            | 2025-08-10 21:23:58.842378
+--  11 | Remote                   | Job is fully remote and can be done from anywhere.         | 2025-08-10 21:23:58.842378
+--  12 | Hybrid                   | Job allows a mix of remote and in-office work.             | 2025-08-10 21:23:58.842378
+--  13 | Contract                 | Temporary positions with a defined end date.               | 2025-08-10 21:23:58.842378
+--  14 | Full-Time                | Permanent positions with full-time hours.                  | 2025-08-10 21:23:58.842378
+--  15 | Part-Time                | Positions with reduced hours compared to full-time.        | 2025-08-10 21:23:58.842378
+--  16 | Internship               | Entry-level positions for students or recent graduates.    | 2025-08-10 21:23:58.842378
+--  17 | Freelance                | Independent contractor roles with flexible hours.          | 2025-08-10 21:23:58.842378
+--  18 | Cybersecurity            | Jobs focused on protecting systems and data.               | 2025-08-10 21:23:58.842378
+--  19 | AI & Machine Learning    | Positions in artificial intelligence and machine learning. | 2025-08-10 21:23:58.842378
+--  20 | Blockchain               | Roles related to blockchain technology and development.    | 2025-08-10 21:23:58.842378
+--  21 | Cloud Computing          | Jobs in cloud services and architecture.                   | 2025-08-10 21:23:58.842378
+--  22 | Big Data                 | Positions in big data technologies and analytics.          | 2025-08-10 21:23:58.842378
+--  23 | IoT                      | Jobs related to Internet of Things technologies.           | 2025-08-10 21:23:58.842378
+--  24 | Virtual Reality          | Roles in virtual reality development.                      | 2025-08-10 21:23:58.842378
+--  25 | Augmented Reality        | Positions in augmented reality applications.               | 2025-08-10 21:23:58.842378
+--  26 | Robotics                 | Jobs in robotics engineering and development.              | 2025-08-10 21:23:58.842378
+--  27 | 3D Printing              | Roles related to 3D printing technology.                   | 2025-08-10 21:23:58.842378
+--  28 | Quantum Computing        | Positions in quantum computing research and development.   | 2025-08-10 21:23:58.842378
+--  29 | Aerospace                | Jobs in aerospace engineering and technology.              | 2025-08-10 21:23:58.842378
+--  30 | Renewable Energy         | Roles focused on renewable energy solutions.               | 2025-08-10 21:23:58.842378
+--  31 | Smart Home               | Jobs in smart home technology and solutions.               | 2025-08-10 21:23:58.842378
+--  32 | Wearable Technology      | Positions in wearable tech development.                    | 2025-08-10 21:23:58.842378
+--  33 | E-commerce               | Roles in online retail and e-commerce platforms.           | 2025-08-10 21:23:58.842378
+--  34 | Digital Marketing        | Jobs in digital marketing and online advertising.          | 2025-08-10 21:23:58.842378
+--  35 | Social Media             | Positions focused on social media management and strategy. | 2025-08-10 21:23:58.842378
+--  36 | SEO & SEM                | Jobs in search engine optimization and marketing.          | 2025-08-10 21:23:58.842378
+--  37 | Email Marketing          | Roles in email marketing campaigns and strategies.         | 2025-08-10 21:23:58.842378
+--  38 | Affiliate Marketing      | Positions in affiliate marketing programs.                 | 2025-08-10 21:23:58.842378
+--  39 | Influencer Marketing     | Jobs related to influencer partnerships and campaigns.     | 2025-08-10 21:23:58.842378
+--  40 | Web Development          | Roles in web development and programming.                  | 2025-08-10 21:23:58.842378
+--  41 | App Development          | Positions in mobile app development.                       | 2025-08-10 21:23:58.842378
+--  42 | Game Development         | Jobs in video game design and development.                 | 2025-08-10 21:23:58.842378
+--  43 | UI/UX Design             | Roles in user interface and user experience design.        | 2025-08-10 21:23:58.842378
+--  44 | Graphic Design           | Jobs in graphic design and visual communication.           | 2025-08-10 21:23:58.842378
+--  45 | HR & Recruitment         | Positions in human resources and recruitment.              | 2025-08-10 21:23:58.842378
+--  46 | Legal                    | Jobs in legal services and compliance.                     | 2025-08-10 21:23:58.842378
+--  47 | Healthcare               | Roles in healthcare and medical services.                  | 2025-08-10 21:23:58.842378
+--  48 | Education                | Positions in education and training.                       | 2025-08-10 21:23:58.842378
+--  49 | Non-Profit               | Jobs in non-profit organizations and social causes.        | 2025-08-10 21:23:58.842378
+--  50 | Logistics & Supply Chain | Roles in logistics and supply chain management.            | 2025-08-10 21:23:58.842378
+
+-- Map tags to jobs 51-60
+INSERT INTO job_tags (job_id, tag_id) VALUES
+-- Job 51 (Software Engineer)
+(51, 1),   -- Software Development
+(51, 14),  -- Full-Time
+
+-- Job 52 (Data Scientist)
+(52, 2),   -- Data Science
+(52, 14),  -- Full-Time
+(52, 19),  -- AI & Machine Learning
+
+-- Job 53 (Product Manager)
+(53, 3),   -- Project Management
+(53, 14),  -- Full-Time
+
+-- Job 54 (UX Designer)
+(54, 7),   -- Design
+(54, 43),  -- UI/UX Design
+(54, 11),  -- Remote
+(54, 14),  -- Full-Time
+
+-- Job 55 (DevOps Engineer)
+(55, 8),   -- DevOps
+(55, 21),  -- Cloud Computing
+(55, 14),  -- Full-Time
+
+-- Job 56 (Marketing Manager)
+(56, 4),   -- Marketing
+(56, 34),  -- Digital Marketing
+(56, 14),  -- Full-Time
+
+-- Job 57 (Sales Executive)
+(57, 5),   -- Sales
+(57, 14),  -- Full-Time
+
+-- Job 58 (Customer Support Specialist)
+(58, 6),   -- Customer Support
+(58, 14),  -- Full-Time
+
+-- Job 59 (Content Writer)
+(59, 9),   -- Content Creation
+(59, 11),  -- Remote
+(59, 17),  -- Freelance
+
+-- Job 60 (Financial Analyst)
+(60, 10),  -- Finance
+(60, 14);  -- Full-Time
