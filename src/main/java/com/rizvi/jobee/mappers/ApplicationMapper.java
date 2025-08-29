@@ -2,13 +2,15 @@ package com.rizvi.jobee.mappers;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.springframework.data.jpa.repository.EntityGraph;
 
 import com.rizvi.jobee.dtos.ApplicantSummaryForBusinessDto;
+import com.rizvi.jobee.dtos.ApplicationDetailsForBusinessDto;
 import com.rizvi.jobee.dtos.ApplicationDto;
 import com.rizvi.jobee.dtos.UserApplicationDto;
 import com.rizvi.jobee.entities.Application;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = { UserProfileMapper.class })
 public interface ApplicationMapper {
     @Mapping(target = "jobId", source = "job.id")
     @Mapping(target = "jobTitle", source = "job.title")
@@ -31,4 +33,10 @@ public interface ApplicationMapper {
     @Mapping(target = "profileSummary", source = "userProfile.summary")
     @Mapping(target = "title", source = "userProfile.title")
     ApplicantSummaryForBusinessDto toApplicantSummaryForBusinessDto(Application application);
+
+    @EntityGraph(attributePaths = { "userProfile", "userProfile.account", "resumeDocument", "coverLetterDocument" })
+    @Mapping(target = "appliedAt", source = "createdAt")
+    @Mapping(target = "resumeUrl", source = "application.resumeDocument.documentUrl")
+    @Mapping(target = "coverLetterUrl", source = "application.coverLetterDocument.documentUrl")
+    ApplicationDetailsForBusinessDto toApplicationDetailsForBusinessDto(Application application);
 }

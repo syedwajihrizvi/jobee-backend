@@ -59,9 +59,6 @@ public class UserProfileController {
         public ResponseEntity<UserProfileSummaryDto> getProfileById(@PathVariable Long id) {
                 var userProfile = userProfileRepository.findById(id)
                                 .orElseThrow(() -> new AccountNotFoundException("User profile not found"));
-                for (var document : userProfile.getDocuments()) {
-                        System.out.println("SYED-DEBUG: " + document.getFileName());
-                }
                 var userProfileDto = userMapper.toProfileSummaryDto(userProfile);
                 return ResponseEntity.ok(userProfileDto);
         }

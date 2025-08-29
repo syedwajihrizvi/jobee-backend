@@ -14,12 +14,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.rizvi.jobee.dtos.ApplicantSummaryForBusinessDto;
+import com.rizvi.jobee.dtos.ApplicationDetailsForBusinessDto;
 import com.rizvi.jobee.dtos.ApplicationDto;
 import com.rizvi.jobee.dtos.CreateApplicationDto;
 import com.rizvi.jobee.dtos.JobApplicationStatusDto;
 import com.rizvi.jobee.entities.Application;
 import com.rizvi.jobee.exceptions.JobNotFoundException;
 import com.rizvi.jobee.exceptions.UserDocumentNotFoundException;
+import com.rizvi.jobee.exceptions.ApplicationNotFoundException;
 import com.rizvi.jobee.mappers.ApplicationMapper;
 import com.rizvi.jobee.mappers.JobMapper;
 import com.rizvi.jobee.principals.CustomPrincipal;
@@ -29,6 +31,7 @@ import com.rizvi.jobee.repositories.JobRepository;
 import com.rizvi.jobee.repositories.UserDocumentRepository;
 import com.rizvi.jobee.repositories.UserProfileRepository;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
@@ -63,6 +66,15 @@ public class ApplicationController {
         var applications = applicationRepository.findAll();
         var applicationDtos = applications.stream().map(applicationMapper::toDto).toList();
         return ResponseEntity.ok(applicationDtos);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "For business users to get full applicatio details about a user")
+    public ResponseEntity<ApplicationDetailsForBusinessDto> getApplication(
+            @PathVariable Long id) {
+        var application = applicationRepository.findById(id).orElseThrow(
+                () -> new ApplicationNotFoundException("Application with ID " + id + " not found"));
+        return ResponseEntity.ok(applicationMapper.toApplicationDetailsForBusinessDto(application));
     }
 
     @GetMapping("/job/{id}")

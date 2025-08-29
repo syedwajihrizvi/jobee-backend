@@ -16,7 +16,7 @@ import com.rizvi.jobee.dtos.EducationDto;
 import com.rizvi.jobee.entities.Education;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.EducationNotFoundException;
-import com.rizvi.jobee.mappers.UserMapper;
+import com.rizvi.jobee.mappers.EducationMapper;
 import com.rizvi.jobee.principals.CustomPrincipal;
 import com.rizvi.jobee.repositories.EducationRepository;
 import com.rizvi.jobee.repositories.UserProfileRepository;
@@ -30,7 +30,7 @@ import lombok.AllArgsConstructor;
 public class EducationController {
         private final UserProfileRepository userProfileRepository;
         private final EducationRepository educationRepository;
-        private final UserMapper userMapper;
+        private final EducationMapper educationMapper;
 
         @PostMapping
         @Operation(summary = "Add education information")
@@ -52,7 +52,7 @@ public class EducationController {
                 var savedEducation = educationRepository.save(education);
                 userProfileRepository.save(userProfile);
                 UriComponents uri = uriComponentsBuilder.path("/education/{id}").buildAndExpand(savedEducation.getId());
-                return ResponseEntity.created(uri.toUri()).body(userMapper.toEducationDto(savedEducation));
+                return ResponseEntity.created(uri.toUri()).body(educationMapper.toEducationDto(savedEducation));
         }
 
         @PutMapping("/{id}")
@@ -65,6 +65,6 @@ public class EducationController {
                 education.setFromYear(updatedEducationDto.getFromYear());
                 education.setToYear(updatedEducationDto.getToYear());
                 var updatedEducation = educationRepository.save(education);
-                return ResponseEntity.ok(userMapper.toEducationDto(updatedEducation));
+                return ResponseEntity.ok(educationMapper.toEducationDto(updatedEducation));
         }
 }

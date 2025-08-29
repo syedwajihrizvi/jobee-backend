@@ -18,7 +18,7 @@ import com.rizvi.jobee.dtos.ExperienceDto;
 import com.rizvi.jobee.entities.Experience;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.ExperienceNotFoundException;
-import com.rizvi.jobee.mappers.UserMapper;
+import com.rizvi.jobee.mappers.ExperienceMapper;
 import com.rizvi.jobee.principals.CustomPrincipal;
 import com.rizvi.jobee.repositories.ExperienceRepository;
 import com.rizvi.jobee.repositories.UserProfileRepository;
@@ -32,13 +32,11 @@ import lombok.AllArgsConstructor;
 public class ExperienceController {
     private final ExperienceRepository experienceRepository;
     private final UserProfileRepository userProfileRepository;
-    private final UserMapper userMapper;
+    private final ExperienceMapper experienceMapper;
 
-    // TODO: Implement the methods
-    // GET, POST, PUT, DELTETE
     @GetMapping
     public ResponseEntity<List<ExperienceDto>> getExperiences() {
-        var experiences = experienceRepository.findAll().stream().map(userMapper::toExperienceDto).toList();
+        var experiences = experienceRepository.findAll().stream().map(experienceMapper::toExperienceDto).toList();
         return ResponseEntity.ok(experiences);
     }
 
@@ -62,7 +60,7 @@ public class ExperienceController {
         var uri = uriComponentsBuilder.path("/profiles/experience/{id}")
                 .buildAndExpand(savedExperience.getId())
                 .toUri();
-        return ResponseEntity.created(uri).body(userMapper.toExperienceDto(savedExperience));
+        return ResponseEntity.created(uri).body(experienceMapper.toExperienceDto(savedExperience));
     }
 
     @PutMapping("/{id}")
@@ -78,6 +76,6 @@ public class ExperienceController {
         experience.setTo(updatedExperienceDto.getTo());
         experience.setDescription(updatedExperienceDto.getDescription());
         var savedExperience = experienceRepository.save(experience);
-        return ResponseEntity.ok(userMapper.toExperienceDto(savedExperience));
+        return ResponseEntity.ok(experienceMapper.toExperienceDto(savedExperience));
     }
 }

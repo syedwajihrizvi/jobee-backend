@@ -13,7 +13,7 @@ import com.rizvi.jobee.dtos.UserSkillDto;
 import com.rizvi.jobee.entities.UserSkill;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.SkillNotFoundException;
-import com.rizvi.jobee.mappers.UserMapper;
+import com.rizvi.jobee.mappers.SkillMapper;
 import com.rizvi.jobee.principals.CustomPrincipal;
 import com.rizvi.jobee.repositories.SkillRepository;
 import com.rizvi.jobee.repositories.UserProfileRepository;
@@ -30,7 +30,7 @@ public class UserSkillController {
         private final UserSkillRepository userSkillRepository;
         private final SkillRepository skillRepository;
         private final UserProfileRepository userProfileRepository;
-        private final UserMapper userMapper;
+        private final SkillMapper skillMapper;
 
         @PostMapping
         @Operation(summary = "Add skill to user profile")
@@ -56,13 +56,13 @@ public class UserSkillController {
                 if (userSkill != null) {
                         userSkill.setExperience(createUserSkillDto.getExperience());
                         userSkillRepository.save(userSkill);
-                        return ResponseEntity.ok(userMapper.toUserSkillDto(userSkill));
+                        return ResponseEntity.ok(skillMapper.toUserSkillDto(userSkill));
                 }
                 var newUserSkill = UserSkill.builder().skill(skill).userProfile(userProfile)
                                 .experience(createUserSkillDto.getExperience()).build();
                 userProfile.addSkill(newUserSkill);
                 userSkillRepository.save(newUserSkill);
                 var uri = uriComponentsBuilder.path("/skills/{id}").buildAndExpand(newUserSkill.getId()).toUri();
-                return ResponseEntity.created(uri).body(userMapper.toUserSkillDto(newUserSkill));
+                return ResponseEntity.created(uri).body(skillMapper.toUserSkillDto(newUserSkill));
         }
 }

@@ -52,7 +52,6 @@ public class UserDocument {
             return documentUrl;
         }
         var res = documentUrl.substring(documentUrl.lastIndexOf('/') + 1, documentUrl.lastIndexOf('.'));
-        System.out.println("SYED-DEBUG: " + res);
         return res;
     }
 }
