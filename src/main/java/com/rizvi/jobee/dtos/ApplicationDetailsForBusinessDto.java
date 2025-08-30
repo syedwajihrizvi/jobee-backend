@@ -10,5 +10,7 @@ public class ApplicationDetailsForBusinessDto {
     private LocalDateTime appliedAt;
     private String resumeUrl;
     private String coverLetterUrl;
+    private Long jobId;
+    private Boolean shortListed;
     private UserProfileSummaryForBusinessDto userProfile;
 }

@@ -2,6 +2,7 @@ package com.rizvi.jobee.entities;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.rizvi.jobee.enums.EmploymentType;
@@ -85,6 +86,10 @@ public class Job {
     public void setBusinessAccount(BusinessAccount businessAccount) {
         this.businessAccount = businessAccount;
         businessAccount.getJobs().add(this);
+    }
+
+    public List<Application> getShortListedApplications() {
+        return applications.stream().filter(application -> application.getShortListed() == true).toList();
     }
 
 }

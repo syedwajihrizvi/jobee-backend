@@ -13,5 +13,6 @@ public class ApplicantSummaryForBusinessDto {
     private String profileImageUrl;
     private LocalDateTime appliedAt;
     private String profileSummary;
+    private String location;
     private String title;
 }

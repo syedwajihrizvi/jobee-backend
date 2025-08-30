@@ -32,11 +32,14 @@ public interface ApplicationMapper {
     @Mapping(target = "profileImageUrl", source = "userProfile.profileImageUrl")
     @Mapping(target = "profileSummary", source = "userProfile.summary")
     @Mapping(target = "title", source = "userProfile.title")
+    @Mapping(target = "location", expression = "java(application.getUserProfile().getCity() + \", \" + application.getUserProfile().getCountry())")
     ApplicantSummaryForBusinessDto toApplicantSummaryForBusinessDto(Application application);
 
-    @EntityGraph(attributePaths = { "userProfile", "userProfile.account", "resumeDocument", "coverLetterDocument" })
+    @EntityGraph(attributePaths = { "userProfile", "userProfile.account", "resumeDocument", "coverLetterDocument",
+            "job" })
     @Mapping(target = "appliedAt", source = "createdAt")
     @Mapping(target = "resumeUrl", source = "application.resumeDocument.documentUrl")
     @Mapping(target = "coverLetterUrl", source = "application.coverLetterDocument.documentUrl")
+    @Mapping(target = "jobId", source = "job.id")
     ApplicationDetailsForBusinessDto toApplicationDetailsForBusinessDto(Application application);
 }

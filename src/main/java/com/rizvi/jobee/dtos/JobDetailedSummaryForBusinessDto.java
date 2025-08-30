@@ -17,4 +17,5 @@ public class JobDetailedSummaryForBusinessDto {
     private Integer applicants;
     private List<TagDto> tags;
     private LocalDate createdAt;
+    private Integer totalShortListedCandidates;
 }

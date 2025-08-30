@@ -15,39 +15,39 @@ import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 
 public class JobSpecifications {
-    public static Specification<Job> withFilters(JobQuery jobQuery) {
+    public static Specification<Job> withFilters(JobQuery query) {
         return (root, _, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            if (jobQuery.getSearch() != null && !jobQuery.getSearch().isEmpty()) {
-                String search = jobQuery.getSearch().toLowerCase().trim();
+            if (query.getSearch() != null && !query.getSearch().isEmpty()) {
+                String search = query.getSearch().toLowerCase().trim();
                 predicates.add(cb.or(
                         cb.like(cb.lower(root.get("title")), "%" + search + "%"),
                         cb.like(cb.lower(root.get("description")), "%" + search + "%")));
             }
-            if (jobQuery.getLocation() != null && !jobQuery.getLocation().isEmpty()) {
-                String searchLocation = "%" + jobQuery.getLocation().toLowerCase().trim().replace(" ", "") + "%";
+            if (query.getLocation() != null && !query.getLocation().isEmpty()) {
+                String searchLocation = "%" + query.getLocation().toLowerCase().trim().replace(" ", "") + "%";
                 predicates.add(cb.like(
                         cb.lower(cb.function("replace", String.class, root.get("location"), cb.literal(" "),
                                 cb.literal(""))),
                         searchLocation));
             }
-            if (jobQuery.getCompanyName() != null && !jobQuery.getCompanyName().isEmpty()) {
+            if (query.getCompanyName() != null && !query.getCompanyName().isEmpty()) {
                 Join<Job, BusinessAccount> businessAccountJoin = root.join("businessAccount");
                 Join<BusinessAccount, Company> companyJoin = businessAccountJoin.join("company");
-                String searchCompany = "%" + jobQuery.getCompanyName().toLowerCase().trim().replace(" ", "") + "%";
+                String searchCompany = "%" + query.getCompanyName().toLowerCase().trim().replace(" ", "") + "%";
                 predicates.add(cb.like(
                         cb.lower(cb.function("replace", String.class, companyJoin.get("name"), cb.literal(" "),
                                 cb.literal(""))),
                         searchCompany));
             }
-            if (jobQuery.getDistance() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("distance"), jobQuery.getDistance()));
+            if (query.getDistance() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("distance"), query.getDistance()));
             }
-            if (jobQuery.getSalary() != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("minSalary"), jobQuery.getSalary()));
+            if (query.getSalary() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("minSalary"), query.getSalary()));
             }
-            if (jobQuery.getExperience() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("experience"), jobQuery.getExperience()));
+            if (query.getExperience() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("experience"), query.getExperience()));
             }
             return cb.and(predicates.toArray(new Predicate[0]));
         };

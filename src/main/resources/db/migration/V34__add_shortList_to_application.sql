@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS job_shortlist;
+ALTER TABLE applications
+    ADD COLUMN IF NOT EXISTS short_listed BOOLEAN DEFAULT FALSE;

@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,11 +27,13 @@ import com.rizvi.jobee.exceptions.ApplicationNotFoundException;
 import com.rizvi.jobee.mappers.ApplicationMapper;
 import com.rizvi.jobee.mappers.JobMapper;
 import com.rizvi.jobee.principals.CustomPrincipal;
+import com.rizvi.jobee.queries.ApplicationQuery;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.repositories.ApplicationRepository;
 import com.rizvi.jobee.repositories.JobRepository;
 import com.rizvi.jobee.repositories.UserDocumentRepository;
 import com.rizvi.jobee.repositories.UserProfileRepository;
+import com.rizvi.jobee.specifications.ApplicantSpecification;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -69,7 +73,7 @@ public class ApplicationController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "For business users to get full applicatio details about a user")
+    @Operation(summary = "For business users to get full application details about a user")
     public ResponseEntity<ApplicationDetailsForBusinessDto> getApplication(
             @PathVariable Long id) {
         var application = applicationRepository.findById(id).orElseThrow(
@@ -79,8 +83,11 @@ public class ApplicationController {
 
     @GetMapping("/job/{id}")
     public ResponseEntity<List<ApplicantSummaryForBusinessDto>> getApplicationsForJobs(
+            @ModelAttribute ApplicationQuery query,
             @PathVariable Long id) {
-        var applications = applicationRepository.findByJobId(id);
+        query.setJobId(id);
+        System.out.println(query);
+        var applications = applicationRepository.findAll(ApplicantSpecification.withFilters(query));
         var applicationDtos = applications.stream().map(applicationMapper::toApplicantSummaryForBusinessDto).toList();
         return ResponseEntity.ok(applicationDtos);
     }
@@ -120,5 +127,27 @@ public class ApplicationController {
         var uri = uriComponentsBuilder.path("/applications/{id}")
                 .buildAndExpand(savedApplication.getId()).toUri();
         return ResponseEntity.created(uri).body(applicationMapper.toDto(savedApplication));
+    }
+
+    @PatchMapping("/{id}/shortList")
+    @Operation(summary = "Shortlist a candidate application")
+    public ResponseEntity<?> shortListCandidate(
+            @PathVariable Long id) {
+        var application = applicationRepository.findById(id)
+                .orElseThrow(() -> new ApplicationNotFoundException("Application not found"));
+        application.setShortListed(true);
+        applicationRepository.save(application);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{id}/unShortList")
+    @Operation(summary = "Unshortlist a candidate application")
+    public ResponseEntity<?> unShortListCandidate(
+            @PathVariable Long id) {
+        var application = applicationRepository.findById(id)
+                .orElseThrow(() -> new ApplicationNotFoundException("Application not found"));
+        application.setShortListed(false);
+        applicationRepository.save(application);
+        return ResponseEntity.ok().build();
     }
 }

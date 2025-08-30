@@ -18,6 +18,7 @@ import com.rizvi.jobee.dtos.CreateJobDto;
 import com.rizvi.jobee.dtos.JobDetailedSummaryForBusinessDto;
 import com.rizvi.jobee.dtos.JobSummaryDto;
 import com.rizvi.jobee.dtos.JobSummaryForBusinessDto;
+import com.rizvi.jobee.entities.Application;
 import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.BusinessNotFoundException;
@@ -29,6 +30,7 @@ import com.rizvi.jobee.repositories.JobRepository;
 import com.rizvi.jobee.repositories.UserProfileRepository;
 import com.rizvi.jobee.specifications.JobSpecifications;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 
 @RestController
@@ -122,6 +124,16 @@ public class JobController {
         var uri = uriComponentsBuilder.path("/jobs/{id}").buildAndExpand(savedJob.getId()).toUri();
         return ResponseEntity.created(uri).body(jobMapper.toSummaryDto(savedJob));
 
+    }
+
+    @GetMapping("/{id}/shortlisted")
+    @Operation(summary = "Get all shortlisted candidates for a job")
+    public ResponseEntity<List<Long>> getShortListedApplicants(
+            @PathVariable Long id) {
+        System.out.println("Fetching shortlisted applicants for job ID: " + id);
+        var job = jobRepository.findById(id).orElseThrow(() -> new JobNotFoundException("Job not found"));
+        var shortListedApplicants = job.getShortListedApplications().stream().map(Application::getId).toList();
+        return ResponseEntity.ok(shortListedApplicants);
     }
 
 }

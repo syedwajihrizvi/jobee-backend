@@ -38,6 +38,10 @@ public class Application {
     @Builder.Default
     private ApplicationStatus status = ApplicationStatus.PENDING;
 
+    @Builder.Default
+    @Column(name = "short_listed", nullable = true, insertable = false, updatable = true)
+    private Boolean shortListed = false;
+
     @Column(name = "created_at", nullable = true, insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
