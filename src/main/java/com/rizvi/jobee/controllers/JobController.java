@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +21,8 @@ import com.rizvi.jobee.dtos.JobSummaryDto;
 import com.rizvi.jobee.dtos.JobSummaryForBusinessDto;
 import com.rizvi.jobee.entities.Application;
 import com.rizvi.jobee.entities.Job;
+import com.rizvi.jobee.entities.Tag;
+import com.rizvi.jobee.enums.EmploymentType;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.BusinessNotFoundException;
 import com.rizvi.jobee.exceptions.JobNotFoundException;
@@ -27,6 +30,7 @@ import com.rizvi.jobee.mappers.JobMapper;
 import com.rizvi.jobee.queries.JobQuery;
 import com.rizvi.jobee.repositories.BusinessAccountRepository;
 import com.rizvi.jobee.repositories.JobRepository;
+import com.rizvi.jobee.repositories.TagRepository;
 import com.rizvi.jobee.repositories.UserProfileRepository;
 import com.rizvi.jobee.specifications.JobSpecifications;
 
@@ -40,6 +44,7 @@ public class JobController {
     private final JobRepository jobRepository;
     private final BusinessAccountRepository businessAccountRepository;
     private final UserProfileRepository userProfileRepository;
+    private final TagRepository tagRepository;
     private final JobMapper jobMapper;
 
     @GetMapping
@@ -108,12 +113,23 @@ public class JobController {
         return ResponseEntity.ok(jobMapper.toSummaryDto(job));
     }
 
+    // TODO: Business account ID should come from CustomPrincipal
+    @Transactional
     @PostMapping
     public ResponseEntity<?> createJob(
             @RequestBody CreateJobDto request,
             UriComponentsBuilder uriComponentsBuilder) throws RuntimeException {
         var accountId = request.getBusinessAccountId();
-
+        var tags = request.getTags();
+        var tagEntities = new ArrayList<Tag>();
+        for (String tagName : tags) {
+            var tag = tagRepository.findByName(tagName.trim().replaceAll("[^a-zA-Z0-9 ]", ""));
+            if (tag == null) {
+                tag = Tag.builder().name(tagName).build();
+                tag = tagRepository.save(tag);
+            }
+            tagEntities.add(tag);
+        }
         var businessAccount = businessAccountRepository.findById(accountId).orElse(null);
         if (businessAccount == null) {
             throw new BusinessNotFoundException();
@@ -121,8 +137,16 @@ public class JobController {
         var job = Job.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
+                .location(request.getLocation())
+                .employmentType(request.getEmploymentType())
+                .minSalary(request.getMinSalary())
+                .maxSalary(request.getMaxSalary())
+                .experience(request.getExperience())
                 .build();
         job.setBusinessAccount(businessAccount);
+        for (Tag tag : tagEntities) {
+            job.addTag(tag);
+        }
         var savedJob = jobRepository.save(job);
         var uri = uriComponentsBuilder.path("/jobs/{id}").buildAndExpand(savedJob.getId()).toUri();
         return ResponseEntity.created(uri).body(jobMapper.toSummaryDto(savedJob));

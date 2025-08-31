@@ -92,4 +92,9 @@ public class Job {
         return applications.stream().filter(application -> application.getShortListed() == true).toList();
     }
 
+    public void addTag(Tag tag) {
+        this.tags.add(tag);
+        tag.getJobs().add(this);
+    }
+
 }

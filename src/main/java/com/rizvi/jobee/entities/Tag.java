@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,6 +23,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Builder
 @Table(name = "tags")
 public class Tag {
     @Id
@@ -38,6 +40,7 @@ public class Tag {
     @Column(name = "created_at", nullable = true, insertable = false, updatable = false)
     private LocalDate createdAt;
 
+    @Builder.Default
     @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY)
     private Set<Job> jobs = new HashSet<>();
 }
