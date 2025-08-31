@@ -12,7 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import com.rizvi.jobee.entities.Job;
 
 public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificationExecutor<Job> {
-    @EntityGraph(attributePaths = { "businessAccount", "businessAccount.company", "tags" })
+    @EntityGraph(attributePaths = { "businessAccount", "businessAccount.company", "tags", "applications" })
     List<Job> findAll(Specification<Job> spec);
 
     @EntityGraph(attributePaths = { "businessAccount", "businessAccount.company", "tags" })

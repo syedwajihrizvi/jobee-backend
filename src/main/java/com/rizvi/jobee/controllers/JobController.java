@@ -68,8 +68,11 @@ public class JobController {
     }
 
     @GetMapping("/companies/{companyId}/jobs")
-    public ResponseEntity<List<JobSummaryForBusinessDto>> getJobsByCompany(@PathVariable Long companyId) {
-        var jobs = jobRepository.findByCompanyId(companyId);
+    public ResponseEntity<List<JobSummaryForBusinessDto>> getJobsByCompany(
+            @ModelAttribute JobQuery jobQuery,
+            @PathVariable Long companyId) {
+        jobQuery.setCompanyId(companyId);
+        var jobs = jobRepository.findAll(JobSpecifications.withFilters(jobQuery));
         var jobDto = jobs.stream().map(jobMapper::toSummaryForBusinessDto).toList();
         return ResponseEntity.ok(jobDto);
     }

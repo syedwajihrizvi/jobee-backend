@@ -24,7 +24,6 @@ public class ApplicantSpecification {
             predicates.add(cb.equal(jobJoin.get("id"), query.getJobId()));
             if (query.getLocations() != null && !query.getLocations().isEmpty()) {
                 List<Predicate> locationPredicates = new ArrayList<>();
-                System.out.println("Adding location filters");
                 for (String loc : query.getLocations()) {
                     String searchLoc = "%" + loc.toLowerCase().trim().replace(" ", "") + "%";
                     locationPredicates.add(
@@ -37,7 +36,6 @@ public class ApplicantSpecification {
             }
             if (query.getSkills() != null && !query.getSkills().isEmpty()) {
                 List<Predicate> skillPredicates = new ArrayList<>();
-                System.out.println("Adding skill filters");
                 for (String skill : query.getSkills()) {
                     Join<UserProfile, UserSkill> userSkillsJoin = userProfileJoin.join("skills");
                     String searchSkill = "%" + skill.toLowerCase().trim().replace(" ", "") + "%";
@@ -47,7 +45,6 @@ public class ApplicantSpecification {
             }
             if (query.getEducationLevel() != null && !query.getEducationLevel().isEmpty()) {
                 Join<UserProfile, Education> educationJoin = userProfileJoin.join("education");
-                System.out.println("Adding education level filter");
                 predicates.add(cb.equal(
                         cb.lower(educationJoin.get("level")),
                         query.getEducationLevel().toLowerCase().trim()));

@@ -6,6 +6,7 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 
 import com.rizvi.jobee.entities.Job;
+import com.rizvi.jobee.entities.Tag;
 import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.Company;
 
@@ -18,36 +19,56 @@ public class JobSpecifications {
     public static Specification<Job> withFilters(JobQuery query) {
         return (root, _, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
+            Join<Job, BusinessAccount> businessAccountJoin = root.join("businessAccount");
+            Join<BusinessAccount, Company> companyJoin = businessAccountJoin.join("company");
             if (query.getSearch() != null && !query.getSearch().isEmpty()) {
                 String search = query.getSearch().toLowerCase().trim();
                 predicates.add(cb.or(
                         cb.like(cb.lower(root.get("title")), "%" + search + "%"),
                         cb.like(cb.lower(root.get("description")), "%" + search + "%")));
             }
-            if (query.getLocation() != null && !query.getLocation().isEmpty()) {
-                String searchLocation = "%" + query.getLocation().toLowerCase().trim().replace(" ", "") + "%";
-                predicates.add(cb.like(
-                        cb.lower(cb.function("replace", String.class, root.get("location"), cb.literal(" "),
-                                cb.literal(""))),
-                        searchLocation));
+            if (query.getLocations() != null && !query.getLocations().isEmpty()) {
+                List<Predicate> locationPredicates = new ArrayList<>();
+                for (String loc : query.getLocations()) {
+                    String searchLoc = "%" + loc.toLowerCase().trim().replace(" ", "") + "%";
+                    locationPredicates.add(
+                            cb.like(
+                                    cb.lower(cb.function("replace", String.class, root.get("location"), cb.literal(" "),
+                                            cb.literal(""))),
+                                    searchLoc));
+                }
+                predicates.add(cb.or(locationPredicates.toArray(new Predicate[0])));
             }
-            if (query.getCompanyName() != null && !query.getCompanyName().isEmpty()) {
-                Join<Job, BusinessAccount> businessAccountJoin = root.join("businessAccount");
-                Join<BusinessAccount, Company> companyJoin = businessAccountJoin.join("company");
-                String searchCompany = "%" + query.getCompanyName().toLowerCase().trim().replace(" ", "") + "%";
-                predicates.add(cb.like(
-                        cb.lower(cb.function("replace", String.class, companyJoin.get("name"), cb.literal(" "),
-                                cb.literal(""))),
-                        searchCompany));
+            if (query.getCompanyId() != null) {
+                predicates.add(cb.equal(companyJoin.get("id"), query.getCompanyId()));
             }
-            if (query.getDistance() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("distance"), query.getDistance()));
+            if (query.getCompanies() != null && !query.getCompanies().isEmpty()) {
+                for (String comp : query.getCompanies()) {
+                    String searchCompany = "%" + comp.toLowerCase().trim().replace(" ", "") + "%";
+                    predicates.add(cb.like(
+                            cb.lower(cb.function("replace", String.class, companyJoin.get("name"), cb.literal(" "),
+                                    cb.literal(""))),
+                            searchCompany));
+                }
+                predicates.add(cb.or(predicates.toArray(new Predicate[0])));
             }
-            if (query.getSalary() != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("minSalary"), query.getSalary()));
+            if (query.getTags() != null && !query.getTags().isEmpty()) {
+                List<Predicate> tagPredicates = new ArrayList<>();
+                Join<Job, Tag> tagsJoin = root.join("tags");
+                for (String tag : query.getTags()) {
+                    String searchTag = "%" + tag.toLowerCase().trim().replace(" ", "") + "%";
+                    tagPredicates.add(cb.like(
+                            cb.lower(cb.function("replace", String.class, tagsJoin.get("name"), cb.literal(" "),
+                                    cb.literal(""))),
+                            searchTag));
+                }
+                predicates.add(cb.or(tagPredicates.toArray(new Predicate[0])));
             }
-            if (query.getExperience() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("experience"), query.getExperience()));
+            if (query.getMinSalary() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("minSalary"), query.getMinSalary()));
+            }
+            if (query.getMaxSalary() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("maxSalary"), query.getMaxSalary()));
             }
             return cb.and(predicates.toArray(new Predicate[0]));
         };
