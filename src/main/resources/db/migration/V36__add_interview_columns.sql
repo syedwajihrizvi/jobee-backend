@@ -1,0 +1,9 @@
+ALTER TABLE interviews
+    ADD COLUMN title VARCHAR(255) NOT NULL,
+    ADD COLUMN interview_date TIMESTAMP NOT NULL,
+    ADD COLUMN startTime TIME NOT NULL,
+    ADD COLUMN duration INTEGER NOT NULL,
+    ADD COLUMN interviewType VARCHAR(50) NOT NULL,
+    ADD COLUMN location VARCHAR(255),
+    ADD COLUMN meetingLink VARCHAR(255),
+    DROP COLUMN IF EXISTS scheduledAt;

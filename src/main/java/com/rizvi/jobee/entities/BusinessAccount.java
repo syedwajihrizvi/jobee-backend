@@ -1,6 +1,6 @@
 package com.rizvi.jobee.entities;
 
-import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 import com.rizvi.jobee.enums.BusinessType;
@@ -14,6 +14,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -42,6 +43,12 @@ public class BusinessAccount {
     @Column(name = "password", nullable = false)
     private String password;
 
+    @Column(name = "first_name", nullable = false)
+    private String firstName;
+
+    @Column(name = "last_name", nullable = false)
+    private String lastName;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "account_type", nullable = false)
     private BusinessType accountType;;
@@ -50,8 +57,12 @@ public class BusinessAccount {
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
 
-    @Column(name = "created_at", nullable = true, insertable = false, updatable = false)
-    private LocalDate createdAt;
+    @Builder.Default
+    @ManyToMany(mappedBy = "interviewers", fetch = jakarta.persistence.FetchType.LAZY)
+    private Set<Interview> interviews = new HashSet<>();
+
+    @OneToMany(mappedBy = "createdBy", orphanRemoval = true, cascade = CascadeType.ALL)
+    public Set<Interview> createdInterviews;
 
     @OneToMany(mappedBy = "businessAccount", orphanRemoval = true, cascade = CascadeType.ALL)
     public Set<Job> jobs;
@@ -59,5 +70,9 @@ public class BusinessAccount {
     public void setCompany(Company company) {
         this.company = company;
         company.getBusinessAccounts().add(this);
+    }
+
+    public String getFullName() {
+        return this.firstName + " " + this.lastName;
     }
 }

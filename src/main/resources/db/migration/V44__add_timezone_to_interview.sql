@@ -1,0 +1,3 @@
+ALTER TABLE interviews
+    ADD COLUMN timezone VARCHAR(50) DEFAULT 'UTC',
+    ADD COLUMN phoneNumber VARCHAR(15);

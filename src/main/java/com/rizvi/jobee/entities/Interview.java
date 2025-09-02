@@ -1,17 +1,34 @@
 package com.rizvi.jobee.entities;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Set;
 
+import org.hibernate.annotations.Type;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
+import com.rizvi.jobee.dtos.ConductorDto;
 import com.rizvi.jobee.enums.InterviewStatus;
+import com.rizvi.jobee.enums.InterviewType;
+import com.rizvi.jobee.enums.Timezone;
+import com.vladmihalcea.hibernate.type.json.JsonType;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -33,11 +50,37 @@ public class Interview {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "scheduled_time", nullable = false)
-    private LocalDateTime scheduledTime;
+    @Column(name = "title", nullable = false)
+    private String title;
 
-    @Column(name = "description", nullable = false)
+    @Column(name = "description", nullable = true)
     private String description;
+
+    @Column(name = "interview_date", nullable = false)
+    private LocalDate interviewDate;
+
+    @Column(name = "start_time", nullable = false)
+    private LocalTime startTime;
+
+    @Enumerated(value = EnumType.STRING)
+    @Column(name = "timezone", nullable = false)
+    private Timezone timezone;
+
+    @Column(name = "end_time", nullable = false)
+    private LocalTime endTime;
+
+    @Enumerated(value = EnumType.STRING)
+    @Column(name = "interview_type", nullable = false)
+    private InterviewType interviewType;
+
+    @Column(name = "location", nullable = false)
+    private String location;
+
+    @Column(name = "meeting_link", nullable = false)
+    private String meetingLink;
+
+    @Column(name = "phone_number", nullable = true)
+    private String phoneNumber;
 
     @Enumerated(value = EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -47,6 +90,10 @@ public class Interview {
     private LocalDateTime createdAt;
 
     @ManyToOne
+    @JoinColumn(name = "created_by_user_id", nullable = true)
+    private BusinessAccount createdBy;
+
+    @ManyToOne
     @JoinColumn(name = "job_id", nullable = false)
     private Job job;
 
@@ -54,7 +101,23 @@ public class Interview {
     @JoinColumn(name = "candidate_id", nullable = false)
     private UserProfile candidate;
 
-    @ManyToOne()
-    @JoinColumn(name = "interviewer_id", nullable = false)
-    private BusinessAccount interviewer;
+    @Builder.Default
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(name = "interview_conductors", joinColumns = {
+            @JoinColumn(name = "interview_id") }, inverseJoinColumns = { @JoinColumn(name = "interviewer_id") })
+    private Set<BusinessAccount> interviewers = new HashSet<>();
+
+    @Type(JsonType.class)
+    @Column(name = "other_interviewers", columnDefinition = "jsonb", nullable = true)
+    @Builder.Default
+    private List<ConductorDto> otherInterviewers = new ArrayList<>();
+
+    public void addOtherInterviewer(ConductorDto interviewer) {
+        otherInterviewers.add(interviewer);
+    }
+
+    public void addInterviewer(BusinessAccount interviewer) {
+        this.interviewers.add(interviewer);
+        interviewer.getInterviews().add(this);
+    }
 }
