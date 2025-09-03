@@ -69,11 +69,10 @@ public class InterviewController {
     @Operation(summary = "Business can schedule an interview for a candidate")
     public ResponseEntity<InterviewDto> createInterview(
             @Valid @RequestBody CreateInterviewDto request,
-            // @AuthenticationPrincipal CustomPrincipal principal,
+            @AuthenticationPrincipal CustomPrincipal principal,
             UriComponentsBuilder uriComponentsBuilder) throws RuntimeException {
         System.out.println(request);
-        // var creator_id = principal.getId();
-        var creator_id = 54L;
+        var creator_id = principal.getId();
         var creator = businessAccountRepository.findById(creator_id).orElse(null);
         var job = jobRepository.findById(request.getJobId()).orElse(null);
         if (job == null) {

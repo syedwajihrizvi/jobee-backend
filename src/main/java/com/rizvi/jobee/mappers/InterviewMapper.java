@@ -16,8 +16,10 @@ public interface InterviewMapper {
     @Mapping(target = "candidateId", source = "candidate.id")
     @Mapping(target = "interview_date", source = "interviewDate")
     @Mapping(target = "start_time", source = "startTime")
+    @Mapping(target = "end_time", source = "endTime")
     @Mapping(target = "candidateEmail", source = "candidate.account.email")
     @Mapping(target = "candidateName", expression = "java(interview.getCandidate().getFullName())")
+    @Mapping(target = "companyName", source = "job.businessAccount.company.name")
     InterviewDto toDto(Interview interview);
 
     @Mapping(target = "id", source = "businessAccount.id")
