@@ -11,9 +11,9 @@ public class InterviewDto {
     private Long id;
     private String title;
     private String description;
-    private LocalDate interview_date;
-    private LocalTime start_time;
-    private LocalTime end_time;
+    private LocalDate interviewDate;
+    private LocalTime startTime;
+    private LocalTime endTime;
     private String status;
     private LocalDate createdAt;
     private Long jobId;

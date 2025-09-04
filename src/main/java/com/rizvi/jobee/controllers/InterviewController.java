@@ -16,11 +16,13 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.rizvi.jobee.dtos.ConductorDto;
 import com.rizvi.jobee.dtos.CreateInterviewDto;
 import com.rizvi.jobee.dtos.InterviewDto;
+import com.rizvi.jobee.dtos.InterviewSummaryDto;
 import com.rizvi.jobee.entities.Interview;
 import com.rizvi.jobee.enums.ApplicationStatus;
 import com.rizvi.jobee.enums.InterviewStatus;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.ApplicationNotFoundException;
+import com.rizvi.jobee.exceptions.InterviewNotFoundException;
 import com.rizvi.jobee.exceptions.JobNotFoundException;
 import com.rizvi.jobee.mappers.InterviewMapper;
 import com.rizvi.jobee.principals.CustomPrincipal;
@@ -54,14 +56,23 @@ public class InterviewController {
         return ResponseEntity.ok(interviewDtos);
     }
 
+    @GetMapping("/{id}")
+    @Operation(summary = "Get interview by ID")
+    public ResponseEntity<InterviewDto> getInterviewById(@PathVariable Long id) {
+        Interview interview = interviewRepository.findById(id).orElseThrow(
+                () -> new InterviewNotFoundException("Interview not found with ID: " + id));
+        InterviewDto interviewDto = interviewMapper.toDto(interview);
+        return ResponseEntity.ok(interviewDto);
+    }
+
     @GetMapping("/candidate/{candidateId}")
     @Operation(summary = "Get interviews for a specific candidate")
-    public ResponseEntity<List<InterviewDto>> getInterviewsByCandidateId(@PathVariable Long candidateId) {
+    public ResponseEntity<List<InterviewSummaryDto>> getInterviewsByCandidateId(@PathVariable Long candidateId) {
         List<Interview> interviews = interviewRepository.findByCandidateId(candidateId);
-        List<InterviewDto> interviewDtos = interviews.stream()
-                .map(interviewMapper::toDto)
+        List<InterviewSummaryDto> interviewSummaryDtos = interviews.stream()
+                .map(interviewMapper::toSummaryDto)
                 .toList();
-        return ResponseEntity.ok(interviewDtos);
+        return ResponseEntity.ok(interviewSummaryDtos);
     }
 
     @PostMapping()
@@ -69,10 +80,11 @@ public class InterviewController {
     @Operation(summary = "Business can schedule an interview for a candidate")
     public ResponseEntity<InterviewDto> createInterview(
             @Valid @RequestBody CreateInterviewDto request,
-            @AuthenticationPrincipal CustomPrincipal principal,
+            // @AuthenticationPrincipal CustomPrincipal principal,
             UriComponentsBuilder uriComponentsBuilder) throws RuntimeException {
         System.out.println(request);
-        var creator_id = principal.getId();
+        var creator_id = 54L;
+        // var creator_id = principal.getId();
         var creator = businessAccountRepository.findById(creator_id).orElse(null);
         var job = jobRepository.findById(request.getJobId()).orElse(null);
         if (job == null) {

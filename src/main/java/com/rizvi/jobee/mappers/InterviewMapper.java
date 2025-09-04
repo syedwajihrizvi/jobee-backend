@@ -5,6 +5,7 @@ import org.mapstruct.Mapping;
 
 import com.rizvi.jobee.dtos.InterviewConductorDto;
 import com.rizvi.jobee.dtos.InterviewDto;
+import com.rizvi.jobee.dtos.InterviewSummaryDto;
 import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.Interview;
 
@@ -14,13 +15,14 @@ public interface InterviewMapper {
     @Mapping(target = "jobTitle", source = "job.title")
     @Mapping(target = "createdById", source = "createdBy.id")
     @Mapping(target = "candidateId", source = "candidate.id")
-    @Mapping(target = "interview_date", source = "interviewDate")
-    @Mapping(target = "start_time", source = "startTime")
-    @Mapping(target = "end_time", source = "endTime")
     @Mapping(target = "candidateEmail", source = "candidate.account.email")
     @Mapping(target = "candidateName", expression = "java(interview.getCandidate().getFullName())")
     @Mapping(target = "companyName", source = "job.businessAccount.company.name")
     InterviewDto toDto(Interview interview);
+
+    @Mapping(target = "jobTitle", source = "job.title")
+    @Mapping(target = "companyName", source = "job.businessAccount.company.name")
+    InterviewSummaryDto toSummaryDto(Interview interview);
 
     @Mapping(target = "id", source = "businessAccount.id")
     @Mapping(target = "email", source = "businessAccount.email")
