@@ -25,4 +25,5 @@ public class UserProfileSummaryDto {
     private List<UserApplicationDto> applications;
     private UserAccountSummaryDto account;
     private Boolean profileComplete;
+    private UserDocumentDto primaryResume;
 }

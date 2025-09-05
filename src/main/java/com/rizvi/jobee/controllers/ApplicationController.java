@@ -92,6 +92,37 @@ public class ApplicationController {
         return ResponseEntity.ok(applicationDtos);
     }
 
+    @PostMapping("/quickApply")
+    @Operation(summary = "Quick apply to job with logged in user")
+    public ResponseEntity<ApplicationDto> quickApplyToJob(
+            @RequestBody CreateApplicationDto createQuickApplicationDto,
+            @AuthenticationPrincipal CustomPrincipal customPrincipal,
+            UriComponentsBuilder uriComponentsBuilder) {
+        var userId = customPrincipal.getId();
+        var userProfile = userProfileRepository.findUserById(userId).get();
+        if (userProfile == null) {
+            throw new AccountNotFoundException("User account with ID " + userId + " not found");
+        }
+        var primaryResume = userProfile.getPrimaryResume();
+        if (primaryResume == null) {
+            throw new UserDocumentNotFoundException("User does not have a primary resume set");
+        }
+        System.out.println(primaryResume);
+        var application = new Application();
+        var jobId = createQuickApplicationDto.getJobId();
+        var job = jobRepository.findById(jobId).orElse(null);
+        if (job == null) {
+            throw new JobNotFoundException("Job with ID " + jobId + " not found");
+        }
+        application.setJob(job);
+        application.setUserProfile(userProfile);
+        application.setResumeDocument(primaryResume);
+        var savedApplication = applicationRepository.save(application);
+        var uri = uriComponentsBuilder.path("/applications/{id}")
+                .buildAndExpand(savedApplication.getId()).toUri();
+        return ResponseEntity.created(uri).body(applicationMapper.toDto(savedApplication));
+    }
+
     @PostMapping
     public ResponseEntity<ApplicationDto> createApplication(
             @Valid @RequestBody CreateApplicationDto createApplicationDto,

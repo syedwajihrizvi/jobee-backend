@@ -60,6 +60,7 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers(HttpMethod.POST, "/accounts/register", "/accounts/login")
                         .permitAll()
+                        .requestMatchers(HttpMethod.GET, "/user-documents/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/experiences/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/business-accounts/me").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user-documents").permitAll()
@@ -81,7 +82,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/applications/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/jobs").hasAuthority(Roles.BUSINESS.name())
                         .requestMatchers(HttpMethod.DELETE, "/jobs/**").hasAuthority(Roles.BUSINESS.name())
-                        .requestMatchers(HttpMethod.POST, "/applications").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/applications/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/interviews").permitAll())
                 // .requestMatchers(HttpMethod.POST,
                 // "/interviews").hasAuthority(Roles.BUSINESS.name()))

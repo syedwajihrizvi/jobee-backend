@@ -77,6 +77,10 @@ public class UserProfile {
     @Builder.Default
     private Set<UserDocument> documents = new HashSet<>();
 
+    @OneToOne
+    @JoinColumn(name = "primary_resume_id", unique = true)
+    private UserDocument primaryResume;
+
     @Builder.Default
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(name = "user_favorite_jobs", joinColumns = @JoinColumn(name = "user_profile_id"), inverseJoinColumns = @JoinColumn(name = "job_id"))
