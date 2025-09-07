@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.rizvi.jobee.dtos.CreateUserSkillDto;
-import com.rizvi.jobee.dtos.UserSkillDto;
+import com.rizvi.jobee.dtos.skill.CreateUserSkillDto;
+import com.rizvi.jobee.dtos.skill.UserSkillDto;
 import com.rizvi.jobee.entities.UserSkill;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.SkillNotFoundException;

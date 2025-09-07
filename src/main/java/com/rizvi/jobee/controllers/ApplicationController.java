@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.rizvi.jobee.dtos.ApplicantSummaryForBusinessDto;
-import com.rizvi.jobee.dtos.ApplicationDetailsForBusinessDto;
-import com.rizvi.jobee.dtos.ApplicationDto;
-import com.rizvi.jobee.dtos.CreateApplicationDto;
-import com.rizvi.jobee.dtos.JobApplicationStatusDto;
+import com.rizvi.jobee.dtos.application.ApplicantSummaryForBusinessDto;
+import com.rizvi.jobee.dtos.application.ApplicationDetailsForBusinessDto;
+import com.rizvi.jobee.dtos.application.ApplicationDto;
+import com.rizvi.jobee.dtos.application.CreateApplicationDto;
+import com.rizvi.jobee.dtos.job.JobApplicationStatusDto;
 import com.rizvi.jobee.entities.Application;
 import com.rizvi.jobee.exceptions.JobNotFoundException;
 import com.rizvi.jobee.exceptions.UserDocumentNotFoundException;
@@ -86,7 +86,6 @@ public class ApplicationController {
             @ModelAttribute ApplicationQuery query,
             @PathVariable Long id) {
         query.setJobId(id);
-        System.out.println(query);
         var applications = applicationRepository.findAll(ApplicantSpecification.withFilters(query));
         var applicationDtos = applications.stream().map(applicationMapper::toApplicantSummaryForBusinessDto).toList();
         return ResponseEntity.ok(applicationDtos);
@@ -107,7 +106,6 @@ public class ApplicationController {
         if (primaryResume == null) {
             throw new UserDocumentNotFoundException("User does not have a primary resume set");
         }
-        System.out.println(primaryResume);
         var application = new Application();
         var jobId = createQuickApplicationDto.getJobId();
         var job = jobRepository.findById(jobId).orElse(null);

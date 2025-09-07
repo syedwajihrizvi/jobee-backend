@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import com.rizvi.jobee.dtos.ConductorDto;
+import com.rizvi.jobee.dtos.interview.ConductorDto;
 import com.rizvi.jobee.enums.InterviewStatus;
 import com.rizvi.jobee.enums.InterviewType;
 import com.rizvi.jobee.enums.Timezone;

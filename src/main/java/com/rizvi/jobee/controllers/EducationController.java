@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.rizvi.jobee.dtos.CreateEducationDto;
-import com.rizvi.jobee.dtos.EducationDto;
+import com.rizvi.jobee.dtos.education.CreateEducationDto;
+import com.rizvi.jobee.dtos.education.EducationDto;
 import com.rizvi.jobee.entities.Education;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.EducationNotFoundException;

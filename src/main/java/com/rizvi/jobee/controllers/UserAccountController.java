@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.rizvi.jobee.dtos.JwtDto;
-import com.rizvi.jobee.dtos.LoginDto;
-import com.rizvi.jobee.dtos.RegisterUserAccountDto;
-import com.rizvi.jobee.dtos.UserAccountSummaryDto;
+import com.rizvi.jobee.dtos.user.JwtDto;
+import com.rizvi.jobee.dtos.user.LoginDto;
+import com.rizvi.jobee.dtos.user.RegisterUserAccountDto;
+import com.rizvi.jobee.dtos.user.UserAccountSummaryDto;
 import com.rizvi.jobee.mappers.UserMapper;
 import com.rizvi.jobee.entities.UserAccount;
 import com.rizvi.jobee.entities.UserProfile;
@@ -58,8 +58,8 @@ public class UserAccountController {
             @Valid @RequestBody LoginDto request) throws RuntimeException {
         var email = request.getEmail();
         var password = request.getPassword();
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(email, password));
+        // authenticationManager.authenticate(
+        // new UsernamePasswordAuthenticationToken(email, password));
         var userAccount = userAccountRepository.findByEmail(email).orElse(null);
         if (userAccount == null) {
             throw new IncorrectEmailOrPasswordException("Invalid email or password");

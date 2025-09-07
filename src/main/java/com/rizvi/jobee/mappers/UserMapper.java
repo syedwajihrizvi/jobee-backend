@@ -3,8 +3,8 @@ package com.rizvi.jobee.mappers;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import com.rizvi.jobee.dtos.UserAccountSummaryDto;
-import com.rizvi.jobee.dtos.UserProfileSummaryDto;
+import com.rizvi.jobee.dtos.user.UserAccountSummaryDto;
+import com.rizvi.jobee.dtos.user.UserProfileSummaryDto;
 import com.rizvi.jobee.entities.UserAccount;
 import com.rizvi.jobee.entities.UserProfile;
 

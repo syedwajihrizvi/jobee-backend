@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.rizvi.jobee.dtos.BusinessAccountDto;
-import com.rizvi.jobee.dtos.CreateBusinessAccountDto;
-import com.rizvi.jobee.dtos.JwtDto;
-import com.rizvi.jobee.dtos.LoginDto;
+import com.rizvi.jobee.dtos.user.BusinessAccountDto;
+import com.rizvi.jobee.dtos.user.CreateBusinessAccountDto;
+import com.rizvi.jobee.dtos.user.JwtDto;
+import com.rizvi.jobee.dtos.user.LoginDto;
 import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.Company;
 import com.rizvi.jobee.enums.BusinessType;

@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.rizvi.jobee.dtos.CreateCompanyDto;
+import com.rizvi.jobee.dtos.company.CreateCompanyDto;
 import com.rizvi.jobee.entities.Company;
 import com.rizvi.jobee.repositories.CompanyRepository;
 

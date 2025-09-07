@@ -4,10 +4,11 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.data.jpa.repository.EntityGraph;
 
-import com.rizvi.jobee.dtos.ApplicantSummaryForBusinessDto;
-import com.rizvi.jobee.dtos.ApplicationDetailsForBusinessDto;
-import com.rizvi.jobee.dtos.ApplicationDto;
-import com.rizvi.jobee.dtos.UserApplicationDto;
+import com.rizvi.jobee.dtos.application.ApplicantSummaryForBusinessDto;
+import com.rizvi.jobee.dtos.application.ApplicationDetailsForBusinessDto;
+import com.rizvi.jobee.dtos.application.ApplicationDto;
+import com.rizvi.jobee.dtos.application.ApplicationSummaryDto;
+import com.rizvi.jobee.dtos.user.UserApplicationDto;
 import com.rizvi.jobee.entities.Application;
 
 @Mapper(componentModel = "spring", uses = { UserProfileMapper.class })
@@ -20,6 +21,9 @@ public interface ApplicationMapper {
     @Mapping(target = "appliedAt", source = "createdAt")
     @Mapping(target = "status", source = "status")
     ApplicationDto toDto(Application application);
+
+    @Mapping(target = "appliedAt", source = "createdAt")
+    ApplicationSummaryDto toSummaryDto(Application application);
 
     @Mapping(target = "jobId", source = "job.id")
     @Mapping(target = "appliedAt", source = "createdAt")

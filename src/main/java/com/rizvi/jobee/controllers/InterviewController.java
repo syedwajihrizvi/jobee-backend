@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.rizvi.jobee.dtos.ConductorDto;
-import com.rizvi.jobee.dtos.CreateInterviewDto;
-import com.rizvi.jobee.dtos.InterviewDto;
-import com.rizvi.jobee.dtos.InterviewSummaryDto;
+import com.rizvi.jobee.dtos.interview.ConductorDto;
+import com.rizvi.jobee.dtos.interview.CreateInterviewDto;
+import com.rizvi.jobee.dtos.interview.InterviewDto;
+import com.rizvi.jobee.dtos.interview.InterviewSummaryDto;
 import com.rizvi.jobee.entities.Interview;
 import com.rizvi.jobee.enums.ApplicationStatus;
 import com.rizvi.jobee.enums.InterviewStatus;

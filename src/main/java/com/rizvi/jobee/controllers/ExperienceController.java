@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.rizvi.jobee.dtos.CreateExperienceDto;
-import com.rizvi.jobee.dtos.ExperienceDto;
+import com.rizvi.jobee.dtos.experience.CreateExperienceDto;
+import com.rizvi.jobee.dtos.experience.ExperienceDto;
 import com.rizvi.jobee.entities.Experience;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.ExperienceNotFoundException;

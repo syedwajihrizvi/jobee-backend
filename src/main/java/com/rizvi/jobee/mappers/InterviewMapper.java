@@ -3,9 +3,9 @@ package com.rizvi.jobee.mappers;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import com.rizvi.jobee.dtos.InterviewConductorDto;
-import com.rizvi.jobee.dtos.InterviewDto;
-import com.rizvi.jobee.dtos.InterviewSummaryDto;
+import com.rizvi.jobee.dtos.interview.InterviewConductorDto;
+import com.rizvi.jobee.dtos.interview.InterviewDto;
+import com.rizvi.jobee.dtos.interview.InterviewSummaryDto;
 import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.Interview;
 

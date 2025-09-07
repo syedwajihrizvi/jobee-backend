@@ -3,7 +3,7 @@ package com.rizvi.jobee.mappers;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import com.rizvi.jobee.dtos.ExperienceDto;
+import com.rizvi.jobee.dtos.experience.ExperienceDto;
 import com.rizvi.jobee.entities.Experience;
 
 @Mapper(componentModel = "spring")

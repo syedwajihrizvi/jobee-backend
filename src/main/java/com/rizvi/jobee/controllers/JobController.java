@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -15,18 +16,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.rizvi.jobee.dtos.CreateJobDto;
-import com.rizvi.jobee.dtos.JobDetailedSummaryForBusinessDto;
-import com.rizvi.jobee.dtos.JobSummaryDto;
-import com.rizvi.jobee.dtos.JobSummaryForBusinessDto;
+import com.rizvi.jobee.dtos.job.CreateJobDto;
+import com.rizvi.jobee.dtos.job.JobDetailedSummaryForBusinessDto;
+import com.rizvi.jobee.dtos.job.JobSummaryDto;
+import com.rizvi.jobee.dtos.job.JobSummaryForBusinessDto;
 import com.rizvi.jobee.entities.Application;
 import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.entities.Tag;
-import com.rizvi.jobee.enums.EmploymentType;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.BusinessNotFoundException;
 import com.rizvi.jobee.exceptions.JobNotFoundException;
 import com.rizvi.jobee.mappers.JobMapper;
+import com.rizvi.jobee.principals.CustomPrincipal;
 import com.rizvi.jobee.queries.JobQuery;
 import com.rizvi.jobee.repositories.BusinessAccountRepository;
 import com.rizvi.jobee.repositories.JobRepository;
@@ -60,14 +61,15 @@ public class JobController {
     }
 
     @GetMapping("/applied")
-    public ResponseEntity<List<JobSummaryDto>> getAppliedJobs(
-            @RequestParam String userId) {
-        var userProfile = userProfileRepository.findByAccountId(Long.valueOf(userId))
+    public ResponseEntity<List<Long>> getAppliedJobs(
+            @AuthenticationPrincipal CustomPrincipal principal) {
+        var userId = principal.getId();
+        var userProfile = userProfileRepository.findByAccountId(userId)
                 .orElseThrow(() -> new AccountNotFoundException("User profile not found"));
         List<Long> appliedJobs = userProfile.getApplications().stream().map((app) -> app.getJob().getId()).toList();
         List<Job> jobs = jobRepository.findJobWithIdList(appliedJobs);
-        List<JobSummaryDto> jobDtos = jobs.stream()
-                .map(jobMapper::toSummaryDto)
+        List<Long> jobDtos = jobs.stream()
+                .map(job -> job.getId())
                 .toList();
         return ResponseEntity.ok(jobDtos);
     }

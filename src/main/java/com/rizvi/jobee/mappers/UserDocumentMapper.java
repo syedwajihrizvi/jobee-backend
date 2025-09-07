@@ -3,7 +3,7 @@ package com.rizvi.jobee.mappers;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import com.rizvi.jobee.dtos.UserDocumentDto;
+import com.rizvi.jobee.dtos.user.UserDocumentDto;
 import com.rizvi.jobee.entities.UserDocument;
 
 @Mapper(componentModel = "spring")

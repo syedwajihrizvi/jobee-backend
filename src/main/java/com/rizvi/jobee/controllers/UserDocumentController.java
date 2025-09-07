@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.rizvi.jobee.dtos.UserDocumentDto;
 import com.rizvi.jobee.enums.UserDocumentType;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.mappers.UserDocumentMapper;
@@ -20,6 +19,7 @@ import com.rizvi.jobee.principals.CustomPrincipal;
 import com.rizvi.jobee.repositories.UserDocumentRepository;
 import com.rizvi.jobee.repositories.UserProfileRepository;
 import com.rizvi.jobee.services.UserDocumentService;
+import com.rizvi.jobee.dtos.user.UserDocumentDto;
 import com.rizvi.jobee.entities.UserDocument;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -56,7 +56,6 @@ public class UserDocumentController {
                 Long userId = principal.getId();
                 var result = userDocumentService.uploadDocument(userId, document,
                                 UserDocumentType.valueOf(documentType));
-                System.out.println("Upload result: " + result);
                 if (result == null) {
                         return ResponseEntity.badRequest().build();
                 }
