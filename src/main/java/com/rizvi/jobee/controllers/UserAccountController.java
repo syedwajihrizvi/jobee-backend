@@ -41,6 +41,7 @@ public class UserAccountController {
     public ResponseEntity<UserAccountSummaryDto> registerUser(
             @RequestBody RegisterUserAccountDto request,
             UriComponentsBuilder uriComponentsBuilder) {
+
         var password = passwordEncoder.encode(request.getPassword());
         var userAccount = UserAccount.builder().email(request.getEmail()).password(password).build();
         var userProfile = UserProfile.builder().firstName(request.getFirstName())
@@ -58,8 +59,8 @@ public class UserAccountController {
             @Valid @RequestBody LoginDto request) throws RuntimeException {
         var email = request.getEmail();
         var password = request.getPassword();
-        // authenticationManager.authenticate(
-        // new UsernamePasswordAuthenticationToken(email, password));
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(email, password));
         var userAccount = userAccountRepository.findByEmail(email).orElse(null);
         if (userAccount == null) {
             throw new IncorrectEmailOrPasswordException("Invalid email or password");

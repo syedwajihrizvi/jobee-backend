@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class CompleteProfileDto {
+
     private String title;
     private String summary;
     private String city;

@@ -13,13 +13,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.rizvi.jobee.dtos.education.CreateEducationDto;
 import com.rizvi.jobee.dtos.education.EducationDto;
-import com.rizvi.jobee.entities.Education;
-import com.rizvi.jobee.exceptions.AccountNotFoundException;
-import com.rizvi.jobee.exceptions.EducationNotFoundException;
 import com.rizvi.jobee.mappers.EducationMapper;
 import com.rizvi.jobee.principals.CustomPrincipal;
-import com.rizvi.jobee.repositories.EducationRepository;
-import com.rizvi.jobee.repositories.UserProfileRepository;
+import com.rizvi.jobee.services.EducationService;
+import com.rizvi.jobee.services.UserProfileService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
@@ -28,8 +25,8 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 @RequestMapping("/profiles/education")
 public class EducationController {
-        private final UserProfileRepository userProfileRepository;
-        private final EducationRepository educationRepository;
+        private final UserProfileService userProfileService;
+        private final EducationService educationService;
         private final EducationMapper educationMapper;
 
         @PostMapping
@@ -39,18 +36,8 @@ public class EducationController {
                         @AuthenticationPrincipal CustomPrincipal customPrincipal,
                         UriComponentsBuilder uriComponentsBuilder) throws RuntimeException {
                 var userId = customPrincipal.getId();
-                var userProfile = userProfileRepository.findUserById(userId)
-                                .orElseThrow(() -> new AccountNotFoundException(
-                                                "User profile not found for user id: " + userId));
-
-                var education = Education.builder().degree(createEducationDto.getDegree())
-                                .institution(createEducationDto.getInstitution())
-                                .fromYear(createEducationDto.getFromYear())
-                                .toYear(createEducationDto.getToYear())
-                                .userProfile(userProfile).build();
-                userProfile.addEducation(education);
-                var savedEducation = educationRepository.save(education);
-                userProfileRepository.save(userProfile);
+                var userProfile = userProfileService.getUserProfileById(userId);
+                var savedEducation = educationService.createEducation(createEducationDto, userProfile);
                 UriComponents uri = uriComponentsBuilder.path("/education/{id}").buildAndExpand(savedEducation.getId());
                 return ResponseEntity.created(uri.toUri()).body(educationMapper.toEducationDto(savedEducation));
         }
@@ -59,12 +46,7 @@ public class EducationController {
         public ResponseEntity<EducationDto> updateEducation(
                         @PathVariable Long id,
                         @RequestBody CreateEducationDto updatedEducationDto) throws RuntimeException {
-                var education = educationRepository.findById(id).orElseThrow(() -> new EducationNotFoundException(id));
-                education.setDegree(updatedEducationDto.getDegree());
-                education.setInstitution(updatedEducationDto.getInstitution());
-                education.setFromYear(updatedEducationDto.getFromYear());
-                education.setToYear(updatedEducationDto.getToYear());
-                var updatedEducation = educationRepository.save(education);
-                return ResponseEntity.ok(educationMapper.toEducationDto(updatedEducation));
+                var education = educationService.updateEducation(id, updatedEducationDto);
+                return ResponseEntity.ok(educationMapper.toEducationDto(education));
         }
 }

@@ -16,11 +16,9 @@ import com.rizvi.jobee.enums.UserDocumentType;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.mappers.UserDocumentMapper;
 import com.rizvi.jobee.principals.CustomPrincipal;
-import com.rizvi.jobee.repositories.UserDocumentRepository;
 import com.rizvi.jobee.repositories.UserProfileRepository;
 import com.rizvi.jobee.services.UserDocumentService;
 import com.rizvi.jobee.dtos.user.UserDocumentDto;
-import com.rizvi.jobee.entities.UserDocument;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
@@ -31,7 +29,6 @@ import lombok.AllArgsConstructor;
 public class UserDocumentController {
 
         private final UserDocumentService userDocumentService;
-        private final UserDocumentRepository userDocumentRepository;
         private final UserProfileRepository userProfileRepository;
         private final UserDocumentMapper userDocumentMapper;
 
@@ -40,10 +37,9 @@ public class UserDocumentController {
         public ResponseEntity<List<UserDocumentDto>> getUserDocuments(
                         @AuthenticationPrincipal CustomPrincipal principal) {
                 Long userId = principal.getId();
-                System.out.println("Fetching documents for user ID: " + userId);
-                var documents = userDocumentRepository.findByUserId(userId).stream().map(userDocumentMapper::toDto)
-                                .toList();
-                return ResponseEntity.ok(documents);
+                var documents = userDocumentService.getUserDocuments(userId);
+                var documentDtos = documents.stream().map(userDocumentMapper::toDto).toList();
+                return ResponseEntity.ok(documentDtos);
         }
 
         @PostMapping()
@@ -54,20 +50,18 @@ public class UserDocumentController {
                         @AuthenticationPrincipal CustomPrincipal principal,
                         UriComponentsBuilder uriComponentsBuilder) throws RuntimeException {
                 Long userId = principal.getId();
-                var result = userDocumentService.uploadDocument(userId, document,
-                                UserDocumentType.valueOf(documentType));
-                if (result == null) {
-                        return ResponseEntity.badRequest().build();
-                }
                 var userProfile = userProfileRepository.findById(userId).orElseThrow(
                                 () -> new AccountNotFoundException("User profile not found"));
-                var userDocument = UserDocument.builder().documentType(UserDocumentType.valueOf(documentType))
-                                .documentUrl(result).user(userProfile).build();
-                userProfile.addDocument(userDocument);
-                userProfileRepository.save(userProfile);
+                var userDocumentType = UserDocumentType.valueOf(documentType); // Validate document type
+                var createdDocument = userDocumentService.createUserDocumentViaFile(document, userDocumentType,
+                                userProfile, false);
+                if (createdDocument == null) {
+                        return ResponseEntity.badRequest().build();
+                }
+
                 var uri = uriComponentsBuilder.path("/user-documents/{id}")
-                                .buildAndExpand(userDocument.getId())
+                                .buildAndExpand(createdDocument.getId())
                                 .toUri();
-                return ResponseEntity.created(uri).body(userDocumentMapper.toDto(userDocument));
+                return ResponseEntity.created(uri).body(userDocumentMapper.toDto(createdDocument));
         }
 }

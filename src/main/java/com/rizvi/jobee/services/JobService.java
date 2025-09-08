@@ -1,0 +1,84 @@
+package com.rizvi.jobee.services;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.rizvi.jobee.dtos.job.CreateJobDto;
+import com.rizvi.jobee.entities.BusinessAccount;
+import com.rizvi.jobee.entities.Job;
+import com.rizvi.jobee.entities.Tag;
+import com.rizvi.jobee.exceptions.JobNotFoundException;
+import com.rizvi.jobee.queries.JobQuery;
+import com.rizvi.jobee.repositories.JobRepository;
+import com.rizvi.jobee.repositories.TagRepository;
+import com.rizvi.jobee.specifications.JobSpecifications;
+
+import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
+
+@AllArgsConstructor
+@Service
+public class JobService {
+    private final JobRepository jobRepository;
+    private final TagRepository tagRepository;
+
+    public List<Job> getAllJobs(JobQuery jobQuery) {
+        return jobRepository.findAll(JobSpecifications.withFilters(jobQuery));
+    }
+
+    public Job getJobById(Long jobId) {
+        var job = jobRepository.findById(jobId).orElse(null);
+        if (job == null) {
+            throw new JobNotFoundException("Job with id " + jobId + " not found");
+        }
+        return job;
+    }
+
+    public List<Job> getJobsByCompany(JobQuery jobQuery, Long companyId) {
+        jobQuery.setCompanyId(companyId);
+        return jobRepository.findAll(JobSpecifications.withFilters(jobQuery));
+    }
+
+    public Job getCompanyJobById(Long jobId) {
+        var job = jobRepository.findDetailedJobById(jobId).orElse(null);
+        if (job == null) {
+            throw new JobNotFoundException("Job with id " + jobId + " not found");
+        }
+        return job;
+    }
+
+    public List<Job> getJobsByIds(List<Long> jobIds) {
+        return jobRepository.findJobWithIdList(jobIds);
+    }
+
+    @Transactional
+    public Job createJob(CreateJobDto request, BusinessAccount businessAccount) {
+        var tagEntities = new ArrayList<Tag>();
+        for (String tagName : request.getTags()) {
+            var tag = tagRepository.findByName(tagName.trim().replaceAll("[^a-zA-Z0-9 ]", ""));
+            if (tag == null) {
+                tag = Tag.builder().name(tagName).build();
+                tag = tagRepository.save(tag);
+            }
+            tagEntities.add(tag);
+        }
+        var job = Job.builder()
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .location(request.getLocation())
+                .employmentType(request.getEmploymentType())
+                .minSalary(request.getMinSalary())
+                .maxSalary(request.getMaxSalary())
+                .experience(request.getExperience())
+                .build();
+        job.setBusinessAccount(businessAccount);
+        for (Tag tag : tagEntities) {
+            job.addTag(tag);
+        }
+        var savedJob = jobRepository.save(job);
+        return savedJob;
+
+    }
+}
