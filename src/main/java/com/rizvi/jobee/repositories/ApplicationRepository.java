@@ -22,7 +22,7 @@ public interface ApplicationRepository extends JpaRepository<Application, Long>,
     @Query("select a from Application a where a.job.id = :jobId and a.userProfile.id = :userProfileId")
     Application findByJobIdAndUserProfileId(Long jobId, Long userProfileId);
 
-    @EntityGraph(attributePaths = { "job", "job.businessAccount", "job.businessAccount.company" })
+    @EntityGraph(attributePaths = { "job", "job.businessAccount", "job.businessAccount.company", "job.tags" })
     List<Application> findByUserProfile(UserProfile userProfile);
 
     @EntityGraph(attributePaths = { "job", "job.businessAccount", "job.businessAccount.company" })

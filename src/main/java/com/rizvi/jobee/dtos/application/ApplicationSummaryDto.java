@@ -9,4 +9,5 @@ public class ApplicationSummaryDto {
     private Long id;
     private LocalDate appliedAt;
     private String status;
+    private Long interviewId;
 }

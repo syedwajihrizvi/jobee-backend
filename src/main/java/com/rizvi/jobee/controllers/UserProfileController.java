@@ -35,6 +35,7 @@ import com.rizvi.jobee.repositories.ApplicationRepository;
 import com.rizvi.jobee.repositories.JobRepository;
 import com.rizvi.jobee.repositories.UserProfileRepository;
 import com.rizvi.jobee.services.AccountService;
+import com.rizvi.jobee.services.InterviewService;
 import com.rizvi.jobee.services.UserProfileService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -48,6 +49,7 @@ public class UserProfileController {
         private final ApplicationRepository applicationRepository;
         private final JobRepository jobRepository;
         private final UserProfileService userProfileService;
+        private final InterviewService interviewService;
         private final AccountService accountService;
         private final UserMapper userMapper;
         private final JobMapper jobMapper;
@@ -112,6 +114,12 @@ public class UserProfileController {
                         return ResponseEntity.notFound().build();
                 }
                 var applicationDto = applicationMapper.toSummaryDto(application);
+                var interview = interviewService.getInterviewByJobIdAndCandidateId(jobId, userId);
+                System.out.println("JOB ID: " + jobId + " USER ID: " + userId);
+                System.out.println("INTERVIEW: " + interview);
+                if (interview != null) {
+                        applicationDto.setInterviewId(interview.getId());
+                }
                 return ResponseEntity.ok(applicationDto);
         }
 

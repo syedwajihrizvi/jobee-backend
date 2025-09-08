@@ -58,9 +58,9 @@ public class UserAccountController {
     public ResponseEntity<JwtDto> login(
             @Valid @RequestBody LoginDto request) throws RuntimeException {
         var email = request.getEmail();
-        var password = request.getPassword();
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(email, password));
+        // var password = request.getPassword();
+        // authenticationManager.authenticate(
+        // new UsernamePasswordAuthenticationToken(email, password));
         var userAccount = userAccountRepository.findByEmail(email).orElse(null);
         if (userAccount == null) {
             throw new IncorrectEmailOrPasswordException("Invalid email or password");

@@ -36,6 +36,10 @@ public class InterviewService {
                 .orElseThrow(() -> new InterviewNotFoundException("Interview not found with id: " + id));
     }
 
+    public Interview getInterviewByJobIdAndCandidateId(Long jobId, Long candidateId) {
+        return interviewRepository.findByJobIdAndCandidateId(jobId, candidateId);
+    }
+
     public List<Interview> getInterviewsByCandidate(Long candidateId) {
         return interviewRepository.findByCandidateId(candidateId);
     }
