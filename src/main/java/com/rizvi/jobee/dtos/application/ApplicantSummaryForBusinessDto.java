@@ -15,4 +15,6 @@ public class ApplicantSummaryForBusinessDto {
     private String profileSummary;
     private String location;
     private String title;
+    private String status;
+    private Boolean shortListed;
 }

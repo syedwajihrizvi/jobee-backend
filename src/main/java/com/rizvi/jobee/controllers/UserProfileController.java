@@ -115,8 +115,6 @@ public class UserProfileController {
                 }
                 var applicationDto = applicationMapper.toSummaryDto(application);
                 var interview = interviewService.getInterviewByJobIdAndCandidateId(jobId, userId);
-                System.out.println("JOB ID: " + jobId + " USER ID: " + userId);
-                System.out.println("INTERVIEW: " + interview);
                 if (interview != null) {
                         applicationDto.setInterviewId(interview.getId());
                 }

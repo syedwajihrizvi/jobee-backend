@@ -40,6 +40,13 @@ public class InterviewService {
         return interviewRepository.findByJobIdAndCandidateId(jobId, candidateId);
     }
 
+    public List<Interview> getInterviewsByJobId(Long jobId, Number limit) {
+        if (limit != null) {
+            return interviewRepository.findByJobIdWithLimit(jobId, limit);
+        }
+        return interviewRepository.findByJobId(jobId);
+    }
+
     public List<Interview> getInterviewsByCandidate(Long candidateId) {
         return interviewRepository.findByCandidateId(candidateId);
     }

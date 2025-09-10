@@ -16,4 +16,5 @@ public class JobSummaryForBusinessDto {
     private String businessName;
     private String employmentType;
     private LocalDateTime createdAt;
+    private LocalDateTime appDeadline;
 }

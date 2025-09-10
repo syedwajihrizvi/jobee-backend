@@ -1,5 +1,6 @@
 package com.rizvi.jobee.dtos.job;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.rizvi.jobee.enums.EmploymentType;
@@ -17,4 +18,5 @@ public class CreateJobDto {
     private Integer maxSalary;
     private List<String> tags;
     private Integer experience;
+    private LocalDateTime appDeadline;
 }

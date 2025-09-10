@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -62,6 +63,18 @@ public class InterviewController {
                 .map(interviewMapper::toSummaryDto)
                 .toList();
         return ResponseEntity.ok(interviewSummaryDtos);
+    }
+
+    @GetMapping("/job/{jobId}")
+    @Operation(summary = "Get interviews for a specific job")
+    public ResponseEntity<List<InterviewDto>> getInterviewsByJobId(
+            @PathVariable Long jobId,
+            @RequestParam(required = false) Number limit) {
+        var interviews = interviewService.getInterviewsByJobId(jobId, limit);
+        var interviewDtos = interviews.stream()
+                .map(interviewMapper::toDto)
+                .toList();
+        return ResponseEntity.ok(interviewDtos);
     }
 
     @PostMapping()

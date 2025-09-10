@@ -1,6 +1,6 @@
 package com.rizvi.jobee.dtos.job;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.rizvi.jobee.dtos.tag.TagDto;
@@ -18,6 +18,7 @@ public class JobDetailedSummaryForBusinessDto {
     private Integer maxSalary;
     private Integer applicants;
     private List<TagDto> tags;
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
     private Integer totalShortListedCandidates;
+    private LocalDateTime appDeadline;
 }
