@@ -22,6 +22,7 @@ public class UserProfileSummaryDto {
     private String email;
     private String phoneNumber;
     private String profileImageUrl;
+    private String videoIntroUrl;
     private List<UserDocumentDto> documents;
     private List<JobIdDto> favoriteJobs;
     private List<UserSkillDto> skills;

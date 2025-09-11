@@ -53,6 +53,9 @@ public class UserProfile {
     @Column(name = "profile_image_url", nullable = true)
     private String profileImageUrl;
 
+    @Column(name = "video_intro_url", nullable = true)
+    private String videoIntroUrl;
+
     @Column(name = "city", nullable = true)
     private String city;
 

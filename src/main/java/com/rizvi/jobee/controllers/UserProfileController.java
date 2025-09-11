@@ -214,11 +214,12 @@ public class UserProfileController {
         public ResponseEntity<UserProfileSummaryDto> completeUserProfile(
                         @RequestPart("resume") MultipartFile document,
                         @RequestPart("profileImage") MultipartFile profileImage,
+                        @RequestPart(name = "videoIntro", required = false) MultipartFile videoIntro,
                         @RequestPart("data") String request,
                         @AuthenticationPrincipal CustomPrincipal principal) throws RuntimeException, AmazonS3Exception {
                 var userId = principal.getId();
                 var userProfile = userProfileService.updateUserProfileViaCompleteProfile(
-                                document, profileImage, request, userId);
+                                document, profileImage, videoIntro, request, userId);
                 return ResponseEntity.ok().body(userMapper.toProfileSummaryDto(userProfile));
         }
 

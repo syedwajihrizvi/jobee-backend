@@ -113,7 +113,7 @@ public class UserProfileService {
 
     @Transactional
     public UserProfile updateUserProfileViaCompleteProfile(
-            MultipartFile resume, MultipartFile profileImage, String request, Long userId)
+            MultipartFile resume, MultipartFile profileImage, MultipartFile videoIntro, String request, Long userId)
             throws RuntimeException, AmazonS3Exception {
         var userProfile = userProfileRepository.findByAccountId(userId).orElse(null);
         if (userProfile == null) {
@@ -138,6 +138,14 @@ public class UserProfileService {
         } catch (Exception e) {
             throw new AmazonS3Exception(e.getMessage());
         }
+        if (videoIntro != null)
+            try {
+                s3Service.uploadVideoIntro(userProfile.getId(), videoIntro);
+                userProfile.setVideoIntroUrl(userId.toString() + "_" + videoIntro.getOriginalFilename());
+                userProfileRepository.save(userProfile);
+            } catch (Exception e) {
+                throw new AmazonS3Exception(e.getMessage());
+            }
         var resumeType = UserDocumentType.valueOf(UserDocumentType.RESUME.name());
         var result = userDocumentService.uploadDocument(userId, resume, resumeType);
         if (result == null) {

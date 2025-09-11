@@ -12,5 +12,4 @@ public class CompleteProfileDto {
     private String phoneNumber;
     private String company;
     private String position;
-
 }
