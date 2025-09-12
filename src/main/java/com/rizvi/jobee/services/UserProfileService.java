@@ -111,6 +111,31 @@ public class UserProfileService {
         return savedProfile;
     }
 
+    public UserProfile updateUserVideo(MultipartFile videoIntro, Long accountId) throws AmazonS3Exception {
+        var userProfile = userProfileRepository.findByAccountId(accountId).orElse(null);
+        if (userProfile == null) {
+            return null;
+        }
+        try {
+            s3Service.uploadVideoIntro(accountId, videoIntro);
+            userProfile.setVideoIntroUrl(accountId.toString() + "_" + videoIntro.getOriginalFilename());
+            var savedProfile = userProfileRepository.save(userProfile);
+            return savedProfile;
+        } catch (Exception e) {
+            throw new AmazonS3Exception(e.getMessage());
+        }
+    }
+
+    public Void removeVideoIntro(Long accountId) throws AmazonS3Exception {
+        var userProfile = userProfileRepository.findByAccountId(accountId).orElse(null);
+        if (userProfile == null) {
+            return null;
+        }
+        userProfile.setVideoIntroUrl(null);
+        userProfileRepository.save(userProfile);
+        return null;
+    }
+
     @Transactional
     public UserProfile updateUserProfileViaCompleteProfile(
             MultipartFile resume, MultipartFile profileImage, MultipartFile videoIntro, String request, Long userId)

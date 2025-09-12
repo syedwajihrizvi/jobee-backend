@@ -59,4 +59,8 @@ public class S3Service {
                                                 videoIntro.getInputStream(),
                                                 videoIntro.getSize()));
         }
+
+        public void deleteFile(String key) throws IOException {
+                s3Client.deleteObject(builder -> builder.bucket(awsProperties.getBucket()).key(key).build());
+        }
 }

@@ -181,6 +181,28 @@ public class UserProfileController {
                 return ResponseEntity.ok().body(userMapper.toProfileSummaryDto(savedProfile));
         }
 
+        @PatchMapping("/update-video-intro")
+        @Operation(summary = "Update video introduction")
+        public ResponseEntity<UserProfileSummaryDto> updateVideoIntro(
+                        @RequestParam("videoIntro") MultipartFile videoIntro,
+                        @AuthenticationPrincipal CustomPrincipal principal) throws AmazonS3Exception {
+                if (videoIntro.isEmpty()) {
+                        throw new IllegalArgumentException("Video introduction file is empty");
+                }
+                var userId = principal.getId();
+                var savedProfile = userProfileService.updateUserVideo(videoIntro, userId);
+                return ResponseEntity.ok().body(userMapper.toProfileSummaryDto(savedProfile));
+        }
+
+        @PatchMapping("/remove-video-intro")
+        @Operation(summary = "Remove video introduction")
+        public ResponseEntity<Void> removeVideoIntro(
+                        @AuthenticationPrincipal CustomPrincipal principal) throws AmazonS3Exception {
+                var userId = principal.getId();
+                userProfileService.removeVideoIntro(userId);
+                return ResponseEntity.noContent().build();
+        }
+
         @PatchMapping("/update-general-info")
         @Operation(summary = "Update general information of user profile")
         @Transactional
