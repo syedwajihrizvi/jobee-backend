@@ -1,0 +1,2 @@
+ALTER TABLE user_documents
+    ADD COLUMN title VARCHAR(55) DEFAULT NULL;

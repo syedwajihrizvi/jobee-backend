@@ -34,6 +34,9 @@ public class UserDocument {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "title", nullable = true)
+    private String title;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "document_type", nullable = false)
     private UserDocumentType documentType;

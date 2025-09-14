@@ -138,7 +138,8 @@ public class UserProfileService {
 
     @Transactional
     public UserProfile updateUserProfileViaCompleteProfile(
-            MultipartFile resume, MultipartFile profileImage, MultipartFile videoIntro, String request, Long userId)
+            MultipartFile resume, MultipartFile profileImage, MultipartFile videoIntro, String resumeTitle,
+            String request, Long userId)
             throws RuntimeException, AmazonS3Exception {
         var userProfile = userProfileRepository.findByAccountId(userId).orElse(null);
         if (userProfile == null) {
@@ -176,8 +177,8 @@ public class UserProfileService {
         if (result == null) {
             throw new RuntimeException("Failed to upload resume");
         }
-        var userDocument = userDocumentService.createUserDocumentViaFile(profileImage, resumeType, userProfile,
-                true);
+        var userDocument = userDocumentService.createUserDocumentViaFile(resume, resumeType, userProfile,
+                resumeTitle, true);
         if (userDocument == null) {
             throw new RuntimeException("Failed to create user document");
         }

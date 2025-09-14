@@ -21,9 +21,14 @@ public class S3Service {
 
         public String uploadDocument(
                         Long userId, MultipartFile document, UserDocumentType documentType) throws IOException {
+                String originalName = document.getOriginalFilename();
+                System.out.println("Original file name: " + originalName);
+                String safeFileName = originalName
+                                .trim()
+                                .replaceAll("\\s+", "_") // replace spaces with underscores
+                                .replaceAll("[^a-zA-Z0-9._-]", ""); // allow only safe characters
                 final String key = "user-documents/" + documentType + "/" + userId + "/"
-                                + document.getOriginalFilename();
-                System.out.println("Uploading document to S3 with key: " + key);
+                                + safeFileName;
                 s3Client.putObject(
                                 PutObjectRequest.builder()
                                                 .bucket(awsProperties.getBucket())

@@ -36,19 +36,19 @@ public class UserDocumentService {
 
     public UserDocument createUserDocumentViaFile(
             MultipartFile document, UserDocumentType documentType, UserProfile userProfile,
-            Boolean setPrimary) {
+            String title, Boolean setPrimary) {
         var userId = userProfile.getId();
         var result = uploadDocument(userId, document, documentType);
         if (result == null) {
             return null;
         }
         var userDocument = UserDocument.builder().documentType(documentType)
-                .documentUrl(result).user(userProfile).build();
+                .documentUrl(result).title(title).user(userProfile).build();
         userProfile.addDocument(userDocument);
         if (setPrimary) {
             userProfile.setPrimaryResume(userDocument);
-            userProfileRepository.save(userProfile);
         }
+        userProfileRepository.save(userProfile);
         return userDocument;
     }
 }

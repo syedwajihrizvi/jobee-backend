@@ -47,6 +47,7 @@ public class UserDocumentController {
         public ResponseEntity<?> createUserDocumentViaFile(
                         @RequestParam("document") MultipartFile document,
                         @RequestParam("documentType") String documentType,
+                        @RequestParam(name = "title", required = false) String title,
                         @AuthenticationPrincipal CustomPrincipal principal,
                         UriComponentsBuilder uriComponentsBuilder) throws RuntimeException {
                 Long userId = principal.getId();
@@ -54,7 +55,7 @@ public class UserDocumentController {
                                 () -> new AccountNotFoundException("User profile not found"));
                 var userDocumentType = UserDocumentType.valueOf(documentType); // Validate document type
                 var createdDocument = userDocumentService.createUserDocumentViaFile(document, userDocumentType,
-                                userProfile, false);
+                                userProfile, title, false);
                 if (createdDocument == null) {
                         return ResponseEntity.badRequest().build();
                 }

@@ -2,5 +2,8 @@ package com.rizvi.jobee.enums;
 
 public enum UserDocumentType {
     RESUME,
-    COVER_LETTER
+    COVER_LETTER,
+    CERTIFICATE,
+    TRANSCRIPT,
+    RECOMMENDATION
 }

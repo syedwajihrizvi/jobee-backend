@@ -12,5 +12,6 @@ public class UserDocumentDto {
     private UserDocumentType documentType;
     private String documentUrl;
     private String filename;
+    private String title;
     private LocalDateTime createdAt;
 }
