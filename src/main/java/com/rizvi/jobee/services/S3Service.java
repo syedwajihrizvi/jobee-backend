@@ -53,7 +53,7 @@ public class S3Service {
         }
 
         public void uploadVideoIntro(Long userId, MultipartFile videoIntro) throws IOException {
-                final String key = "user-video-intros/" + userId + "_" + videoIntro.getOriginalFilename();
+                final String key = "user-video-intros/" + userId;
                 System.out.println("Uploading video intro to S3 with key: " + key);
                 s3Client.putObject(
                                 PutObjectRequest.builder()

@@ -118,7 +118,7 @@ public class UserProfileService {
         }
         try {
             s3Service.uploadVideoIntro(accountId, videoIntro);
-            userProfile.setVideoIntroUrl(accountId.toString() + "_" + videoIntro.getOriginalFilename());
+            userProfile.setVideoIntroUrl(accountId.toString());
             var savedProfile = userProfileRepository.save(userProfile);
             return savedProfile;
         } catch (Exception e) {
@@ -167,7 +167,7 @@ public class UserProfileService {
         if (videoIntro != null)
             try {
                 s3Service.uploadVideoIntro(userProfile.getId(), videoIntro);
-                userProfile.setVideoIntroUrl(userId.toString() + "_" + videoIntro.getOriginalFilename());
+                userProfile.setVideoIntroUrl(userId.toString());
                 userProfileRepository.save(userProfile);
             } catch (Exception e) {
                 throw new AmazonS3Exception(e.getMessage());
