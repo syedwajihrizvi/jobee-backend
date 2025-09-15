@@ -20,6 +20,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.rizvi.jobee.dtos.application.ApplicationSummaryDto;
 import com.rizvi.jobee.dtos.job.JobIdDto;
+import com.rizvi.jobee.dtos.job.JobSummaryDto;
 import com.rizvi.jobee.dtos.user.CreateUserProfileDto;
 import com.rizvi.jobee.dtos.user.UpdateUserProfileGeneralInfoDto;
 import com.rizvi.jobee.dtos.user.UpdateUserProfileSummaryDto;
@@ -124,15 +125,15 @@ public class UserProfileController {
         // # Should be in the JobController
         @GetMapping("/favorite-jobs")
         @Operation(summary = "Get all favorite jobs for the authenticated user")
-        public ResponseEntity<List<JobIdDto>> getFavoriteJobs(
+        public ResponseEntity<List<JobSummaryDto>> getFavoriteJobs(
                         @AuthenticationPrincipal CustomPrincipal principal) {
                 var userId = principal.getId();
                 var userProfile = userProfileRepository.findById(userId)
                                 .orElseThrow(() -> new AccountNotFoundException("User profile not found"));
-                var favoriteJobIds = userProfile.getFavoriteJobs().stream()
-                                .map(jobMapper::toJobIdDto)
+                var favoriteJobs = userProfile.getFavoriteJobs().stream()
+                                .map(jobMapper::toSummaryDto)
                                 .toList();
-                return ResponseEntity.ok(favoriteJobIds);
+                return ResponseEntity.ok(favoriteJobs);
         }
 
         @PostMapping()
@@ -160,7 +161,6 @@ public class UserProfileController {
                 var userId = principal.getId();
                 var userProfile = userProfileRepository.findByAccountId(userId)
                                 .orElseThrow(() -> new AccountNotFoundException("User profile not found"));
-                System.out.println("TOGGLING FAVORITE FOR JOB ID: " + jobId);
                 var job = jobRepository.findById(Long.valueOf(jobId))
                                 .orElseThrow(() -> new JobNotFoundException("Job with ID " + jobId + " not found"));
                 userProfile.toggleFavoriteJob(job);
