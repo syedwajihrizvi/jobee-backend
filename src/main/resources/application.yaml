@@ -24,3 +24,5 @@ cloud:
     bucket: ${AWS_S3_BUCKET:jobee-backend}
     accessKey: ${AWS_ACCESS_KEY_ID:your-access-key-id}
     secretKey: ${AWS_SECRET_ACCESS_KEY:your-secret-access-key}
+openai:
+  apiKey: ${OPENAI_API_KEY:your-openai-api-key}
