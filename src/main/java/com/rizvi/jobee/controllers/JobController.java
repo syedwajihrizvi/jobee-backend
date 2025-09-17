@@ -137,5 +137,4 @@ public class JobController {
         var shortListedApplicants = job.getShortListedApplications().stream().map(Application::getId).toList();
         return ResponseEntity.ok(shortListedApplicants);
     }
-
 }

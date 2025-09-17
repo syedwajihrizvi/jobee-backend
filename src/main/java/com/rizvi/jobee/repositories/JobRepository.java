@@ -27,4 +27,12 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
     @EntityGraph(attributePaths = { "applications", "tags" })
     @Query("select j from Job j where j.id = :jobId")
     Optional<Job> findDetailedJobById(Long jobId);
+
+    @Query(nativeQuery = true, value = """
+            SELECT DISTINCT j.* FROM jobs j
+            JOIN job_tags jt ON j.id = jt.job_id
+            JOIN tags t ON jt.tag_id = t.id
+            WHERE LOWER(TRIM(t.name)) IN :skills
+            """)
+    List<Job> findJobsWithSkills(List<String> skills);
 }

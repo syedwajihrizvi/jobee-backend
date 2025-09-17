@@ -52,6 +52,13 @@ public class JobSpecifications {
                 }
                 predicates.add(cb.or(predicates.toArray(new Predicate[0])));
             }
+            if (query.getEmploymentTypes() != null && !query.getEmploymentTypes().isEmpty()) {
+                List<Predicate> employmentTypePredicates = new ArrayList<>();
+                for (String type : query.getEmploymentTypes()) {
+                    employmentTypePredicates.add(cb.equal(root.get("employmentType"), type));
+                }
+                predicates.add(cb.or(employmentTypePredicates.toArray(new Predicate[0])));
+            }
             if (query.getTags() != null && !query.getTags().isEmpty()) {
                 List<Predicate> tagPredicates = new ArrayList<>();
                 Join<Job, Tag> tagsJoin = root.join("tags");
@@ -69,6 +76,9 @@ public class JobSpecifications {
             }
             if (query.getMaxSalary() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("maxSalary"), query.getMaxSalary()));
+            }
+            if (query.getMinExperience() != null && query.getMaxExperience() != null) {
+                predicates.add(cb.between(root.get("experience"), query.getMinExperience(), query.getMaxExperience()));
             }
             return cb.and(predicates.toArray(new Predicate[0]));
         };

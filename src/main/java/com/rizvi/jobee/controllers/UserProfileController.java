@@ -37,6 +37,7 @@ import com.rizvi.jobee.repositories.JobRepository;
 import com.rizvi.jobee.repositories.UserProfileRepository;
 import com.rizvi.jobee.services.AccountService;
 import com.rizvi.jobee.services.InterviewService;
+import com.rizvi.jobee.services.JobRecommenderService;
 import com.rizvi.jobee.services.UserProfileService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -51,6 +52,7 @@ public class UserProfileController {
         private final JobRepository jobRepository;
         private final UserProfileService userProfileService;
         private final InterviewService interviewService;
+        private final JobRecommenderService jobRecommenderService;
         private final AccountService accountService;
         private final UserMapper userMapper;
         private final JobMapper jobMapper;
@@ -136,6 +138,18 @@ public class UserProfileController {
                 return ResponseEntity.ok(favoriteJobs);
         }
 
+        @GetMapping("/recommended-jobs")
+        @Operation(summary = "Get AI recommended jobs for the authenticated user")
+        public ResponseEntity<List<JobSummaryDto>> getRecommendedJobs(
+                        @AuthenticationPrincipal CustomPrincipal principal) {
+                var userId = principal.getId();
+                var userProfile = userProfileRepository.findById(userId)
+                                .orElseThrow(() -> new AccountNotFoundException("User profile not found"));
+                var jobs = jobRecommenderService.getRecommendedJobsForUser(userProfile);
+                var jobDtos = jobs.stream().map(jobMapper::toSummaryDto).toList();
+                return ResponseEntity.ok(jobDtos);
+        }
+
         @PostMapping()
         @Operation(summary = "Create a new user profile")
         public ResponseEntity<UserProfileSummaryDto> createUserProfile(
@@ -153,8 +167,8 @@ public class UserProfileController {
                 return ResponseEntity.created(uri).body(userProfileDto);
         }
 
-        // # Should be in the JobController
         @PostMapping("/favorite-jobs")
+        @Operation(summary = "Add or remove a job from the authenticated user's favorite jobs")
         public ResponseEntity<?> addFavoriteJob(
                         @RequestParam Long jobId,
                         @AuthenticationPrincipal CustomPrincipal principal) {
