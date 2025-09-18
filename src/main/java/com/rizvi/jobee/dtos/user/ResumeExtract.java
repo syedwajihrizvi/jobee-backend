@@ -3,11 +3,12 @@ package com.rizvi.jobee.dtos.user;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
-import com.rizvi.jobee.helpers.AISchemas.Education;
-import com.rizvi.jobee.helpers.AISchemas.Experience;
+import com.rizvi.jobee.helpers.AISchemas.AIEducation;
+import com.rizvi.jobee.helpers.AISchemas.AIExperience;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
@@ -15,6 +16,7 @@ import lombok.ToString;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
 public class ResumeExtract {
     @JsonPropertyDescription("Phone number extracted from resume")
     public String phoneNumber;
@@ -29,7 +31,8 @@ public class ResumeExtract {
     @JsonPropertyDescription("Skills extracted from resume")
     public List<String> skills;
     @JsonPropertyDescription("Experience extracted from resume")
-    public List<Experience> experience;
+    public List<AIExperience> experience;
     @JsonPropertyDescription("Education extracted from resume")
-    public List<Education> education;
+    public List<AIEducation> education;
+
 }

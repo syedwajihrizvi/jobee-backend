@@ -1,8 +1,11 @@
 package com.rizvi.jobee.services;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.rizvi.jobee.dtos.skill.CreateUserSkillDto;
+import com.rizvi.jobee.entities.Skill;
 import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.entities.UserSkill;
 import com.rizvi.jobee.exceptions.SkillNotFoundException;
@@ -23,9 +26,11 @@ public class UserSkillService {
         var skillName = request.getSkill();
         // Check if a skill with a name similar to the passed skill exists
         var strippedSkillName = skillName.replace(" ", "").toLowerCase();
-        var skill = skillRepository.findByNameLike(strippedSkillName);
+        Skill skill;
+        skill = skillRepository.findByNameLike(strippedSkillName);
         if (skill == null) {
-            throw new SkillNotFoundException("Skill not found with name: " + strippedSkillName);
+            skill = Skill.builder().name(skillName).build();
+            skill = skillRepository.save(skill);
         }
         var userSkill = userSkillRepository.findByUserProfileIdAndSkillId(userProfile.getId(), skill.getId());
         if (userSkill != null) {
@@ -38,5 +43,26 @@ public class UserSkillService {
         userProfile.addSkill(newUserSkill);
         var savedUserSkill = userSkillRepository.save(newUserSkill);
         return savedUserSkill;
+    }
+
+    @Transactional
+    public boolean createUserSkills(List<String> skills, UserProfile userProfile) {
+        for (String parsedSkill : skills) {
+            var strippedSkillName = parsedSkill.replace(" ", "").toLowerCase();
+            Skill skill;
+            skill = skillRepository.findByNameLike(strippedSkillName);
+            if (skill == null) {
+                skill = Skill.builder().name(parsedSkill).build();
+                skill = skillRepository.save(skill);
+            }
+            var userSkill = userSkillRepository.findByUserProfileIdAndSkillId(userProfile.getId(), skill.getId());
+            if (userSkill == null) {
+                var newUserSkill = UserSkill.builder().skill(skill).userProfile(userProfile).build();
+                userSkillRepository.save(newUserSkill);
+            }
+            userProfile.addSkill(userSkill);
+            userSkillRepository.save(userSkill);
+        }
+        return true;
     }
 }

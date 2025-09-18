@@ -30,6 +30,9 @@ public class UserProfileService {
     private final UserProfileRepository userProfileRepository;
     private final UserAccountRepository userAccountRepository;
     private final UserDocumentService userDocumentService;
+    private final UserSkillService userSkillService;
+    private final EducationService userEducationService;
+    private final ExperienceService userExperienceService;
     private final S3Service s3Service;
     private final AIService aiService;
 
@@ -156,10 +159,7 @@ public class UserProfileService {
             completeProfileDto = new ObjectMapper().readValue(request, CompleteProfileDto.class);
             userProfile.setTitle(completeProfileDto.getTitle());
             userProfile.setSummary(completeProfileDto.getSummary());
-            userProfile.setCity(completeProfileDto.getCity());
-            userProfile.setCountry(completeProfileDto.getCountry());
             userProfile.setPhoneNumber(completeProfileDto.getPhoneNumber());
-            userProfile.setCompany(completeProfileDto.getCompany());
         } catch (JsonProcessingException e) {
             // TODO: Handle the exception properly
             throw new RuntimeException("Failed to parse request body");
@@ -192,7 +192,12 @@ public class UserProfileService {
         // Get the resume details
         try {
             var details = aiService.extractDetailsFromResume(resume);
-            System.out.println(details);
+            var educations = details.getEducation();
+            var skills = details.getSkills();
+            var experiences = details.getExperience();
+            userEducationService.createEducationsForUserFromAISchemas(educations, userProfile);
+            userSkillService.createUserSkills(skills, userProfile);
+            userExperienceService.addExperiencesForUserFromAISchemas(experiences, userProfile);
         } catch (Exception e) {
             // Log the error but continue
             System.err.println("Failed to extract details from resume: " + e.getMessage());

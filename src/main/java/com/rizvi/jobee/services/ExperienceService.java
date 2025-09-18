@@ -8,6 +8,7 @@ import com.rizvi.jobee.dtos.experience.CreateExperienceDto;
 import com.rizvi.jobee.entities.Experience;
 import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.exceptions.ExperienceNotFoundException;
+import com.rizvi.jobee.helpers.AISchemas.AIExperience;
 import com.rizvi.jobee.repositories.ExperienceRepository;
 
 import lombok.AllArgsConstructor;
@@ -28,6 +29,22 @@ public class ExperienceService {
                 .to(request.getTo()).description(request.getDescription())
                 .profile(userProfile).build();
         return experienceRepository.save(experience);
+    }
+
+    public boolean addExperiencesForUserFromAISchemas(
+            List<AIExperience> experiences, UserProfile userProfile) {
+        for (AIExperience experience : experiences) {
+            var newExperience = Experience.builder()
+                    .title(experience.getTitle())
+                    .company(experience.getCompany())
+                    .from(Integer.valueOf(experience.getFromYear()))
+                    .to(Integer.valueOf(experience.getToYear()))
+                    .description(experience.getDescription())
+                    .profile(userProfile)
+                    .build();
+            experienceRepository.save(newExperience);
+        }
+        return true;
     }
 
     public Experience updateExperience(CreateExperienceDto request, Long id) {

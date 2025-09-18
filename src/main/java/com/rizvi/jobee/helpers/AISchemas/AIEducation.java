@@ -11,7 +11,7 @@ import lombok.ToString;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class Education {
+public class AIEducation {
     @JsonPropertyDescription("Institution name")
     public String institution;
     @JsonPropertyDescription("Degree obtained")
