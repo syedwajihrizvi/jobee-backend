@@ -37,17 +37,22 @@ public class EducationService {
     public boolean createEducationsForUserFromAISchemas(
             List<AIEducation> educations, UserProfile userProfile) {
         for (AIEducation education : educations) {
-            // TODO: Only handle educations that are not not null
-            // Set the fields to null by making them nullable in the schema
             if (education.degree != null && education.institution != null
                     && education.fromYear != null) {
                 var newEducation = Education.builder()
                         .degree(education.degree)
                         .institution(education.institution)
-                        .fromYear(Integer.valueOf(education.fromYear))
-                        .toYear(Integer.valueOf(education.toYear))
                         .userProfile(userProfile)
                         .build();
+                if (education.fromYear != null) {
+                    newEducation.setFromYear(Integer.valueOf(education.fromYear));
+                }
+                if (education.toYear != null) {
+                    if (education.toYear.equalsIgnoreCase("present")) {
+                        newEducation.setToYear(null);
+                    } else
+                        newEducation.setToYear(Integer.valueOf(education.toYear));
+                }
                 userProfile.addEducation(newEducation);
                 educationRepository.save(newEducation);
             }

@@ -10,4 +10,7 @@ public interface SkillRepository extends JpaRepository<Skill, Long> {
     @Query(value = """
             SELECT * FROM skills WHERE LOWER(REGEXP_REPLACE(name, '[^a-z0-9]', '', 'g')) = LOWER(REGEXP_REPLACE(:name, '[^a-z0-9]', '', 'g'))""", nativeQuery = true)
     Skill findByNameLike(@Param("name") String name);
+
+    @Query("select s from Skill s where s.slug = :slug")
+    Skill findBySlug(String slug);
 }

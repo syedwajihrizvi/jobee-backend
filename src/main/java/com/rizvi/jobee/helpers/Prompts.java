@@ -57,7 +57,7 @@ public class Prompts {
                 "title": "<job title or null>",
                 "description": "<short job description or null>",
                 "fromYear": "<start year or null>",
-                "toYear": "<end year or 'present' or null>"
+                "toYear": "<end year or 'present' or null. If fromYear is null then toYear must be null>"
                 }
             ]
             }

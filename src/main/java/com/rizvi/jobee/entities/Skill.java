@@ -35,6 +35,9 @@ public class Skill {
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
+    @Column(name = "slug", nullable = false, unique = true)
+    private String slug;
+
     @Column(name = "description", nullable = true)
     private String description;
 

@@ -38,10 +38,12 @@ public class ExperienceService {
                     .title(experience.getTitle())
                     .company(experience.getCompany())
                     .from(Integer.valueOf(experience.getFromYear()))
-                    .to(Integer.valueOf(experience.getToYear()))
                     .description(experience.getDescription())
                     .profile(userProfile)
                     .build();
+            if (experience.getToYear().equalsIgnoreCase("present") || experience.getToYear() == null) {
+                newExperience.setTo(null);
+            }
             experienceRepository.save(newExperience);
         }
         return true;
