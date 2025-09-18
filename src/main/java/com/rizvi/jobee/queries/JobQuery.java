@@ -17,4 +17,5 @@ public class JobQuery {
     private Integer maxExperience;
     private Long companyId;
     private List<String> employmentTypes;
+    private List<String> settings;
 }

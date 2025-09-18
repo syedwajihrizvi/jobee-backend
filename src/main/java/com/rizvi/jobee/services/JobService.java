@@ -69,6 +69,8 @@ public class JobService {
                 .description(request.getDescription())
                 .location(request.getLocation())
                 .employmentType(request.getEmploymentType())
+                .setting(request.getSetting())
+                .appDeadline(request.getAppDeadline())
                 .minSalary(request.getMinSalary())
                 .maxSalary(request.getMaxSalary())
                 .experience(request.getExperience())

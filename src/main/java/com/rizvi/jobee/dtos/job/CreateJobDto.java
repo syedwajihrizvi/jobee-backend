@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.rizvi.jobee.enums.EmploymentType;
+import com.rizvi.jobee.enums.JobSetting;
 
 import lombok.Data;
 
@@ -14,6 +15,7 @@ public class CreateJobDto {
     private Long businessAccountId;
     private String location;
     private EmploymentType employmentType;
+    private JobSetting setting;
     private Integer minSalary;
     private Integer maxSalary;
     private List<String> tags;

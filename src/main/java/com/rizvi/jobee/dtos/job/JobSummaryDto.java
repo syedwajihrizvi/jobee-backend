@@ -16,6 +16,7 @@ public class JobSummaryDto {
     private String businessName;
     private String location;
     private String employmentType;
+    private String setting;
     private Integer minSalary;
     private Integer maxSalary;
     private Integer experience;

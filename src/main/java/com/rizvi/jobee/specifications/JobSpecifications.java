@@ -59,6 +59,13 @@ public class JobSpecifications {
                 }
                 predicates.add(cb.or(employmentTypePredicates.toArray(new Predicate[0])));
             }
+            if (query.getSettings() != null && !query.getSettings().isEmpty()) {
+                List<Predicate> workplaceSettingsPredicates = new ArrayList<>();
+                for (String type : query.getSettings()) {
+                    workplaceSettingsPredicates.add(cb.equal(root.get("setting"), type));
+                }
+                predicates.add(cb.or(workplaceSettingsPredicates.toArray(new Predicate[0])));
+            }
             if (query.getTags() != null && !query.getTags().isEmpty()) {
                 List<Predicate> tagPredicates = new ArrayList<>();
                 Join<Job, Tag> tagsJoin = root.join("tags");

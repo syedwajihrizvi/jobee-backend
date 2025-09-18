@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.rizvi.jobee.enums.EmploymentType;
+import com.rizvi.jobee.enums.JobSetting;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -56,6 +57,10 @@ public class Job {
     @Enumerated(value = EnumType.STRING)
     @Column(name = "employment_type", nullable = true)
     private EmploymentType employmentType;
+
+    @Enumerated(value = EnumType.STRING)
+    @Column(name = "setting", nullable = false)
+    private JobSetting setting;
 
     @Column(name = "min_salary", nullable = true)
     private Integer minSalary;

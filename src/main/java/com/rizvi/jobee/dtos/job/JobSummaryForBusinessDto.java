@@ -15,6 +15,7 @@ public class JobSummaryForBusinessDto {
     private Integer maxSalary;
     private String businessName;
     private String employmentType;
+    private String setting;
     private LocalDateTime createdAt;
     private LocalDateTime appDeadline;
 }
