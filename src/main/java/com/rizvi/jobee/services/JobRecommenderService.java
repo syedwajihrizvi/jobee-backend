@@ -20,8 +20,7 @@ public class JobRecommenderService {
         // In a real-world scenario, this would involve complex algorithms and possibly
         // AI/ML models
         // Right now, just find jobs that match user's skills, interests
-        var skills = user.getSkills().stream().map(s -> s.getSkill().getName().toLowerCase().trim()).toList();
-        System.out.println("User skills: " + skills);
+        var skills = user.getSkills().stream().map(s -> s.getSkill().getSlug().toLowerCase().trim()).toList();
         return jobRepository.findJobsWithSkills(skills);
     }
 }

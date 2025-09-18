@@ -28,7 +28,7 @@ public class UserSkillService {
         Skill skill;
         skill = skillRepository.findBySlug(skillSlug);
         if (skill == null) {
-            skill = Skill.builder().name(skillName).build();
+            skill = Skill.builder().name(skillName).slug(skillSlug).build();
             skill = skillRepository.save(skill);
         }
         var userSkill = userSkillRepository.findByUserProfileIdAndSkillId(userProfile.getId(), skill.getId());
