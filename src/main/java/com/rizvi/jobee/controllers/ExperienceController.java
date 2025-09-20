@@ -39,6 +39,17 @@ public class ExperienceController {
         return ResponseEntity.ok(experiences);
     }
 
+    @GetMapping("/my-experiences")
+    @Operation(summary = "Get all experiences for authenticated user")
+    public ResponseEntity<List<ExperienceDto>> getAllExperiencesForUser(
+            @AuthenticationPrincipal CustomPrincipal principal) {
+        var id = principal.getId();
+        var experiences = experienceService.getExperiencesForUser(id).stream()
+                .map(experienceMapper::toExperienceDto)
+                .toList();
+        return ResponseEntity.ok(experiences);
+    }
+
     @PostMapping
     @Operation(summary = "Add experience information")
     public ResponseEntity<ExperienceDto> addExperience(

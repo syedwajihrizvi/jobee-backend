@@ -29,10 +29,10 @@ public class Experience {
     private Long id;
 
     @Column(name = "from_year", nullable = false)
-    private Integer from;
+    private String from;
 
     @Column(name = "to_year", nullable = true)
-    private Integer to;
+    private String to;
 
     @Column(name = "title", nullable = false)
     private String title;
@@ -51,6 +51,6 @@ public class Experience {
 
     @ManyToOne
     @JoinColumn(name = "user_profile_id", nullable = false)
-    private UserProfile profile;
+    private UserProfile userProfile;
 
 }

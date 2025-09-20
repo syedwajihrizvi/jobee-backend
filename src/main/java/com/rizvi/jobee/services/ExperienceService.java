@@ -22,29 +22,33 @@ public class ExperienceService {
         return experienceRepository.findAll();
     }
 
+    public List<Experience> getExperiencesForUser(Long userId) {
+        return experienceRepository.findByUserProfileId(userId);
+    }
+
     public Experience addExperience(CreateExperienceDto request, UserProfile userProfile) {
         var experience = Experience.builder().title(request.getTitle())
                 .company(request.getCompany()).city(request.getCity())
                 .country(request.getCountry()).from(request.getFrom())
                 .to(request.getTo()).description(request.getDescription())
-                .profile(userProfile).build();
+                .userProfile(userProfile).build();
         return experienceRepository.save(experience);
     }
 
     public boolean addExperiencesForUserFromAISchemas(
             List<AIExperience> experiences, UserProfile userProfile) {
         for (AIExperience experience : experiences) {
-            var newExperience = Experience.builder()
-                    .title(experience.getTitle())
-                    .company(experience.getCompany())
-                    .from(Integer.valueOf(experience.getFromYear()))
-                    .description(experience.getDescription())
-                    .profile(userProfile)
-                    .build();
-            if (experience.getToYear().equalsIgnoreCase("present") || experience.getToYear() == null) {
-                newExperience.setTo(null);
+            if (!experienceExists(experience, userProfile)) {
+                var newExperience = Experience.builder()
+                        .title(experience.getTitle())
+                        .company(experience.getCompany())
+                        .description(experience.getDescription())
+                        .from(experience.getFromYear())
+                        .to(experience.getToYear())
+                        .userProfile(userProfile)
+                        .build();
+                experienceRepository.save(newExperience);
             }
-            experienceRepository.save(newExperience);
         }
         return true;
     }
@@ -59,5 +63,32 @@ public class ExperienceService {
         experience.setTo(request.getTo());
         experience.setDescription(request.getDescription());
         return experienceRepository.save(experience);
+    }
+
+    public boolean experienceExists(AIExperience experience, UserProfile userProfile) {
+        String title = normalizeString(experience.getTitle());
+        String company = normalizeString(experience.getCompany());
+        String fromYear = experience.getFromYear();
+        String toYear = experience.getToYear();
+        var experiences = experienceRepository.findByUserProfileId(userProfile.getId());
+        for (Experience exp : experiences) {
+            String expTitle = normalizeString(exp.getTitle());
+            String expCompany = normalizeString(exp.getCompany());
+            String expFromYear = exp.getFrom();
+            String expToYear = exp.getTo();
+            var titleMatch = !title.isEmpty() && !expTitle.isEmpty() && title.equals(expTitle);
+            var companyMatch = !company.isEmpty() && !expCompany.isEmpty() && company.equals(expCompany);
+            var fromYearMatch = fromYear == expFromYear;
+            var toYearMatch = toYear == expToYear;
+            // If title, company, from
+            return titleMatch && companyMatch && fromYearMatch && toYearMatch;
+        }
+        return false;
+    }
+
+    public String normalizeString(String input) {
+        if (input == null)
+            return null;
+        return input.trim().toLowerCase();
     }
 }

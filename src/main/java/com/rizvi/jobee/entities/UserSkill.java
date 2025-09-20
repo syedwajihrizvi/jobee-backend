@@ -39,4 +39,8 @@ public class UserSkill {
     @JoinColumn(name = "skill_id", nullable = false)
     private Skill skill;
 
+    public String getSkillSlug() {
+        return skill.getSlug();
+    }
+
 }

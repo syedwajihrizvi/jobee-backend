@@ -37,27 +37,27 @@ public class Prompts {
             Return a single JSON object with the following schema:
 
             {
-            "phoneNumber": "<phone number or null>",
-            "city": "<current city or null>",
-            "country": "<current country or null>",
-            "currentCompany": "<current company or null>",
-            "currentPosition": "<current position or null>",
+            "phoneNumber": "<phone number or '' if not found>",
+            "city": "<current city or '' if not found>",
+            "country": "<current country or '' if not found>",
+            "currentCompany": "<current company or '' if not found>",
+            "currentPosition": "<current position or '' if not found>",
             "skills": ["<skill1>", "<skill2>", ...],
             "education": [
                 {
-                "institution": "<institution name or null>",
-                "fromYear": "<start year or null>",
-                "toYear": "<end year or 'present' or null>",
-                "degree": "<degree name or null>"
+                "institution": "<institution name or '' if not found>",
+                "fromYear": "<start year or '' if not found>",
+                "toYear": "<end year or 'present' or set to '' if not found>",
+                "degree": "<degree name or '' if not found>"
                 }
             ],
             "experience": [
                 {
-                "company": "<company name or null>",
-                "title": "<job title or null>",
-                "description": "<short job description or null>",
-                "fromYear": "<start year or null>",
-                "toYear": "<end year or 'present' or null. If fromYear is null then toYear must be null>"
+                "company": "<company name or '' if not found>",
+                "title": "<job title or '' if not found>",
+                "description": "<short job description. 2-5 sentences",
+                "fromYear": "<start year or '' if not found>",
+                "toYear": "<end year or 'present' or '' if not found. If fromYear is '' then toYear must be ''>"
                 }
             ]
             }

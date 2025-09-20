@@ -20,6 +20,10 @@ public class EducationService {
     private final UserProfileRepository userProfileRepository;
     private final EducationRepository educationRepository;
 
+    public List<Education> getEducationsForUser(Long userId) {
+        return educationRepository.findByUserProfileId(userId);
+    }
+
     public Education createEducation(CreateEducationDto request, UserProfile userProfile) {
 
         var education = Education.builder().degree(request.getDegree())
@@ -37,22 +41,17 @@ public class EducationService {
     public boolean createEducationsForUserFromAISchemas(
             List<AIEducation> educations, UserProfile userProfile) {
         for (AIEducation education : educations) {
-            if (education.degree != null && education.institution != null
-                    && education.fromYear != null) {
+            if (!educationExists(education, userProfile) &&
+                    education.degree != null &&
+                    education.institution != null) {
+                System.out.println("SYED-DEBUG: Adding education: " + education);
                 var newEducation = Education.builder()
                         .degree(education.degree)
                         .institution(education.institution)
                         .userProfile(userProfile)
+                        .fromYear(education.fromYear)
+                        .toYear(education.toYear)
                         .build();
-                if (education.fromYear != null) {
-                    newEducation.setFromYear(Integer.valueOf(education.fromYear));
-                }
-                if (education.toYear != null) {
-                    if (education.toYear.equalsIgnoreCase("present")) {
-                        newEducation.setToYear(null);
-                    } else
-                        newEducation.setToYear(Integer.valueOf(education.toYear));
-                }
                 userProfile.addEducation(newEducation);
                 educationRepository.save(newEducation);
             }
@@ -71,5 +70,36 @@ public class EducationService {
         education.setFromYear(request.getFromYear());
         education.setToYear(request.getToYear());
         return educationRepository.save(education);
+    }
+
+    public boolean educationExists(AIEducation education, UserProfile userProfile) {
+        // TODO: Currently only handles exact matches. What if the user wants to
+        // override an existing degree entry
+        String degree = normalizeString(education.degree);
+        String institution = normalizeString(education.institution);
+        System.out.println("SYED-DEBUG: Checking existence for degree: " + degree + ", institution: " + institution
+                + ", fromYear: " + education.fromYear + ", toYear: " + education.toYear);
+        String fromYear = education.fromYear;
+        String toYear = education.toYear;
+        var educations = educationRepository.findByUserProfileId(userProfile.getId());
+        for (Education edu : educations) {
+            String eduDegree = normalizeString(edu.getDegree());
+            String eduInstitution = normalizeString(edu.getInstitution());
+            String eduFromYear = edu.getFromYear();
+            String eduToYear = edu.getToYear();
+            var degreeMatch = !eduDegree.isEmpty() && !degree.isEmpty() && eduDegree.equals(degree);
+            var institutionMatch = !eduInstitution.isEmpty() && !institution.isEmpty()
+                    && eduInstitution.equals(institution);
+            var fromYearMatch = fromYear == eduFromYear;
+            var toYearMatch = toYear == eduToYear;
+            return degreeMatch && institutionMatch && fromYearMatch && toYearMatch;
+        }
+        return false;
+    }
+
+    public String normalizeString(String input) {
+        if (input == null)
+            return "";
+        return input.replace(" ", "").toLowerCase();
     }
 }

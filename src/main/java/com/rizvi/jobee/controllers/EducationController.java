@@ -1,7 +1,10 @@
 package com.rizvi.jobee.controllers;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -28,6 +31,17 @@ public class EducationController {
         private final UserProfileService userProfileService;
         private final EducationService educationService;
         private final EducationMapper educationMapper;
+
+        @GetMapping("/my-education")
+        @Operation(summary = "Get all education for authenticated user")
+        public ResponseEntity<List<EducationDto>> getAllEducationForUser(
+                        @AuthenticationPrincipal CustomPrincipal principal) {
+                var id = principal.getId();
+                var educations = educationService.getEducationsForUser(id).stream()
+                                .map(educationMapper::toEducationDto)
+                                .toList();
+                return ResponseEntity.ok(educations);
+        }
 
         @PostMapping
         @Operation(summary = "Add education information")

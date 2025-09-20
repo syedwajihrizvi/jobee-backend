@@ -10,7 +10,7 @@ public class ExperienceDto {
     private String company;
     private String city;
     private String country;
-    private Integer from;
-    private Integer to;
+    private String from;
+    private String to;
     private Boolean currentlyWorking;
 }

@@ -35,10 +35,10 @@ public class Education {
     private Long id;
 
     @Column(name = "from_year", nullable = false)
-    private Integer fromYear;
+    private String fromYear;
 
     @Column(name = "to_year", nullable = true)
-    private Integer toYear;
+    private String toYear;
 
     @Column(name = "degree", nullable = false)
     private String degree;

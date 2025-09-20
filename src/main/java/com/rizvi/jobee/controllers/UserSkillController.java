@@ -1,7 +1,10 @@
 package com.rizvi.jobee.controllers;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +29,17 @@ public class UserSkillController {
         private final UserProfileService userProfileService;
         private final UserSkillService userSkillService;
         private final SkillMapper skillMapper;
+
+        @GetMapping("/my-skills")
+        @Operation(summary = "Get all skills for authenticated user")
+        public ResponseEntity<List<UserSkillDto>> getAllSkillsForUser(
+                        @AuthenticationPrincipal CustomPrincipal principal) {
+                var id = principal.getId();
+                var skills = userSkillService.getUserSkills(id).stream()
+                                .map(skillMapper::toUserSkillDto)
+                                .toList();
+                return ResponseEntity.ok(skills);
+        }
 
         @PostMapping
         @Operation(summary = "Add skill to user profile")

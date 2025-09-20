@@ -1,5 +1,6 @@
 package com.rizvi.jobee.services;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -20,11 +21,12 @@ public class UserSkillService {
     private final UserSkillRepository userSkillRepository;
     private final SkillRepository skillRepository;
 
+    // TODO: Refactor methods and extract common code
     @Transactional
     public UserSkill createUserSkill(CreateUserSkillDto request, UserProfile userProfile) {
         var skillName = request.getSkill();
         // Check if a skill with a name similar to the passed skill exists
-        var skillSlug = skillName.replace(" ", "").toLowerCase();
+        var skillSlug = normalizeSkillName(skillName);
         Skill skill;
         skill = skillRepository.findBySlug(skillSlug);
         if (skill == null) {
@@ -46,8 +48,12 @@ public class UserSkillService {
 
     @Transactional
     public boolean createUserSkills(List<String> skills, UserProfile userProfile) {
-        for (String parsedSkill : skills) {
-            var skillSlug = parsedSkill.replace(" ", "").toLowerCase();
+        // # TODO: Optimize this method to reduce number of DB calls
+        System.out.println("SYED-DEBUG: Creating user skills for user: " + userProfile.getId() + ", skills: " + skills);
+        var uniqueSkills = extractNewSkillsFromText(skills, userProfile);
+        System.out.println("SYED-DEBUG: Unique skills to add: " + uniqueSkills);
+        for (String parsedSkill : uniqueSkills) {
+            var skillSlug = normalizeSkillName(parsedSkill);
             Skill skill;
             skill = skillRepository.findBySlug(skillSlug);
             if (skill == null) {
@@ -63,5 +69,33 @@ public class UserSkillService {
             userSkillRepository.save(userSkill);
         }
         return true;
+    }
+
+    public List<String> extractNewSkillsFromText(List<String> skills, UserProfile userProfile) {
+        // TODO: Optimize this method currently O(n^2)
+        List<UserSkill> existingUserSkills = userSkillRepository.findByUserProfileId(userProfile.getId());
+        List<String> newSkills = new ArrayList<>();
+        for (String skill : skills) {
+            var skillSlug = normalizeSkillName(skill);
+            boolean exists = false;
+            for (UserSkill userSkill : existingUserSkills) {
+                if (userSkill.getSkillSlug().equals(skillSlug)) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists) {
+                newSkills.add(skill);
+            }
+        }
+        return newSkills;
+    }
+
+    public List<UserSkill> getUserSkills(Long userId) {
+        return userSkillRepository.findByUserProfileId(userId);
+    }
+
+    private String normalizeSkillName(String skill) {
+        return skill.replace(" ", "").toLowerCase();
     }
 }

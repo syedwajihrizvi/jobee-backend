@@ -1,0 +1,7 @@
+ALTER TABLE educations
+    ALTER COLUMN from_year TYPE VARCHAR(4) USING from_year::VARCHAR,
+    ALTER COLUMN to_year TYPE VARCHAR(10) USING to_year::VARCHAR;
+
+ALTER TABLE experiences
+    ALTER COLUMN from_year TYPE VARCHAR(4) USING from_year::VARCHAR,
+    ALTER COLUMN to_year TYPE VARCHAR(10) USING to_year::VARCHAR;

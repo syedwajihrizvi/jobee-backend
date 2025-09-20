@@ -13,7 +13,7 @@ import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.enums.UserDocumentType;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.AmazonS3Exception;
-import com.rizvi.jobee.exceptions.InvalidResumeException;
+import com.rizvi.jobee.exceptions.InvalidDocumentException;
 import com.rizvi.jobee.repositories.UserAccountRepository;
 import com.rizvi.jobee.repositories.UserProfileRepository;
 
@@ -30,11 +30,7 @@ public class UserProfileService {
     private final UserProfileRepository userProfileRepository;
     private final UserAccountRepository userAccountRepository;
     private final UserDocumentService userDocumentService;
-    private final UserSkillService userSkillService;
-    private final EducationService userEducationService;
-    private final ExperienceService userExperienceService;
     private final S3Service s3Service;
-    private final AIService aiService;
 
     public List<UserProfile> getAllUserProfiles() {
         return userProfileRepository.findAll();
@@ -152,7 +148,7 @@ public class UserProfileService {
         }
         if (resume.getSize() > 200_000) {
             // TODO: Handle the exception properly
-            throw new InvalidResumeException("Resume file size exceeds the limit of 200KB");
+            throw new InvalidDocumentException("Resume file size exceeds the limit of 200KB");
         }
         CompleteProfileDto completeProfileDto;
         try {
@@ -190,18 +186,7 @@ public class UserProfileService {
             throw new RuntimeException("Failed to create user document");
         }
         // Get the resume details
-        try {
-            var details = aiService.extractDetailsFromResume(resume);
-            var educations = details.getEducation();
-            var skills = details.getSkills();
-            var experiences = details.getExperience();
-            userEducationService.createEducationsForUserFromAISchemas(educations, userProfile);
-            userSkillService.createUserSkills(skills, userProfile);
-            userExperienceService.addExperiencesForUserFromAISchemas(experiences, userProfile);
-        } catch (Exception e) {
-            // Log the error but continue
-            System.err.println("Failed to extract details from resume: " + e.getMessage());
-        }
+        userDocumentService.extractResumeDetailsAndPopulateProfile(resume, userProfile);
         var savedProfile = userProfileRepository.findByAccountId(userId).orElse(null);
         if (savedProfile == null) {
             throw new AccountNotFoundException("User profile not found");

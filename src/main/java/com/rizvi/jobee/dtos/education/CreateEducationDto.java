@@ -6,6 +6,6 @@ import lombok.Data;
 public class CreateEducationDto {
     private String degree;
     private String institution;
-    private Integer fromYear;
-    private Integer toYear;
+    private String fromYear;
+    private String toYear;
 }
