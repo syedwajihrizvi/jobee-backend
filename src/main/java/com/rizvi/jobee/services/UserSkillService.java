@@ -9,6 +9,7 @@ import com.rizvi.jobee.dtos.skill.CreateUserSkillDto;
 import com.rizvi.jobee.entities.Skill;
 import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.entities.UserSkill;
+import com.rizvi.jobee.exceptions.UnauthorizedException;
 import com.rizvi.jobee.repositories.SkillRepository;
 import com.rizvi.jobee.repositories.UserSkillRepository;
 
@@ -21,7 +22,11 @@ public class UserSkillService {
     private final UserSkillRepository userSkillRepository;
     private final SkillRepository skillRepository;
 
-    public void deleteUserSkill(Long userSkillId) {
+    public void deleteUserSkill(Long userSkillId, Long userId) {
+        var userSkill = userSkillRepository.findById(userSkillId).orElse(null);
+        if (!userSkill.getUserProfile().getId().equals(userId)) {
+            throw new UnauthorizedException("You are not authorized to delete this skill");
+        }
         userSkillRepository.deleteById(userSkillId);
     }
 

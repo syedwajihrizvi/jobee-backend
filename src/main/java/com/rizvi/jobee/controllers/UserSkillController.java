@@ -58,8 +58,10 @@ public class UserSkillController {
 
         @DeleteMapping("/{id}")
         @Operation(summary = "Delete a skill from user profile")
-        public ResponseEntity<Void> deleteSkill(@PathVariable Long id) {
-                userSkillService.deleteUserSkill(id);
+        public ResponseEntity<Void> deleteSkill(
+                        @PathVariable Long id,
+                        @AuthenticationPrincipal CustomPrincipal principal) {
+                userSkillService.deleteUserSkill(id, principal.getId());
                 return ResponseEntity.noContent().build();
         }
 }

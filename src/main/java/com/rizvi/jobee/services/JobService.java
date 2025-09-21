@@ -2,10 +2,14 @@ package com.rizvi.jobee.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.rizvi.jobee.dtos.job.CreateJobDto;
+import com.rizvi.jobee.dtos.job.PaginatedJobDto;
 import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.entities.Tag;
@@ -24,8 +28,12 @@ public class JobService {
     private final JobRepository jobRepository;
     private final TagRepository tagRepository;
 
-    public List<Job> getAllJobs(JobQuery jobQuery) {
-        return jobRepository.findAll(JobSpecifications.withFilters(jobQuery));
+    public PaginatedJobDto getAllJobs(JobQuery jobQuery, int pageNumber, int pageSize) {
+        PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
+        Page<Job> page = jobRepository.findAll(JobSpecifications.withFilters(jobQuery), pageRequest);
+        var jobs = page.getContent();
+        var hasMore = pageNumber < page.getTotalPages() - 1;
+        return new PaginatedJobDto(hasMore, jobs);
     }
 
     public Job getJobById(Long jobId) {
@@ -36,9 +44,13 @@ public class JobService {
         return job;
     }
 
-    public List<Job> getJobsByCompany(JobQuery jobQuery, Long companyId) {
+    public PaginatedJobDto getJobsByCompany(JobQuery jobQuery, Long companyId, int pageNumber, int pageSize) {
         jobQuery.setCompanyId(companyId);
-        return jobRepository.findAll(JobSpecifications.withFilters(jobQuery));
+        PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
+        Page<Job> page = jobRepository.findAll(JobSpecifications.withFilters(jobQuery), pageRequest);
+        var jobs = page.getContent();
+        var hasMore = pageNumber < page.getTotalPages() - 1;
+        return new PaginatedJobDto(hasMore, jobs);
     }
 
     public Job getCompanyJobById(Long jobId) {

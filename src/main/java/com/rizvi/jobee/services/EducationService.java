@@ -7,6 +7,7 @@ import com.rizvi.jobee.dtos.education.CreateEducationDto;
 import com.rizvi.jobee.entities.Education;
 import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.exceptions.EducationNotFoundException;
+import com.rizvi.jobee.exceptions.UnauthorizedException;
 import com.rizvi.jobee.helpers.AISchemas.AIEducation;
 import com.rizvi.jobee.repositories.EducationRepository;
 import com.rizvi.jobee.repositories.UserProfileRepository;
@@ -22,6 +23,17 @@ public class EducationService {
 
     public List<Education> getEducationsForUser(Long userId) {
         return educationRepository.findByUserProfileId(userId);
+    }
+
+    public void deleteEducation(Long educationId, Long userId) {
+        var education = educationRepository.findById(educationId).orElse(null);
+        if (education == null) {
+            throw new EducationNotFoundException(educationId);
+        }
+        if (!education.getUserProfile().getId().equals(userId)) {
+            throw new UnauthorizedException("You are not authorized to delete this education");
+        }
+        educationRepository.deleteById(educationId);
     }
 
     public Education createEducation(CreateEducationDto request, UserProfile userProfile) {

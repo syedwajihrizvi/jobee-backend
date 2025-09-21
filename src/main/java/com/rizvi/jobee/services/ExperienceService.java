@@ -8,6 +8,7 @@ import com.rizvi.jobee.dtos.experience.CreateExperienceDto;
 import com.rizvi.jobee.entities.Experience;
 import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.exceptions.ExperienceNotFoundException;
+import com.rizvi.jobee.exceptions.UnauthorizedException;
 import com.rizvi.jobee.helpers.AISchemas.AIExperience;
 import com.rizvi.jobee.repositories.ExperienceRepository;
 
@@ -24,6 +25,18 @@ public class ExperienceService {
 
     public List<Experience> getExperiencesForUser(Long userId) {
         return experienceRepository.findByUserProfileId(userId);
+    }
+
+    public boolean deleteExperience(Long experienceId, Long userId) {
+        var experience = experienceRepository.findById(experienceId).orElse(null);
+        if (experience == null) {
+            throw new ExperienceNotFoundException(experienceId);
+        }
+        if (!experience.getUserProfile().getId().equals(userId)) {
+            throw new UnauthorizedException("You are not authorized to delete this experience");
+        }
+        experienceRepository.deleteById(experienceId);
+        return true;
     }
 
     public Experience addExperience(CreateExperienceDto request, UserProfile userProfile) {

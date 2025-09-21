@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -72,5 +73,14 @@ public class ExperienceController {
             @RequestBody CreateExperienceDto updatedExperienceDto) {
         var updatedExperience = experienceService.updateExperience(updatedExperienceDto, id);
         return ResponseEntity.ok(experienceMapper.toExperienceDto(updatedExperience));
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete an experience entry from user profile")
+    public ResponseEntity<Void> deleteExperience(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomPrincipal principal) {
+        experienceService.deleteExperience(id, principal.getId());
+        return ResponseEntity.noContent().build();
     }
 }

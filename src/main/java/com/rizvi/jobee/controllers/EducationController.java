@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -62,5 +63,14 @@ public class EducationController {
                         @RequestBody CreateEducationDto updatedEducationDto) throws RuntimeException {
                 var education = educationService.updateEducation(id, updatedEducationDto);
                 return ResponseEntity.ok(educationMapper.toEducationDto(education));
+        }
+
+        @DeleteMapping("/{id}")
+        @Operation(summary = "Delete an education entry from user profile")
+        public ResponseEntity<Void> deleteEducation(
+                        @PathVariable Long id,
+                        @AuthenticationPrincipal CustomPrincipal principal) {
+                educationService.deleteEducation(id, principal.getId());
+                return ResponseEntity.noContent().build();
         }
 }

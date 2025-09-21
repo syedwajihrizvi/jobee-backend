@@ -18,6 +18,7 @@ import com.rizvi.jobee.dtos.job.CreateJobDto;
 import com.rizvi.jobee.dtos.job.JobDetailedSummaryForBusinessDto;
 import com.rizvi.jobee.dtos.job.JobSummaryDto;
 import com.rizvi.jobee.dtos.job.JobSummaryForBusinessDto;
+import com.rizvi.jobee.dtos.job.PaginatedJobResponseDto;
 import com.rizvi.jobee.entities.Application;
 import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
@@ -47,13 +48,15 @@ public class JobController {
 
     @GetMapping
     @Operation(summary = "Get all jobs with optional filters and search")
-    public ResponseEntity<List<JobSummaryDto>> getJobs(
-            @ModelAttribute JobQuery jobQuery,
-            @RequestParam(required = false) String search) {
-        var jobs = jobService.getAllJobs(jobQuery);
+    public ResponseEntity<PaginatedJobResponseDto<JobSummaryDto>> getJobs(
+            int pageNumber, int pageSize,
+            @ModelAttribute JobQuery jobQuery) {
+        var paginatedJobData = jobService.getAllJobs(jobQuery, pageNumber, pageSize);
+        var jobs = paginatedJobData.getJobs();
+        var hasMore = paginatedJobData.isHasMore();
         var jobDtos = jobs.stream().map(jobMapper::toSummaryDto).toList();
-
-        return ResponseEntity.ok(jobDtos);
+        PaginatedJobResponseDto<JobSummaryDto> response = new PaginatedJobResponseDto<JobSummaryDto>(hasMore, jobDtos);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
@@ -80,13 +83,18 @@ public class JobController {
 
     @GetMapping("/companies/{companyId}/jobs")
     @Operation(summary = "Get all jobs for a specific company with optional filters and search")
-    public ResponseEntity<List<JobSummaryForBusinessDto>> getJobsByCompany(
+    public ResponseEntity<PaginatedJobResponseDto<JobSummaryForBusinessDto>> getJobsByCompany(
+            int pageNumber, int pageSize,
             @ModelAttribute JobQuery jobQuery,
             @PathVariable Long companyId) {
         jobQuery.setCompanyId(companyId);
-        var jobs = jobService.getJobsByCompany(jobQuery, companyId);
-        var jobDto = jobs.stream().map(jobMapper::toSummaryForBusinessDto).toList();
-        return ResponseEntity.ok(jobDto);
+        var paginatedJobData = jobService.getJobsByCompany(jobQuery, companyId, pageNumber, pageSize);
+        var jobs = paginatedJobData.getJobs();
+        var hasMore = paginatedJobData.isHasMore();
+        var jobDtos = jobs.stream().map(jobMapper::toSummaryForBusinessDto).toList();
+        PaginatedJobResponseDto<JobSummaryForBusinessDto> response = new PaginatedJobResponseDto<JobSummaryForBusinessDto>(
+                hasMore, jobDtos);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/companies/{companyId}/jobs/{jobId}")
