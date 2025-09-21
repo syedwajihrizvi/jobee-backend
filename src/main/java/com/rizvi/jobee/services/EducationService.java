@@ -44,7 +44,6 @@ public class EducationService {
             if (!educationExists(education, userProfile) &&
                     education.degree != null &&
                     education.institution != null) {
-                System.out.println("SYED-DEBUG: Adding education: " + education);
                 var newEducation = Education.builder()
                         .degree(education.degree)
                         .institution(education.institution)
@@ -73,33 +72,12 @@ public class EducationService {
     }
 
     public boolean educationExists(AIEducation education, UserProfile userProfile) {
-        // TODO: Currently only handles exact matches. What if the user wants to
-        // override an existing degree entry
-        String degree = normalizeString(education.degree);
-        String institution = normalizeString(education.institution);
-        System.out.println("SYED-DEBUG: Checking existence for degree: " + degree + ", institution: " + institution
-                + ", fromYear: " + education.fromYear + ", toYear: " + education.toYear);
-        String fromYear = education.fromYear;
-        String toYear = education.toYear;
         var educations = educationRepository.findByUserProfileId(userProfile.getId());
         for (Education edu : educations) {
-            String eduDegree = normalizeString(edu.getDegree());
-            String eduInstitution = normalizeString(edu.getInstitution());
-            String eduFromYear = edu.getFromYear();
-            String eduToYear = edu.getToYear();
-            var degreeMatch = !eduDegree.isEmpty() && !degree.isEmpty() && eduDegree.equals(degree);
-            var institutionMatch = !eduInstitution.isEmpty() && !institution.isEmpty()
-                    && eduInstitution.equals(institution);
-            var fromYearMatch = fromYear == eduFromYear;
-            var toYearMatch = toYear == eduToYear;
-            return degreeMatch && institutionMatch && fromYearMatch && toYearMatch;
+            if (edu.isNew(education)) {
+                return true;
+            }
         }
         return false;
-    }
-
-    public String normalizeString(String input) {
-        if (input == null)
-            return "";
-        return input.replace(" ", "").toLowerCase();
     }
 }

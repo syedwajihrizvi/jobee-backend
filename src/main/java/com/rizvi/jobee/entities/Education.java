@@ -3,6 +3,7 @@ package com.rizvi.jobee.entities;
 import java.time.LocalDateTime;
 
 import com.rizvi.jobee.enums.EducationLevel;
+import com.rizvi.jobee.helpers.AISchemas.AIEducation;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -60,4 +61,38 @@ public class Education {
     @JoinColumn(name = "user_profile_id", nullable = false)
     private UserProfile userProfile;
 
+    public boolean isNew(AIEducation education) {
+        String degree = normalizeString(education.degree);
+        String institution = normalizeString(education.institution);
+        String fromYear = education.fromYear;
+        String toYear = education.toYear;
+        String eduDegree = normalizeString(degree);
+        String eduInstitution = normalizeString(institution);
+        String eduFromYear = fromYear;
+        String eduToYear = toYear;
+        var degreeMatch = !eduDegree.isEmpty() && !degree.isEmpty() && eduDegree.equals(degree);
+        var institutionMatch = !eduInstitution.isEmpty() && !institution.isEmpty()
+                && eduInstitution.equals(institution);
+        var fromYearMatch = yearsFromDBMatch(fromYear, eduFromYear);
+        var toYearMatch = yearsFromDBMatch(eduToYear, toYear);
+        return (degreeMatch && institutionMatch && fromYearMatch && toYearMatch);
+    }
+
+    private String normalizeString(String input) {
+        if (input == null)
+            return "";
+        return input.replace(" ", "").toLowerCase();
+    }
+
+    private boolean isEmptyOrNull(String str) {
+        return str == null || str.trim().isEmpty();
+    }
+
+    private boolean yearsFromDBMatch(String year1, String year2) {
+        if (year1 == null && year2 == null)
+            return true;
+        if (year1 != null && year2 != null && year1.equals(year2))
+            return true;
+        return isEmptyOrNull(year1) && isEmptyOrNull(year2);
+    }
 }

@@ -4,7 +4,9 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,5 +54,12 @@ public class UserSkillController {
                 var savedSkill = userSkillService.createUserSkill(createUserSkillDto, userProfile);
                 var uri = uriComponentsBuilder.path("/skills/{id}").buildAndExpand(savedSkill.getId()).toUri();
                 return ResponseEntity.created(uri).body(skillMapper.toUserSkillDto(savedSkill));
+        }
+
+        @DeleteMapping("/{id}")
+        @Operation(summary = "Delete a skill from user profile")
+        public ResponseEntity<Void> deleteSkill(@PathVariable Long id) {
+                userSkillService.deleteUserSkill(id);
+                return ResponseEntity.noContent().build();
         }
 }

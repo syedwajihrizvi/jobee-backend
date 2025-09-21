@@ -1,5 +1,7 @@
 package com.rizvi.jobee.entities;
 
+import com.rizvi.jobee.helpers.AISchemas.AIExperience;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -52,5 +54,39 @@ public class Experience {
     @ManyToOne
     @JoinColumn(name = "user_profile_id", nullable = false)
     private UserProfile userProfile;
+
+    public boolean isNew(AIExperience experience) {
+        String title = normalizeString(experience.getTitle());
+        String company = normalizeString(experience.getCompany());
+        String fromYear = experience.getFromYear();
+        String toYear = experience.getToYear();
+        String expTitle = normalizeString(title);
+        String expCompany = normalizeString(company);
+        String expFromYear = from;
+        String expToYear = to;
+        var titleMatch = !title.isEmpty() && !expTitle.isEmpty() && title.equals(expTitle);
+        var companyMatch = !company.isEmpty() && !expCompany.isEmpty() && company.equals(expCompany);
+        var fromYearMatch = yearsFromDBMatch(expFromYear, fromYear);
+        var toYearMatch = yearsFromDBMatch(expToYear, toYear);
+        return titleMatch && companyMatch && fromYearMatch && toYearMatch;
+    }
+
+    private String normalizeString(String input) {
+        if (input == null)
+            return null;
+        return input.trim().toLowerCase();
+    }
+
+    private boolean isEmptyOrNull(String str) {
+        return str == null || str.trim().isEmpty();
+    }
+
+    private boolean yearsFromDBMatch(String year1, String year2) {
+        if (year1 == null && year2 == null)
+            return true;
+        if (year1 != null && year2 != null && year1.equals(year2))
+            return true;
+        return isEmptyOrNull(year1) && isEmptyOrNull(year2);
+    }
 
 }

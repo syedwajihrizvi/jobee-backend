@@ -21,6 +21,10 @@ public class UserSkillService {
     private final UserSkillRepository userSkillRepository;
     private final SkillRepository skillRepository;
 
+    public void deleteUserSkill(Long userSkillId) {
+        userSkillRepository.deleteById(userSkillId);
+    }
+
     // TODO: Refactor methods and extract common code
     @Transactional
     public UserSkill createUserSkill(CreateUserSkillDto request, UserProfile userProfile) {

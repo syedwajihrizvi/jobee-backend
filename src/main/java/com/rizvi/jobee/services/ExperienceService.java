@@ -66,29 +66,13 @@ public class ExperienceService {
     }
 
     public boolean experienceExists(AIExperience experience, UserProfile userProfile) {
-        String title = normalizeString(experience.getTitle());
-        String company = normalizeString(experience.getCompany());
-        String fromYear = experience.getFromYear();
-        String toYear = experience.getToYear();
         var experiences = experienceRepository.findByUserProfileId(userProfile.getId());
         for (Experience exp : experiences) {
-            String expTitle = normalizeString(exp.getTitle());
-            String expCompany = normalizeString(exp.getCompany());
-            String expFromYear = exp.getFrom();
-            String expToYear = exp.getTo();
-            var titleMatch = !title.isEmpty() && !expTitle.isEmpty() && title.equals(expTitle);
-            var companyMatch = !company.isEmpty() && !expCompany.isEmpty() && company.equals(expCompany);
-            var fromYearMatch = fromYear == expFromYear;
-            var toYearMatch = toYear == expToYear;
-            // If title, company, from
-            return titleMatch && companyMatch && fromYearMatch && toYearMatch;
+            if (exp.isNew(experience)) {
+                return true;
+            }
         }
         return false;
     }
 
-    public String normalizeString(String input) {
-        if (input == null)
-            return null;
-        return input.trim().toLowerCase();
-    }
 }
