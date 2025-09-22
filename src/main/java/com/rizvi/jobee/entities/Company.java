@@ -33,6 +33,30 @@ public class Company {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "website", nullable = true)
+    private String website;
+
+    @Column(name = "hq_city", nullable = true)
+    private String hqCity;
+
+    @Column(name = "hq_state", nullable = true)
+    private String hqState;
+
+    @Column(name = "hq_country", nullable = true)
+    private String hqCountry;
+
+    @Column(name = "founded_year", nullable = true)
+    private Integer foundedYear;
+
+    @Column(name = "num_employees", nullable = true)
+    private Integer numEmployees;
+
+    @Column(name = "industry", nullable = true)
+    private String industry;
+
+    @Column(name = "description", nullable = true)
+    private String description;
+
     @OneToMany(mappedBy = "company", orphanRemoval = true, cascade = CascadeType.ALL)
     @Builder.Default
     private Set<BusinessAccount> businessAccounts = new HashSet<>();

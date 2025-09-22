@@ -13,6 +13,7 @@ import com.rizvi.jobee.entities.Job;
 public interface JobMapper {
     @Mapping(target = "businessName", source = "businessAccount.company.name")
     @Mapping(target = "businessAccountId", source = "businessAccount.id")
+    @Mapping(target = "companyId", source = "businessAccount.company.id")
     JobSummaryDto toSummaryDto(Job job);
 
     @Mapping(target = "applicants", expression = "java(job.getApplications().size())")
