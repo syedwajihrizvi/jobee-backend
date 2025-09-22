@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+import com.rizvi.jobee.enums.PreparationStatus;
+
 import lombok.Data;
 
 @Data
@@ -30,4 +32,5 @@ public class InterviewDto {
     private String timezone;
     private List<InterviewConductorDto> interviewers;
     private List<ConductorDto> otherInterviewers;
+    private PreparationStatus preparationStatus;
 }

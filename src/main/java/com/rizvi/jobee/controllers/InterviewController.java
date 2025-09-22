@@ -94,4 +94,15 @@ public class InterviewController {
         var uri = uriComponentsBuilder.path("/interviews/{id}").buildAndExpand(savedInterview.getId()).toUri();
         return ResponseEntity.created(uri).body(interviewMapper.toDto(savedInterview));
     }
+
+    @PostMapping("/{id}/prepare")
+    @Operation(summary = "Candidate wishes to use Jobsee AI to prepare for the interview")
+    public ResponseEntity<Void> prepareForInterview(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomPrincipal principal) {
+        var candidateId = principal.getId();
+        var interview = interviewService.getInterviewById(id);
+        interviewService.prepareForInterview(interview, candidateId);
+        return ResponseEntity.ok().build();
+    }
 }

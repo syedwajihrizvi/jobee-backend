@@ -1,0 +1,2 @@
+ALTER TABLE interview_preparations
+    ADD COLUMN status VARCHAR(20) DEFAULT 'NOT_STARTED' NOT NULL;

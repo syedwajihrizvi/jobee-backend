@@ -14,6 +14,7 @@ import java.util.List;
 import com.rizvi.jobee.dtos.interview.ConductorDto;
 import com.rizvi.jobee.enums.InterviewStatus;
 import com.rizvi.jobee.enums.InterviewType;
+import com.rizvi.jobee.enums.PreparationStatus;
 import com.rizvi.jobee.enums.Timezone;
 import com.vladmihalcea.hibernate.type.json.JsonType;
 
@@ -30,6 +31,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -89,6 +91,10 @@ public class Interview {
     @Column(name = "created_at", nullable = true, insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @OneToOne(optional = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "preparation_id", nullable = true, unique = true)
+    private InterviewPreparation preparation;
+
     @ManyToOne
     @JoinColumn(name = "created_by_user_id", nullable = true)
     private BusinessAccount createdBy;
@@ -119,5 +125,12 @@ public class Interview {
     public void addInterviewer(BusinessAccount interviewer) {
         this.interviewers.add(interviewer);
         interviewer.getInterviews().add(this);
+    }
+
+    public PreparationStatus getPreparationStatus() {
+        if (this.preparation == null) {
+            return PreparationStatus.NOT_STARTED;
+        }
+        return this.preparation.getStatus();
     }
 }
