@@ -391,4 +391,20 @@
 -- (59, 72), (59, 71), (59, 80),
 -- (60, 73), (60, 81), (60, 82);
 
-UPDATE tags SET slug = LOWER(REPLACE(name, ' ', '')) WHERE slug IS NULL;
+-- INSERT INTO interview_tips (id, interview_id, tip, created_at) VALUES
+-- (1, 19, 'Research the company and its culture.', NOW()),
+-- (2, 19, 'Practice common interview questions.', NOW()),
+-- (3, 19, 'Dress appropriately for the interview.', NOW()),
+-- (4, 19, 'Prepare examples of your past work.', NOW()),
+-- (5, 19, 'Be ready to discuss your strengths and weaknesses.', NOW()),
+-- (6, 19, 'Ask insightful questions about the role and company.', NOW()),
+-- (7, 19, 'Arrive early to the interview location.', NOW()),
+-- (8, 19, 'Bring multiple copies of your resume.', NOW()),
+-- (9, 19, 'Follow up with a thank-you email after the interview.', NOW());
+
+INSERT INTO user_projects (id, user_profile_id, project_name, project_description, project_link, created_at, year_completed) VALUES
+(1, 2, 'Portfolio Website', 'A personal portfolio website showcasing my projects and skills.', 'https://portfolio.example.com', NOW(), 2023),
+(2, 2, 'E-commerce Platform', 'Developed a full-featured e-commerce platform using Django and React.', 'https://ecommerce.example.com', NOW(), 2022),
+(3, 2, 'Mobile Game', 'Created a mobile game using Unity and C#.', 'https://mobilegame.example.com', NOW(), 2021),
+(4, 2, 'Blog Application', 'Built a blog application with user authentication and CRUD functionality.', 'https://blogapp.example.com', NOW(), 2023),
+(5, 2, 'Chat Application', 'Developed a real-time chat application using Node.js and Socket.io.', 'https://chatapp.example.com', NOW(), 2022);

@@ -1,0 +1,1 @@
+ALTER TABLE interview_preparations RENAME COLUMN overalladvice TO overall_advice;

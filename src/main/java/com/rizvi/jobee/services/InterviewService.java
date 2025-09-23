@@ -2,8 +2,8 @@ package com.rizvi.jobee.services;
 
 import java.util.List;
 
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.rizvi.jobee.dtos.interview.ConductorDto;
 import com.rizvi.jobee.dtos.interview.CreateInterviewDto;
@@ -17,8 +17,14 @@ import com.rizvi.jobee.enums.ApplicationStatus;
 import com.rizvi.jobee.enums.InterviewStatus;
 import com.rizvi.jobee.enums.PreparationStatus;
 import com.rizvi.jobee.exceptions.InterviewNotFoundException;
+import com.rizvi.jobee.helpers.AISchemas.AICandidate;
+import com.rizvi.jobee.helpers.AISchemas.AICompany;
+import com.rizvi.jobee.helpers.AISchemas.AIInterview;
+import com.rizvi.jobee.helpers.AISchemas.AIJob;
+import com.rizvi.jobee.helpers.AISchemas.PrepareForInterviewRequest;
 import com.rizvi.jobee.repositories.ApplicationRepository;
 import com.rizvi.jobee.repositories.BusinessAccountRepository;
+import com.rizvi.jobee.repositories.InterviewPreparationRepository;
 import com.rizvi.jobee.repositories.InterviewRepository;
 
 import lombok.AllArgsConstructor;
@@ -28,6 +34,7 @@ import lombok.AllArgsConstructor;
 public class InterviewService {
     private final BusinessAccountRepository businessAccountRepository;
     private final InterviewRepository interviewRepository;
+    private final InterviewPreparationRepository interviewPreparationRepository;
     private final ApplicationRepository applicationRepository;
     private final InterviewPrepQueue interviewPrepQueue;
 
@@ -55,6 +62,7 @@ public class InterviewService {
         return interviewRepository.findByCandidateId(candidateId);
     }
 
+    @Transactional
     public Interview createInterview(
             CreateInterviewDto request, BusinessAccount businessAccount,
             UserProfile candidate, Job job, Application application) {
@@ -88,12 +96,15 @@ public class InterviewService {
         return savedInterview;
     }
 
-    public Boolean prepareForInterview(Interview interview, Long candidateId) {
+    @Transactional
+    public Boolean prepareForInterview(Long interviewId, Long candidateId) {
         // If the interview already has a preparation, return False since we cannot
         // reprepare again
+        var interview = interviewRepository.findInterviewForPreparation(interviewId);
+        if (interview == null) {
+            throw new InterviewNotFoundException("Interview not found with id: " + interviewId);
+        }
         if (!interview.getCandidate().getId().equals(candidateId)) {
-            // TODO: Proper error response if invalid user tries to prepare for someone
-            // else's interview
             return false;
         }
         // Create new interview preparation
@@ -101,11 +112,16 @@ public class InterviewService {
                 .interview(interview)
                 .status(PreparationStatus.IN_PROGRESS)
                 .build();
-        interview.setPreparation(interviewPreparation);
-        interviewPrepQueue.processInterviewPrep(interview.getId());
-        // Push interview prep into a queue
-        interviewRepository.save(interview);
-        System.out.println("SYED-DEBUG: Interview prep started for interview id: " + interview.getId());
+        var savedInterviewPreparation = interviewPreparationRepository.save(interviewPreparation);
+        AIJob aiJob = new AIJob(interview.getJob());
+        AICompany aiCompany = new AICompany(interview.getJob().getBusinessAccount().getCompany());
+        AICandidate aiCandidate = new AICandidate(interview.getCandidate());
+        AIInterview aiInterview = new AIInterview(interview);
+
+        PrepareForInterviewRequest prepareForInterviewRequest = new PrepareForInterviewRequest(aiJob, aiCompany,
+                aiCandidate, aiInterview);
+        interviewPrepQueue.processInterviewPrep(prepareForInterviewRequest, savedInterviewPreparation);
+
         return true;
     }
 }

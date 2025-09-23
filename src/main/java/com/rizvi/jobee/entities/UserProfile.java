@@ -1,6 +1,7 @@
 package com.rizvi.jobee.entities;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import jakarta.persistence.CascadeType;
@@ -103,6 +104,10 @@ public class UserProfile {
 
     @OneToMany(mappedBy = "userProfile", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    private Set<Project> projects = new HashSet<>();
+
+    @OneToMany(mappedBy = "userProfile", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private Set<Application> applications = new HashSet<>();
 
     public void setAccount(UserAccount account) {
@@ -142,5 +147,9 @@ public class UserProfile {
             this.education.add(education);
             education.setUserProfile(this);
         }
+    }
+
+    public List<String> getSkillsAsStringList() {
+        return this.skills.stream().map(s -> s.getSkill().getName()).toList();
     }
 }

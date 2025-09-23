@@ -71,15 +71,9 @@ public class UserDocumentService {
             var educations = details.getEducation();
             var experiences = details.getExperience();
             var skills = details.getSkills();
-            System.out.println("SYED-DEBUG: Extracted educations: " + educations);
-            System.out.println("SYED-DEBUG: Extracted experiences: " + experiences);
-            System.out.println("SYED-DEBUG: Extracted skills: " + skills);
             userEducationService.createEducationsForUserFromAISchemas(educations, userProfile);
-            System.out.println("SYED-DEBUG: Added educations");
             userSkillService.createUserSkills(skills, userProfile);
-            System.out.println("SYED-DEBUG: Added skills");
             userExperienceService.addExperiencesForUserFromAISchemas(experiences, userProfile);
-            System.out.println("SYED-DEBUG: Added experiences");
             return true;
         } catch (Exception e) {
             // Log the error but continue

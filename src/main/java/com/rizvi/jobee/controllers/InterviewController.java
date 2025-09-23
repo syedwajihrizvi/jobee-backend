@@ -78,7 +78,6 @@ public class InterviewController {
     }
 
     @PostMapping()
-    @Transactional
     @Operation(summary = "Business can schedule an interview for a candidate")
     public ResponseEntity<InterviewDto> createInterview(
             @Valid @RequestBody CreateInterviewDto request,
@@ -101,8 +100,7 @@ public class InterviewController {
             @PathVariable Long id,
             @AuthenticationPrincipal CustomPrincipal principal) {
         var candidateId = principal.getId();
-        var interview = interviewService.getInterviewById(id);
-        interviewService.prepareForInterview(interview, candidateId);
+        interviewService.prepareForInterview(id, candidateId);
         return ResponseEntity.ok().build();
     }
 }

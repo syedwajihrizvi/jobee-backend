@@ -9,7 +9,8 @@ import com.rizvi.jobee.entities.UserProfile;
 @Mapper(componentModel = "spring", uses = {
         SkillMapper.class,
         EducationMapper.class,
-        ExperienceMapper.class
+        ExperienceMapper.class,
+        ProjectMapper.class
 })
 public interface UserProfileMapper {
     @Mapping(target = "email", source = "account.email")

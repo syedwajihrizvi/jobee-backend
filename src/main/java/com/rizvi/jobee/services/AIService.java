@@ -13,6 +13,8 @@ import com.openai.models.chat.completions.StructuredChatCompletionCreateParams;
 import com.rizvi.jobee.dtos.user.ResumeExtract;
 import com.rizvi.jobee.exceptions.InvalidDocumentException;
 import com.rizvi.jobee.helpers.Prompts;
+import com.rizvi.jobee.helpers.AISchemas.PrepareForInterviewRequest;
+import com.rizvi.jobee.helpers.AISchemas.PrepareForInterviewResponse;
 
 import lombok.AllArgsConstructor;
 
@@ -29,7 +31,6 @@ public class AIService {
         String resumeTextLower = resumeText.toLowerCase();
         if (!(resumeTextLower.contains("experience") || resumeTextLower.contains("skills")
                 || resumeTextLower.contains("education"))) {
-            System.out.println("SYED-DEBUG: Invalid resume content");
             throw new InvalidDocumentException("The uploaded file does not appear to be a valid resume.");
         }
         String prompt = Prompts.RESUME_ANALYSIS.replace("{resumeText}", resumeText);
@@ -45,9 +46,26 @@ public class AIService {
                 .flatMap(choice -> choice.message().content().stream()).findFirst();
 
         if (result.isPresent()) {
-            System.out.println("SYED-DEBUG: Extracted resume details: " + result.get());
             return result.get();
         }
         return null;
+    }
+
+    public PrepareForInterviewResponse generateInterviewPrep(PrepareForInterviewRequest prepareForInterview)
+            throws IOException {
+        // Convert prepareForInterview to JSON
+        String inputJson = prepareForInterview.toJsonString();
+        String prompt = Prompts.INTERVIEW_PREP.replace("{inputJSON}", inputJson);
+
+        StructuredChatCompletionCreateParams<PrepareForInterviewResponse> params = ChatCompletionCreateParams.builder()
+                .model(ChatModel.GPT_5)
+                .addSystemMessage("You are a helpful assistant that prepares candidates for interviews.")
+                .addUserMessage(prompt)
+                .responseFormat(PrepareForInterviewResponse.class)
+                .build();
+        Optional<PrepareForInterviewResponse> result = openAIClient.chat().completions().create(params).choices()
+                .stream()
+                .flatMap(choice -> choice.message().content().stream()).findFirst();
+        return result.orElse(null);
     }
 }

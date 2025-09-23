@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.rizvi.jobee.dtos.education.EducationDto;
 import com.rizvi.jobee.dtos.experience.ExperienceDto;
+import com.rizvi.jobee.dtos.project.ProjectDto;
 import com.rizvi.jobee.dtos.skill.UserSkillDto;
 
 import lombok.Data;
@@ -25,4 +26,5 @@ public class UserProfileSummaryForBusinessDto {
     private List<UserSkillDto> skills;
     private List<EducationDto> education;
     private List<ExperienceDto> experiences;
+    private List<ProjectDto> projects;
 }

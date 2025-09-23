@@ -1,6 +1,7 @@
 package com.rizvi.jobee.helpers.AISchemas;
 
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import com.rizvi.jobee.entities.Experience;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,4 +25,18 @@ public class AIExperience {
     public String fromYear;
     @JsonPropertyDescription("Job end year")
     public String toYear;
+
+    public AIExperience(Experience experience) {
+        this.company = experience.getCompany();
+        this.title = experience.getTitle();
+        this.description = experience.getDescription();
+        this.fromYear = experience.getFrom();
+        this.toYear = experience.getTo();
+    }
+
+    public String toJsonString() {
+        return """
+                {"company": "%s", "position": "%s", "description": "%s", "fromYear": "%s", "toYear": "%s"}
+                """.formatted(company, title, description, fromYear, toYear);
+    }
 }

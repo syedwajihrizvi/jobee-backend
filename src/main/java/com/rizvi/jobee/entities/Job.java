@@ -105,4 +105,8 @@ public class Job {
         tag.getJobs().add(this);
     }
 
+    public List<String> getTagListInString() {
+        return tags.stream().map(Tag::getName).toList();
+    }
+
 }

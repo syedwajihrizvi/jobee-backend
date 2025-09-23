@@ -30,6 +30,7 @@ public class InterviewDto {
     private String meetingLink;
     private String phoneNumber;
     private String timezone;
+    private List<String> preparationTipsFromInterviewer;
     private List<InterviewConductorDto> interviewers;
     private List<ConductorDto> otherInterviewers;
     private PreparationStatus preparationStatus;

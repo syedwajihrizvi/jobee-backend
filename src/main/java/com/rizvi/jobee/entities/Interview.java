@@ -5,11 +5,11 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Set;
 
-import org.hibernate.annotations.Type;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+
+import org.hibernate.annotations.Type;
 
 import com.rizvi.jobee.dtos.interview.ConductorDto;
 import com.rizvi.jobee.enums.InterviewStatus;
@@ -31,6 +31,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -84,6 +85,10 @@ public class Interview {
     @Column(name = "phone_number", nullable = true)
     private String phoneNumber;
 
+    @OneToMany(mappedBy = "interview", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @Builder.Default
+    private Set<InterviewTips> interviewTips = new HashSet<>();
+
     @Enumerated(value = EnumType.STRING)
     @Column(name = "status", nullable = false)
     private InterviewStatus status;
@@ -91,8 +96,7 @@ public class Interview {
     @Column(name = "created_at", nullable = true, insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @OneToOne(optional = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "preparation_id", nullable = true, unique = true)
+    @OneToOne(mappedBy = "interview", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private InterviewPreparation preparation;
 
     @ManyToOne
@@ -132,5 +136,13 @@ public class Interview {
             return PreparationStatus.NOT_STARTED;
         }
         return this.preparation.getStatus();
+    }
+
+    public List<String> getPreparationTipsAsList() {
+        List<String> tips = new ArrayList<>();
+        for (InterviewTips tip : this.interviewTips) {
+            tips.add(tip.getTip());
+        }
+        return tips;
     }
 }
