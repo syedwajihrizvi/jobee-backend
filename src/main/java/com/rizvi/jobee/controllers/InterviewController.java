@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +15,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.rizvi.jobee.dtos.interview.CreateInterviewDto;
 import com.rizvi.jobee.dtos.interview.InterviewDto;
+import com.rizvi.jobee.dtos.interview.InterviewPreparationDto;
 import com.rizvi.jobee.dtos.interview.InterviewSummaryDto;
 import com.rizvi.jobee.mappers.InterviewMapper;
 import com.rizvi.jobee.principals.CustomPrincipal;
@@ -102,5 +102,14 @@ public class InterviewController {
         var candidateId = principal.getId();
         interviewService.prepareForInterview(id, candidateId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{id}/prepare")
+    @Operation(summary = "Get interview preparation details")
+    public ResponseEntity<InterviewPreparationDto> getInterviewPreparationDetails(
+            @PathVariable Long id) {
+        var interviewPreparation = interviewService.getInterviewPreparationDetails(id);
+        var interviewPreparationDto = interviewMapper.toPreparationDto(interviewPreparation);
+        return ResponseEntity.ok(interviewPreparationDto);
     }
 }

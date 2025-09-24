@@ -2,6 +2,7 @@ package com.rizvi.jobee.entities;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.rizvi.jobee.enums.PreparationStatus;
@@ -69,6 +70,18 @@ public class InterviewPreparation {
     @OneToOne(optional = false)
     @JoinColumn(name = "interview_id", nullable = false, unique = true)
     private Interview interview;
+
+    public List<String> getNotesFromInterviewerAsList() {
+        return interview.getPreparationTipsAsList();
+    }
+
+    public List<String> getStrengthsAsList() {
+        return this.strengths.stream().map(InterviewPreparationStrength::getStrength).toList();
+    }
+
+    public List<String> getWeaknessesAsList() {
+        return this.weaknesses.stream().map(InterviewPreparationWeakness::getWeakness).toList();
+    }
 
     public void updateViaAIResponse(PrepareForInterviewResponse response) {
         // Update the neccessary fields

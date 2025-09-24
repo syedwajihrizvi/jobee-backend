@@ -124,4 +124,8 @@ public class InterviewService {
 
         return true;
     }
+
+    public InterviewPreparation getInterviewPreparationDetails(Long interviewId) {
+        return interviewPreparationRepository.findByInterviewId(interviewId);
+    }
 }

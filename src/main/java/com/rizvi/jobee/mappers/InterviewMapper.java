@@ -5,9 +5,11 @@ import org.mapstruct.Mapping;
 
 import com.rizvi.jobee.dtos.interview.InterviewConductorDto;
 import com.rizvi.jobee.dtos.interview.InterviewDto;
+import com.rizvi.jobee.dtos.interview.InterviewPreparationDto;
 import com.rizvi.jobee.dtos.interview.InterviewSummaryDto;
 import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.Interview;
+import com.rizvi.jobee.entities.InterviewPreparation;
 
 @Mapper(componentModel = "spring")
 public interface InterviewMapper {
@@ -30,4 +32,12 @@ public interface InterviewMapper {
     @Mapping(target = "email", source = "businessAccount.email")
     @Mapping(target = "name", expression = "java(businessAccount.getFullName())")
     InterviewConductorDto toConductorDto(BusinessAccount businessAccount);
+
+    @Mapping(target = "strengths", expression = "java(interviewPreparation.getStrengthsAsList())")
+    @Mapping(target = "weaknesses", expression = "java(interviewPreparation.getWeaknessesAsList())")
+    @Mapping(target = "questions", source = "questions")
+    @Mapping(target = "resources", source = "resources")
+    @Mapping(target = "overallAdvice", source = "overallAdvice")
+    @Mapping(target = "notesFromInterviewer", expression = "java(interviewPreparation.getNotesFromInterviewerAsList())")
+    InterviewPreparationDto toPreparationDto(InterviewPreparation interviewPreparation);
 }
