@@ -68,4 +68,18 @@ public class S3Service {
         public void deleteFile(String key) throws IOException {
                 s3Client.deleteObject(builder -> builder.bucket(awsProperties.getBucket()).key(key).build());
         }
+
+        public String uploadInterviewPrepQuestionAudio(Long interviewId, Long questionId, byte[] audioData)
+                        throws IOException {
+                final String key = "interview-prep/" + interviewId + "/" + questionId + ".mp3";
+                System.out.println("Uploading interview prep question audio to S3 with key: " + key);
+                s3Client.putObject(
+                                PutObjectRequest.builder()
+                                                .bucket(awsProperties.getBucket())
+                                                .key(key).contentType("audio/mpeg")
+                                                .build(),
+                                software.amazon.awssdk.core.sync.RequestBody.fromBytes(audioData));
+                return questionId + ".mp3";
+
+        }
 }

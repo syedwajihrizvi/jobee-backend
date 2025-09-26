@@ -8,6 +8,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.openai.client.OpenAIClient;
 import com.openai.models.ChatModel;
+import com.openai.models.audio.speech.SpeechCreateParams;
+import com.openai.models.audio.speech.SpeechModel;
+import com.openai.models.audio.speech.SpeechCreateParams.ResponseFormat;
+import com.openai.models.audio.speech.SpeechCreateParams.Voice;
 import com.openai.models.chat.completions.ChatCompletionCreateParams;
 import com.openai.models.chat.completions.StructuredChatCompletionCreateParams;
 import com.rizvi.jobee.dtos.user.ResumeExtract;
@@ -67,5 +71,17 @@ public class AIService {
                 .stream()
                 .flatMap(choice -> choice.message().content().stream()).findFirst();
         return result.orElse(null);
+    }
+
+    public byte[] textToSpeech(String text) throws IOException {
+        SpeechCreateParams params = SpeechCreateParams.builder()
+                .model(SpeechModel.GPT_4O_MINI_TTS)
+                .input(text)
+                .voice(Voice.SAGE).responseFormat(ResponseFormat.MP3).speed(1.0f).build();
+        var response = openAIClient.audio().speech().create(params);
+        System.out.println("Received audio response with status code: " + response.statusCode());
+        byte[] audioData = response.body().readAllBytes();
+        System.out.println("Generated audio data of length: " + audioData.length);
+        return audioData;
     }
 }

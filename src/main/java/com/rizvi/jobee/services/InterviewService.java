@@ -11,6 +11,7 @@ import com.rizvi.jobee.entities.Application;
 import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.Interview;
 import com.rizvi.jobee.entities.InterviewPreparation;
+import com.rizvi.jobee.entities.InterviewPreparationQuestion;
 import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.enums.ApplicationStatus;
@@ -24,6 +25,7 @@ import com.rizvi.jobee.helpers.AISchemas.AIJob;
 import com.rizvi.jobee.helpers.AISchemas.PrepareForInterviewRequest;
 import com.rizvi.jobee.repositories.ApplicationRepository;
 import com.rizvi.jobee.repositories.BusinessAccountRepository;
+import com.rizvi.jobee.repositories.InterviewPreparationQuestionRepository;
 import com.rizvi.jobee.repositories.InterviewPreparationRepository;
 import com.rizvi.jobee.repositories.InterviewRepository;
 
@@ -35,7 +37,10 @@ public class InterviewService {
     private final BusinessAccountRepository businessAccountRepository;
     private final InterviewRepository interviewRepository;
     private final InterviewPreparationRepository interviewPreparationRepository;
+    private final InterviewPreparationQuestionRepository interviewPreparationQuestionRepository;
     private final ApplicationRepository applicationRepository;
+    private final AIService aiService;
+    private final S3Service s3Service;
     private final InterviewPrepQueue interviewPrepQueue;
 
     public List<Interview> getAllInterviews() {
@@ -127,5 +132,35 @@ public class InterviewService {
 
     public InterviewPreparation getInterviewPreparationDetails(Long interviewId) {
         return interviewPreparationRepository.findByInterviewId(interviewId);
+    }
+
+    public InterviewPreparationQuestion getInterviewPreparationQuestionTextToSpeech(
+            Long interviewId, Long interviewQuestionId) throws RuntimeException {
+        var interviewPrep = interviewPreparationRepository.findByInterviewId(interviewId);
+        var question = interviewPrep.getQuestions().stream()
+                .filter(q -> q.getId().equals(interviewQuestionId))
+                .findFirst()
+                .orElse(null);
+        if (question == null) {
+            throw new InterviewNotFoundException("Interview question not found with id: " + interviewQuestionId);
+        }
+        System.out.println("Generating text to speech for question: " + question);
+        // If it has an audio url, then we already generated it so simply return the aws
+        // bucet url
+        if (question.getQuestionAudioUrl() != null && !question.getQuestionAudioUrl().isEmpty()) {
+            return question;
+        }
+        // Otherwise, we need to generate the audio using AI and store it in the bucket
+        try {
+            byte[] audioBytes = aiService.textToSpeech(question.getQuestion());
+            var audioFileName = s3Service.uploadInterviewPrepQuestionAudio(interviewId, interviewQuestionId,
+                    audioBytes);
+            question.setQuestionAudioUrl(audioFileName);
+            System.out.println("Generated audio file and uploaded to S3 with filename: " + audioFileName);
+            var savedQuestion = interviewPreparationQuestionRepository.save(question);
+            return savedQuestion;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to generate text to speech: " + e.getMessage());
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.rizvi.jobee.entities;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -34,7 +35,13 @@ public class InterviewPreparationQuestion {
     @Column(name = "answer", nullable = true, columnDefinition = "TEXT")
     private String answer;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @Column(name = "question_audio_url", nullable = true)
+    private String questionAudioUrl;
+
+    @Column(name = "answer_audio_url", nullable = true)
+    private String answerAudioUrl;
+
+    @ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "interview_preparation_id ", nullable = false)
     private InterviewPreparation interviewPreparation;
 }

@@ -15,6 +15,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.rizvi.jobee.dtos.interview.CreateInterviewDto;
 import com.rizvi.jobee.dtos.interview.InterviewDto;
+import com.rizvi.jobee.dtos.interview.InterviewPrepQuestionDto;
 import com.rizvi.jobee.dtos.interview.InterviewPreparationDto;
 import com.rizvi.jobee.dtos.interview.InterviewSummaryDto;
 import com.rizvi.jobee.mappers.InterviewMapper;
@@ -111,5 +112,20 @@ public class InterviewController {
         var interviewPreparation = interviewService.getInterviewPreparationDetails(id);
         var interviewPreparationDto = interviewMapper.toPreparationDto(interviewPreparation);
         return ResponseEntity.ok(interviewPreparationDto);
+    }
+
+    @PostMapping("/{id}/prepare/questions/{interviewQuestionId}/text-to-speech")
+    @Operation(summary = "Convert text to speech for interview question")
+    public ResponseEntity<InterviewPrepQuestionDto> getQuestionTextToSpeech(
+            @PathVariable Long id, @PathVariable Long interviewQuestionId) {
+        var interviewPrepQuestion = interviewService.getInterviewPreparationQuestionTextToSpeech(id,
+                interviewQuestionId);
+        var interviewPrepQuestionDto = new InterviewPrepQuestionDto();
+        interviewPrepQuestionDto.setId(interviewPrepQuestion.getId());
+        interviewPrepQuestionDto.setQuestion(interviewPrepQuestion.getQuestion());
+        interviewPrepQuestionDto.setQuestionAudioUrl(interviewPrepQuestion.getQuestionAudioUrl());
+        interviewPrepQuestionDto.setAnswer(interviewPrepQuestion.getAnswer());
+        interviewPrepQuestionDto.setAnswerAudioUrl(interviewPrepQuestion.getAnswerAudioUrl());
+        return ResponseEntity.ok(interviewPrepQuestionDto);
     }
 }
