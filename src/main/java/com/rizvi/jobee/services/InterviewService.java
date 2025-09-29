@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.rizvi.jobee.dtos.interview.ConductorDto;
 import com.rizvi.jobee.dtos.interview.CreateInterviewDto;
@@ -144,9 +145,8 @@ public class InterviewService {
         if (question == null) {
             throw new InterviewNotFoundException("Interview question not found with id: " + interviewQuestionId);
         }
-        System.out.println("Generating text to speech for question: " + question);
         // If it has an audio url, then we already generated it so simply return the aws
-        // bucet url
+        // bucket url
         if (question.getQuestionAudioUrl() != null && !question.getQuestionAudioUrl().isEmpty()) {
             return question;
         }
@@ -161,6 +161,27 @@ public class InterviewService {
             return savedQuestion;
         } catch (Exception e) {
             throw new RuntimeException("Failed to generate text to speech: " + e.getMessage());
+        }
+    }
+
+    public InterviewPreparationQuestion getInterviewPreparationQuestionSpeechToText(
+            Long interviewId, Long interviewQuestionId, MultipartFile audioFile) throws RuntimeException {
+        var interviewPrep = interviewPreparationRepository.findByInterviewId(interviewId);
+        var question = interviewPrep.getQuestions().stream()
+                .filter(q -> q.getId().equals(interviewQuestionId))
+                .findFirst()
+                .orElse(null);
+        if (question == null) {
+            throw new InterviewNotFoundException("Interview question not found with id: " + interviewQuestionId);
+        }
+        // It does not matter if it already has an answer, we will overwrite it with the
+        // new answer
+        try {
+            String answerText = aiService.speechToText(audioFile);
+            return question;
+            // Then upload the audio file to S3 and save the url
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to process speech to text: " + e.getMessage());
         }
     }
 }

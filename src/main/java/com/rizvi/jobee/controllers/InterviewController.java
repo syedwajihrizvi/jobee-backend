@@ -2,6 +2,7 @@ package com.rizvi.jobee.controllers;
 
 import java.util.List;
 
+import org.hibernate.validator.constraints.pl.REGON;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.rizvi.jobee.dtos.interview.CreateInterviewDto;
@@ -114,12 +116,28 @@ public class InterviewController {
         return ResponseEntity.ok(interviewPreparationDto);
     }
 
-    @PostMapping("/{id}/prepare/questions/{interviewQuestionId}/text-to-speech")
+    @PostMapping("/{id}/prepare/questions/{interviewQuestionId}/question/text-to-speech")
     @Operation(summary = "Convert text to speech for interview question")
     public ResponseEntity<InterviewPrepQuestionDto> getQuestionTextToSpeech(
             @PathVariable Long id, @PathVariable Long interviewQuestionId) {
         var interviewPrepQuestion = interviewService.getInterviewPreparationQuestionTextToSpeech(id,
                 interviewQuestionId);
+        var interviewPrepQuestionDto = new InterviewPrepQuestionDto();
+        interviewPrepQuestionDto.setId(interviewPrepQuestion.getId());
+        interviewPrepQuestionDto.setQuestion(interviewPrepQuestion.getQuestion());
+        interviewPrepQuestionDto.setQuestionAudioUrl(interviewPrepQuestion.getQuestionAudioUrl());
+        interviewPrepQuestionDto.setAnswer(interviewPrepQuestion.getAnswer());
+        interviewPrepQuestionDto.setAnswerAudioUrl(interviewPrepQuestion.getAnswerAudioUrl());
+        return ResponseEntity.ok(interviewPrepQuestionDto);
+    }
+
+    @PostMapping("{id}/prepare/questions/{interviewQuestionId}/answer/speech-to-text")
+    @Operation(summary = "Convert speech to text for interview answer")
+    public ResponseEntity<InterviewPrepQuestionDto> getAnswerSpeechToText(
+            @PathVariable Long id, @PathVariable Long interviewQuestionId,
+            @RequestParam("audioFile") MultipartFile audioFile) {
+        var interviewPrepQuestion = interviewService.getInterviewPreparationQuestionSpeechToText(id,
+                interviewQuestionId, audioFile);
         var interviewPrepQuestionDto = new InterviewPrepQuestionDto();
         interviewPrepQuestionDto.setId(interviewPrepQuestion.getId());
         interviewPrepQuestionDto.setQuestion(interviewPrepQuestion.getQuestion());

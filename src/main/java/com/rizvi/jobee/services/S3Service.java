@@ -71,7 +71,7 @@ public class S3Service {
 
         public String uploadInterviewPrepQuestionAudio(Long interviewId, Long questionId, byte[] audioData)
                         throws IOException {
-                final String key = "interview-prep/" + interviewId + "/" + questionId + ".mp3";
+                final String key = "interview-prep/" + interviewId + "/" + questionId + "-question" + ".mp3";
                 System.out.println("Uploading interview prep question audio to S3 with key: " + key);
                 s3Client.putObject(
                                 PutObjectRequest.builder()
