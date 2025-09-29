@@ -72,7 +72,6 @@ public class S3Service {
         public String uploadInterviewPrepQuestionAudio(Long interviewId, Long questionId, byte[] audioData)
                         throws IOException {
                 final String key = "interview-prep/" + interviewId + "/" + questionId + "-question" + ".mp3";
-                System.out.println("Uploading interview prep question audio to S3 with key: " + key);
                 s3Client.putObject(
                                 PutObjectRequest.builder()
                                                 .bucket(awsProperties.getBucket())
@@ -81,5 +80,17 @@ public class S3Service {
                                 software.amazon.awssdk.core.sync.RequestBody.fromBytes(audioData));
                 return questionId + ".mp3";
 
+        }
+
+        public String uploadInterviewPrepQuestionAnswerAudio(Long interviewId, Long questionId, byte[] audioData)
+                        throws IOException {
+                final String key = "interview-prep/" + interviewId + "/" + questionId + "-answer" + ".mp3";
+                s3Client.putObject(
+                                PutObjectRequest.builder()
+                                                .bucket(awsProperties.getBucket())
+                                                .key(key).contentType("audio/mpeg")
+                                                .build(),
+                                software.amazon.awssdk.core.sync.RequestBody.fromBytes(audioData));
+                return questionId + "-answer.mp3";
         }
 }

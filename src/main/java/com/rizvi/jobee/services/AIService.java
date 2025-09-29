@@ -94,8 +94,6 @@ public class AIService {
     public String speechToText(MultipartFile audioFile) throws IOException {
         // Until OpenAI SDK supports MultipartFile directly, we need to convert it to
         // a temp file which then will be cleaned up. The fools better get it together
-        System.out.println(audioFile.getOriginalFilename());
-        System.out.println(audioFile.getContentType());
         String originalFileName = audioFile.getOriginalFilename();
         Path tempFile = Files.createTempFile("open-audio-", originalFileName);
         try (InputStream in = audioFile.getInputStream()) {
@@ -114,7 +112,6 @@ public class AIService {
                     .build();
             TranscriptionCreateResponse transcription = openAIClient.audio().transcriptions().create(params);
             String response = transcription.asTranscription().text();
-            // Clean up and remove the temp file
             Files.deleteIfExists(tempFile);
             return response;
         } catch (Exception e) {
