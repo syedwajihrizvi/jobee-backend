@@ -1,5 +1,7 @@
 package com.rizvi.jobee.entities;
 
+import com.rizvi.jobee.helpers.AISchemas.AnswerInterviewQuestionResponse;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -50,7 +52,16 @@ public class InterviewPreparationQuestion {
     @Column(name = "ai_answer_audio_url", nullable = true)
     private String aiAnswerAudioUrl;
 
+    @Column(name = "reason_for_score", nullable = true, columnDefinition = "TEXT")
+    private String reasonForScore;
+
     @ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "interview_preparation_id ", nullable = false)
     private InterviewPreparation interviewPreparation;
+
+    public void addAIInterviewAnswer(AnswerInterviewQuestionResponse response, String audioFile) {
+        this.setAiAnswerAudioUrl(audioFile);
+        this.setUserAnswerScore(response.getScoreOfProvidedAnswer());
+        this.setReasonForScore(response.getReasonForScore());
+    }
 }

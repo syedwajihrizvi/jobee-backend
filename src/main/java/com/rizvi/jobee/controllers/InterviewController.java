@@ -143,6 +143,7 @@ public class InterviewController {
         var interviewPrepQuestion = interviewService.getInterviewPreparationQuestionSpeechToText(id,
                 interviewQuestionId, audioFile);
         var aiAnswer = interviewService.answerQuestionWithAI(id, principal.getId(), interviewPrepQuestion);
+        System.out.println("AI Answer: " + aiAnswer);
         var interviewPrepQuestionDto = new InterviewPrepQuestionDto();
         interviewPrepQuestionDto.setId(interviewPrepQuestion.getId());
         interviewPrepQuestionDto.setQuestion(interviewPrepQuestion.getQuestion());

@@ -85,7 +85,7 @@ public class AIService {
         SpeechCreateParams params = SpeechCreateParams.builder()
                 .model(SpeechModel.TTS_1_HD)
                 .input(text)
-                .voice(Voice.CORAL).responseFormat(ResponseFormat.MP3).speed(1.0f).build();
+                .voice(Voice.ECHO).responseFormat(ResponseFormat.MP3).speed(1.0f).build();
         var response = openAIClient.audio().speech().create(params);
         byte[] audioData = response.body().readAllBytes();
         return audioData;
@@ -125,17 +125,22 @@ public class AIService {
             AnswerInterviewQuestionRequest request) throws IOException {
         String inputJson = request.toJsonString();
         String prompt = Prompts.INTERVIEW_PREP_QUESTION_ANSWER.replace("{inputJSON}", inputJson);
-
-        StructuredChatCompletionCreateParams<AnswerInterviewQuestionResponse> params = ChatCompletionCreateParams
-                .builder()
-                .model(ChatModel.GPT_5)
-                .addSystemMessage("You are a helpful assistant that helps candidates answer interview questions.")
-                .addUserMessage(prompt)
-                .responseFormat(AnswerInterviewQuestionResponse.class)
-                .build();
-        Optional<AnswerInterviewQuestionResponse> result = openAIClient.chat().completions().create(params).choices()
-                .stream()
-                .flatMap(choice -> choice.message().content().stream()).findFirst();
-        return result.orElse(null);
+        try {
+            StructuredChatCompletionCreateParams<AnswerInterviewQuestionResponse> params = ChatCompletionCreateParams
+                    .builder()
+                    .model(ChatModel.GPT_5)
+                    .addSystemMessage("You are a helpful assistant that helps candidates answer interview questions.")
+                    .addUserMessage(prompt)
+                    .responseFormat(AnswerInterviewQuestionResponse.class)
+                    .build();
+            Optional<AnswerInterviewQuestionResponse> result = openAIClient.chat().completions().create(params)
+                    .choices()
+                    .stream()
+                    .flatMap(choice -> choice.message().content().stream()).findFirst();
+            return result.orElse(null);
+        } catch (Exception e) {
+            System.out.println("Error during answering interview question: " + e.getMessage());
+            return null;
+        }
     }
 }

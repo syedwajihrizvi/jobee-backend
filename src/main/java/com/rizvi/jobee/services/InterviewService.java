@@ -180,9 +180,10 @@ public class InterviewService {
         // new answer
         try {
             String answerText = aiService.speechToText(audioFile);
-            s3Service.uploadInterviewPrepQuestionAnswerAudio(interviewId, interviewQuestionId, audioFile.getBytes());
+            var audioFileName = s3Service.uploadInterviewPrepQuestionAnswerAudio(interviewId, interviewQuestionId,
+                    audioFile.getBytes());
             question.setAnswer(answerText);
-            question.setAnswerAudioUrl(interviewId + "/" + interviewQuestionId + "-answer.mp3");
+            question.setAnswerAudioUrl(audioFileName);
             var savedQuestion = interviewPreparationQuestionRepository.save(question);
             return savedQuestion;
         } catch (Exception e) {
@@ -192,10 +193,19 @@ public class InterviewService {
 
     public AnswerInterviewQuestionResponse answerQuestionWithAI(Long interviewId, Long candidateId,
             InterviewPreparationQuestion question) {
+        var interviewPrep = interviewPreparationRepository.findByInterviewId(interviewId);
+        if (interviewPrep == null) {
+            throw new InterviewNotFoundException("Interview preparation not found for interview id: " + interviewId);
+        }
         var interview = interviewRepository.findInterviewForPreparation(interviewId);
         if (interview == null || !interview.getCandidate().getId().equals(candidateId)) {
             throw new InterviewNotFoundException("Interview not found with id: " + interviewId);
         }
+        var interviewQuestion = interviewPrep.getQuestions().stream()
+                .filter(q -> q.getId().equals(question.getId()))
+                .findFirst()
+                .orElse(null);
+
         if (interview.getCandidate().getId() != candidateId) {
             throw new InterviewNotFoundException("You are not authorized to answer questions for this interview");
         }
@@ -216,7 +226,10 @@ public class InterviewService {
         try {
             AnswerInterviewQuestionResponse response = aiService.answerInterviewQuestion(answerInterviewQuestion);
             var audioData = aiService.textToSpeech(response.getAnswer());
-            var audioFile = s3Service.uploadInterviewPrepQuestionAIAnswerAudio(interviewId, candidateId, audioData);
+            var audioFile = s3Service.uploadInterviewPrepQuestionAIAnswerAudio(interviewId, interviewQuestion.getId(),
+                    audioData);
+            interviewQuestion.addAIInterviewAnswer(response, audioFile);
+            interviewPreparationQuestionRepository.save(interviewQuestion);
             response.setAnswerAudioUrl(audioFile);
             return response;
         } catch (Exception e) {

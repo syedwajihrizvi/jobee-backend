@@ -78,7 +78,7 @@ public class S3Service {
                                                 .key(key).contentType("audio/mpeg")
                                                 .build(),
                                 software.amazon.awssdk.core.sync.RequestBody.fromBytes(audioData));
-                return questionId + ".mp3";
+                return questionId + "-question" + ".mp3";
 
         }
 
