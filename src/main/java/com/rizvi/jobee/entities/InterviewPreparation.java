@@ -124,7 +124,6 @@ public class InterviewPreparation {
     private void addQuestion(InterviewPrepQuestion question) {
         var newQuestion = InterviewPreparationQuestion.builder()
                 .question(question.getQuestion())
-                .answer(question.getAnswer())
                 .interviewPreparation(this)
                 .build();
         this.questions.add(newQuestion);

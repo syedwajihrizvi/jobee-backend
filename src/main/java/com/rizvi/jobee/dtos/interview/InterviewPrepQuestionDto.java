@@ -9,4 +9,7 @@ public class InterviewPrepQuestionDto {
     private String answer;
     private String questionAudioUrl;
     private String answerAudioUrl;
+    private String aiAnswer;
+    private Short userAnswerScore;
+    private String reasonForScore;
 }

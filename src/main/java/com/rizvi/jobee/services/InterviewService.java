@@ -23,6 +23,9 @@ import com.rizvi.jobee.helpers.AISchemas.AICandidate;
 import com.rizvi.jobee.helpers.AISchemas.AICompany;
 import com.rizvi.jobee.helpers.AISchemas.AIInterview;
 import com.rizvi.jobee.helpers.AISchemas.AIJob;
+import com.rizvi.jobee.helpers.AISchemas.AnswerInterviewQuestionRequest;
+import com.rizvi.jobee.helpers.AISchemas.AnswerInterviewQuestionResponse;
+import com.rizvi.jobee.helpers.AISchemas.InterviewPrepQuestion;
 import com.rizvi.jobee.helpers.AISchemas.PrepareForInterviewRequest;
 import com.rizvi.jobee.repositories.ApplicationRepository;
 import com.rizvi.jobee.repositories.BusinessAccountRepository;
@@ -186,5 +189,38 @@ public class InterviewService {
         } catch (Exception e) {
             throw new RuntimeException("Failed to process speech to text: " + e.getMessage());
         }
+    }
+
+    public AnswerInterviewQuestionResponse answerQuestionWithAI(Long interviewId, Long candidateId,
+            InterviewPreparationQuestion question) {
+        var interview = interviewRepository.findInterviewForPreparation(interviewId);
+        if (interview == null || !interview.getCandidate().getId().equals(candidateId)) {
+            throw new InterviewNotFoundException("Interview not found with id: " + interviewId);
+        }
+        if (interview.getCandidate().getId() != candidateId) {
+            throw new InterviewNotFoundException("You are not authorized to answer questions for this interview");
+        }
+
+        // Create new interview answer
+        AnswerInterviewQuestionRequest answerInterviewQuestion = new AnswerInterviewQuestionRequest();
+        AIJob aiJob = new AIJob(interview.getJob());
+        AICompany aiCompany = new AICompany(interview.getJob().getBusinessAccount().getCompany());
+        AICandidate aiCandidate = new AICandidate(interview.getCandidate());
+        InterviewPrepQuestion aiQuestion = new InterviewPrepQuestion();
+        aiQuestion.setQuestion(question.getQuestion());
+        aiQuestion.setAnswer(question.getAnswer());
+        answerInterviewQuestion.setJob(aiJob);
+        answerInterviewQuestion.setCompany(aiCompany);
+        answerInterviewQuestion.setCandidate(aiCandidate);
+        answerInterviewQuestion.setQuestion(aiQuestion);
+
+        try {
+            AnswerInterviewQuestionResponse response = aiService.answerInterviewQuestion(answerInterviewQuestion);
+            return response;
+        } catch (Exception e) {
+            // TODO: handle exception
+            return null;
+        }
+
     }
 }

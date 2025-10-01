@@ -12,7 +12,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.openai.client.OpenAIClient;
 import com.openai.models.ChatModel;
-import com.openai.models.audio.transcriptions.Transcription;
 import com.openai.models.audio.transcriptions.TranscriptionCreateParams;
 import com.openai.models.audio.transcriptions.TranscriptionCreateResponse;
 import com.openai.models.audio.speech.SpeechCreateParams;
@@ -21,10 +20,11 @@ import com.openai.models.audio.speech.SpeechCreateParams.ResponseFormat;
 import com.openai.models.audio.speech.SpeechCreateParams.Voice;
 import com.openai.models.chat.completions.ChatCompletionCreateParams;
 import com.openai.models.chat.completions.StructuredChatCompletionCreateParams;
-import com.openai.models.realtime.AudioTranscription;
 import com.rizvi.jobee.dtos.user.ResumeExtract;
 import com.rizvi.jobee.exceptions.InvalidDocumentException;
 import com.rizvi.jobee.helpers.Prompts;
+import com.rizvi.jobee.helpers.AISchemas.AnswerInterviewQuestionRequest;
+import com.rizvi.jobee.helpers.AISchemas.AnswerInterviewQuestionResponse;
 import com.rizvi.jobee.helpers.AISchemas.PrepareForInterviewRequest;
 import com.rizvi.jobee.helpers.AISchemas.PrepareForInterviewResponse;
 
@@ -83,9 +83,9 @@ public class AIService {
 
     public byte[] textToSpeech(String text) throws IOException {
         SpeechCreateParams params = SpeechCreateParams.builder()
-                .model(SpeechModel.GPT_4O_MINI_TTS)
+                .model(SpeechModel.TTS_1_HD)
                 .input(text)
-                .voice(Voice.SAGE).responseFormat(ResponseFormat.MP3).speed(1.0f).build();
+                .voice(Voice.SHIMMER).responseFormat(ResponseFormat.MP3).speed(1.0f).build();
         var response = openAIClient.audio().speech().create(params);
         byte[] audioData = response.body().readAllBytes();
         return audioData;
@@ -119,5 +119,23 @@ public class AIService {
             System.out.println("Error during transcription: " + e.getMessage());
         }
         return null;
+    }
+
+    public AnswerInterviewQuestionResponse answerInterviewQuestion(
+            AnswerInterviewQuestionRequest request) throws IOException {
+        String inputJson = request.toJsonString();
+        String prompt = Prompts.INTERVIEW_PREP_QUESTION_ANSWER.replace("{inputJSON}", inputJson);
+
+        StructuredChatCompletionCreateParams<AnswerInterviewQuestionResponse> params = ChatCompletionCreateParams
+                .builder()
+                .model(ChatModel.GPT_5)
+                .addSystemMessage("You are a helpful assistant that helps candidates answer interview questions.")
+                .addUserMessage(prompt)
+                .responseFormat(AnswerInterviewQuestionResponse.class)
+                .build();
+        Optional<AnswerInterviewQuestionResponse> result = openAIClient.chat().completions().create(params).choices()
+                .stream()
+                .flatMap(choice -> choice.message().content().stream()).findFirst();
+        return result.orElse(null);
     }
 }

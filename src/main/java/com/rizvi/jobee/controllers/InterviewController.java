@@ -134,16 +134,24 @@ public class InterviewController {
     @PostMapping("{id}/prepare/questions/{interviewQuestionId}/answer/speech-to-text")
     @Operation(summary = "Convert speech to text for interview answer")
     public ResponseEntity<InterviewPrepQuestionDto> getAnswerSpeechToText(
-            @PathVariable Long id, @PathVariable Long interviewQuestionId,
-            @RequestParam("audioFile") MultipartFile audioFile) {
+            @PathVariable Long id,
+            @PathVariable Long interviewQuestionId,
+            @RequestParam("audioFile") MultipartFile audioFile,
+            @AuthenticationPrincipal CustomPrincipal principal) {
         var interviewPrepQuestion = interviewService.getInterviewPreparationQuestionSpeechToText(id,
                 interviewQuestionId, audioFile);
+        var aiAnswer = interviewService.answerQuestionWithAI(id, principal.getId(), interviewPrepQuestion);
+        // TODO: Generate audio for the AI answer and save the URL
         var interviewPrepQuestionDto = new InterviewPrepQuestionDto();
         interviewPrepQuestionDto.setId(interviewPrepQuestion.getId());
         interviewPrepQuestionDto.setQuestion(interviewPrepQuestion.getQuestion());
         interviewPrepQuestionDto.setQuestionAudioUrl(interviewPrepQuestion.getQuestionAudioUrl());
         interviewPrepQuestionDto.setAnswer(interviewPrepQuestion.getAnswer());
         interviewPrepQuestionDto.setAnswerAudioUrl(interviewPrepQuestion.getAnswerAudioUrl());
+        interviewPrepQuestionDto.setAiAnswer(aiAnswer.getAnswer());
+        interviewPrepQuestionDto.setUserAnswerScore(aiAnswer.getScoreOfProvidedAnswer());
+        interviewPrepQuestionDto.setReasonForScore(aiAnswer.getReasonForScore());
         return ResponseEntity.ok(interviewPrepQuestionDto);
     }
+
 }

@@ -1,0 +1,15 @@
+package com.rizvi.jobee.helpers.AISchemas;
+
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+
+import lombok.Data;
+
+@Data
+public class AnswerInterviewQuestionResponse {
+    @JsonPropertyDescription("Answer to the interview question that can be spoken aloud in a natural, conversational manner")
+    private String answer;
+    @JsonPropertyDescription("Score out of 10 of the provided answer")
+    private Short scoreOfProvidedAnswer;
+    @JsonPropertyDescription("Reason for the score given to the provided answer")
+    private String reasonForScore;
+}

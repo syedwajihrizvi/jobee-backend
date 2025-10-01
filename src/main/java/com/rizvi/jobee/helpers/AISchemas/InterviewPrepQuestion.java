@@ -6,4 +6,10 @@ import lombok.Data;
 public class InterviewPrepQuestion {
     private String question;
     private String answer;
+
+    public String toJsonString() {
+        return """
+                {"question": "%s", "answer": "%s"}
+                """.formatted(question, answer);
+    }
 }

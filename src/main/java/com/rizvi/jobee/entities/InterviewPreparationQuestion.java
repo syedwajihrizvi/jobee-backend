@@ -35,6 +35,12 @@ public class InterviewPreparationQuestion {
     @Column(name = "answer", nullable = true, columnDefinition = "TEXT")
     private String answer;
 
+    @Column(name = "ai_answer", nullable = true, columnDefinition = "TEXT")
+    private String aiAnswer;
+
+    @Column(name = "user_answer_score", nullable = true)
+    private Short userAnswerScore;
+
     @Column(name = "question_audio_url", nullable = true)
     private String questionAudioUrl;
 
