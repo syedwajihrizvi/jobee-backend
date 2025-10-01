@@ -85,7 +85,7 @@ public class AIService {
         SpeechCreateParams params = SpeechCreateParams.builder()
                 .model(SpeechModel.TTS_1_HD)
                 .input(text)
-                .voice(Voice.SHIMMER).responseFormat(ResponseFormat.MP3).speed(1.0f).build();
+                .voice(Voice.CORAL).responseFormat(ResponseFormat.MP3).speed(1.0f).build();
         var response = openAIClient.audio().speech().create(params);
         byte[] audioData = response.body().readAllBytes();
         return audioData;

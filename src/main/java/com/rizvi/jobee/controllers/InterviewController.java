@@ -22,6 +22,7 @@ import com.rizvi.jobee.dtos.interview.InterviewPreparationDto;
 import com.rizvi.jobee.dtos.interview.InterviewSummaryDto;
 import com.rizvi.jobee.mappers.InterviewMapper;
 import com.rizvi.jobee.principals.CustomPrincipal;
+import com.rizvi.jobee.services.AIService;
 import com.rizvi.jobee.services.AccountService;
 import com.rizvi.jobee.services.ApplicationService;
 import com.rizvi.jobee.services.InterviewService;
@@ -41,6 +42,7 @@ public class InterviewController {
     private final InterviewService interviewService;
     private final UserProfileService userProfileService;
     private final ApplicationService applicationService;
+    private final AIService aiService;
     private final InterviewMapper interviewMapper;
 
     @GetMapping()
@@ -141,7 +143,6 @@ public class InterviewController {
         var interviewPrepQuestion = interviewService.getInterviewPreparationQuestionSpeechToText(id,
                 interviewQuestionId, audioFile);
         var aiAnswer = interviewService.answerQuestionWithAI(id, principal.getId(), interviewPrepQuestion);
-        // TODO: Generate audio for the AI answer and save the URL
         var interviewPrepQuestionDto = new InterviewPrepQuestionDto();
         interviewPrepQuestionDto.setId(interviewPrepQuestion.getId());
         interviewPrepQuestionDto.setQuestion(interviewPrepQuestion.getQuestion());
@@ -149,6 +150,7 @@ public class InterviewController {
         interviewPrepQuestionDto.setAnswer(interviewPrepQuestion.getAnswer());
         interviewPrepQuestionDto.setAnswerAudioUrl(interviewPrepQuestion.getAnswerAudioUrl());
         interviewPrepQuestionDto.setAiAnswer(aiAnswer.getAnswer());
+        interviewPrepQuestionDto.setAiAnswerAudioUrl(aiAnswer.getAnswerAudioUrl());
         interviewPrepQuestionDto.setUserAnswerScore(aiAnswer.getScoreOfProvidedAnswer());
         interviewPrepQuestionDto.setReasonForScore(aiAnswer.getReasonForScore());
         return ResponseEntity.ok(interviewPrepQuestionDto);

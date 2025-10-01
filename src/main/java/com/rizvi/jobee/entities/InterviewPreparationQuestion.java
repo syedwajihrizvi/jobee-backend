@@ -47,6 +47,9 @@ public class InterviewPreparationQuestion {
     @Column(name = "answer_audio_url", nullable = true)
     private String answerAudioUrl;
 
+    @Column(name = "ai_answer_audio_url", nullable = true)
+    private String aiAnswerAudioUrl;
+
     @ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "interview_preparation_id ", nullable = false)
     private InterviewPreparation interviewPreparation;

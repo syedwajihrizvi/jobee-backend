@@ -253,6 +253,7 @@ public class Prompts {
         "answer": string,
         "scoreOfProvidedAnswer": integer // Score out of 10 of the provided answer
         "reasonForScore": string // Reason for the score given to the provided answer, be concise (1-2 sentences)
+        "answerAudioUrl": string // Leave as empty string for now, will be filled in later with a URL to the audio file
       }
 
       # Instructions

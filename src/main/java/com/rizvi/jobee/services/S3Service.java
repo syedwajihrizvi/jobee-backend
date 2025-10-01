@@ -93,4 +93,16 @@ public class S3Service {
                                 software.amazon.awssdk.core.sync.RequestBody.fromBytes(audioData));
                 return questionId + "-answer.mp3";
         }
+
+        public String uploadInterviewPrepQuestionAIAnswerAudio(Long interviewId, Long questionId, byte[] audioData)
+                        throws IOException {
+                final String key = "interview-prep/" + interviewId + "/" + questionId + "-ai-answer" + ".mp3";
+                s3Client.putObject(
+                                PutObjectRequest.builder()
+                                                .bucket(awsProperties.getBucket())
+                                                .key(key).contentType("audio/mpeg")
+                                                .build(),
+                                software.amazon.awssdk.core.sync.RequestBody.fromBytes(audioData));
+                return questionId + "-ai-answer.mp3";
+        }
 }

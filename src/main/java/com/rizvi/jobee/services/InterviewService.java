@@ -185,7 +185,6 @@ public class InterviewService {
             question.setAnswerAudioUrl(interviewId + "/" + interviewQuestionId + "-answer.mp3");
             var savedQuestion = interviewPreparationQuestionRepository.save(question);
             return savedQuestion;
-            // Then upload the audio file to S3 and save the url
         } catch (Exception e) {
             throw new RuntimeException("Failed to process speech to text: " + e.getMessage());
         }
@@ -216,6 +215,9 @@ public class InterviewService {
 
         try {
             AnswerInterviewQuestionResponse response = aiService.answerInterviewQuestion(answerInterviewQuestion);
+            var audioData = aiService.textToSpeech(response.getAnswer());
+            var audioFile = s3Service.uploadInterviewPrepQuestionAIAnswerAudio(interviewId, candidateId, audioData);
+            response.setAnswerAudioUrl(audioFile);
             return response;
         } catch (Exception e) {
             // TODO: handle exception
