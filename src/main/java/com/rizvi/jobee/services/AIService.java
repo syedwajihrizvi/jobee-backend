@@ -27,6 +27,7 @@ import com.rizvi.jobee.helpers.AISchemas.AnswerInterviewQuestionRequest;
 import com.rizvi.jobee.helpers.AISchemas.AnswerInterviewQuestionResponse;
 import com.rizvi.jobee.helpers.AISchemas.PrepareForInterviewRequest;
 import com.rizvi.jobee.helpers.AISchemas.PrepareForInterviewResponse;
+import com.rizvi.jobee.helpers.AISchemas.ReferenceToPreviousAnswer;
 
 import lombok.AllArgsConstructor;
 
@@ -125,6 +126,31 @@ public class AIService {
             AnswerInterviewQuestionRequest request) throws IOException {
         String inputJson = request.toJsonString();
         String prompt = Prompts.INTERVIEW_PREP_QUESTION_ANSWER.replace("{inputJSON}", inputJson);
+        try {
+            StructuredChatCompletionCreateParams<AnswerInterviewQuestionResponse> params = ChatCompletionCreateParams
+                    .builder()
+                    .model(ChatModel.GPT_5)
+                    .addSystemMessage("You are a helpful assistant that helps candidates answer interview questions.")
+                    .addUserMessage(prompt)
+                    .responseFormat(AnswerInterviewQuestionResponse.class)
+                    .build();
+            Optional<AnswerInterviewQuestionResponse> result = openAIClient.chat().completions().create(params)
+                    .choices()
+                    .stream()
+                    .flatMap(choice -> choice.message().content().stream()).findFirst();
+            return result.orElse(null);
+        } catch (Exception e) {
+            System.out.println("Error during answering interview question: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public AnswerInterviewQuestionResponse getFeedbackForAnswer(
+            AnswerInterviewQuestionRequest request, ReferenceToPreviousAnswer previousAnswer) {
+        String inputJson = request.toJsonString();
+        String referenceJson = previousAnswer.toJsonString();
+        String prompt = Prompts.INTERVIEW_PREP_QUESTION_ANSWER_FEEDBACK.replace("{inputJSON}", inputJson)
+                .replace("{referenceJSON}", referenceJson);
         try {
             StructuredChatCompletionCreateParams<AnswerInterviewQuestionResponse> params = ChatCompletionCreateParams
                     .builder()

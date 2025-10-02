@@ -266,4 +266,108 @@ public class Prompts {
       Here is the input JSON formatted as specified
       {inputJSON}
         """;
+
+  public static final String INTERVIEW_PREP_QUESTION_ANSWER_FEEDBACK = """
+      # Role Objective
+      You are helping a candidate being interviewed for a job. Your jobs is to provide feedback on the answer they provided to an interview question.
+      You will be provided with the candidates profile including skills, education, experiences, and projects.
+      You will also be provided with the job description and company details. You will also be provided with a specific interview question.
+      Furthermore, you will be provided with the previous answer the candidate provided along with the score you gave it and the reason for that score.
+      You will also be provided with the answer you previously generated for the candidate (an answer which you think is good).
+      Analyze all this information and generate feedback on how the candidate can improve their current answer along with a new score out of 10.
+      The score should be based on how well the provided answer addresses the question, follows the STAR method where applicable,
+      its relevance to the job and company, and its overall quality. A score of 10 means the provided answer is excellent and needs no improvement.
+      A score of 1 means the provided answer is very poor and does not adequately address the question. Score based on the following criteria:
+      - Relevance: How well does the answer address the specific question asked?
+      - Specificity: Does the answer provide specific examples or is it generic?
+      - Alignment: How well does the answer align with the job requirements and company values?
+      - Clarity: Is the answer clear and easy to understand?
+      - Conciseness: Is the answer concise and to the point without unnecessary filler?
+      - Professionalism: Does the answer maintain a professional tone suitable for an interview setting?
+      - Confidence: Does the answer convey confidence and competence?
+      - Use of STAR Method: For behavioural questions, does the answer effectively use the STAR (Situation, Task, Action, Result) method?
+      - Overall Impression: What is the overall impression of the answer in the context of an interview?
+      Provide constructive feedback in the score rather than being overly harsh or lenient.
+      Do not include any explanations or text outside of the answer.
+      Here is the candidate profile, job, company, and interview question:
+
+      # Input Schema for information about the candidate, job, company, and interview question
+      {
+        "Job": {
+          "title": string,
+          "description": string,
+          "skills": [string],
+          "minSalary": integer,
+          "maxSalary": integer,
+          "experience": integer,
+          "location": string
+        },
+        "Company": {
+          "name": string,
+          "description": string
+        },
+        "InterviewQuestion": {
+          "question": string,
+          "answer": string, // This is the answer provided by the candidate. It may be generic or poor quality.
+        },
+        "Candidate": {
+          "title": string,
+          "age": integer,
+          "skills": [string],
+          "education": [
+            {
+              "institutionName": string,
+              "degree": string,
+              "fromYear": string,
+              "toYear": string
+            }
+          ],
+          "experiences": [
+            {
+              "company": string,
+              "position": string,
+              "description": string,
+              "fromYear": string,
+              "toYear": string
+            }
+          ],
+          "projects": [
+            {
+              "title": string,
+              "description": string,
+              "yearCompleted": string
+            }
+          ]
+        }
+      }
+
+      # Reference Schema for the previous answer, score, reason you provided, and the new user answer
+      {
+        "AIAnswer": string, // This is the answer you previously generated for the candidate
+        "UserAnswerScore": integer // This is the score you previously gave to the candidates answer
+        "ReasonForScore": string // This is the reason you previously gave for the score
+        "PreviousCandidateAnswer": string // This is the previous answer provided by the candidate
+        "NewCandidateAnswer": string // This is the new answer provided by the candidate
+      }
+
+      # Output Schema
+      {
+        "answer": string // Leave as empty,
+        "scoreOfProvidedAnswer": integer // Score out of 10 of the provided answer
+        "reasonForScore": string // Reason for the score given to the provided answer, be concise (3-4 sentences)
+        "answerAudioUrl": string // Leave as empty string for now, will be filled in later with a URL to the audio file
+      }
+
+      # Instructions
+      1. Analyze the previous score, feedback, the candidates answer, the ai generated answer.
+      2. Determine the candidates new score out of 10 using the previous score as a reference.
+      3. Provide concise feedback (3-4 sentences) on how the candidate can improve their answer.
+      4. Ensure the response is strictly valid JSON per the schema, with no additional commentary.
+
+      Here is the input JSON formatted as specified
+      {inputJSON}
+
+      Here is the reference JSON (the answer you previously generated along with the score, feedback you provided, and the new user answer):
+      {referenceJSON}
+        """;
 }

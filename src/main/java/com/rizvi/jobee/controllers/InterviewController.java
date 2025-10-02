@@ -118,6 +118,13 @@ public class InterviewController {
         return ResponseEntity.ok(interviewPreparationDto);
     }
 
+    @GetMapping("/{id}/prepare/questions/{interviewQuestionId}")
+    public ResponseEntity<InterviewPrepQuestionDto> getInterviewPreparationQuestion(
+            @PathVariable Long id, @PathVariable Long interviewQuestionId) {
+        var interviewQuestion = interviewService.getInterviewPreparationQuestion(interviewQuestionId);
+        return ResponseEntity.ok(interviewMapper.toInterviewPrepQuestionDto(interviewQuestion));
+    }
+
     @PostMapping("/{id}/prepare/questions/{interviewQuestionId}/question/text-to-speech")
     @Operation(summary = "Convert text to speech for interview question")
     public ResponseEntity<InterviewPrepQuestionDto> getQuestionTextToSpeech(
@@ -134,7 +141,7 @@ public class InterviewController {
     }
 
     @PostMapping("{id}/prepare/questions/{interviewQuestionId}/answer/speech-to-text")
-    @Operation(summary = "Convert speech to text for interview answer")
+    @Operation(summary = "Convert speech to text for interview answer. Called when candidate submits their answer for the first time.")
     public ResponseEntity<InterviewPrepQuestionDto> getAnswerSpeechToText(
             @PathVariable Long id,
             @PathVariable Long interviewQuestionId,
@@ -142,19 +149,18 @@ public class InterviewController {
             @AuthenticationPrincipal CustomPrincipal principal) {
         var interviewPrepQuestion = interviewService.getInterviewPreparationQuestionSpeechToText(id,
                 interviewQuestionId, audioFile);
-        var aiAnswer = interviewService.answerQuestionWithAI(id, principal.getId(), interviewPrepQuestion);
-        System.out.println("AI Answer: " + aiAnswer);
-        var interviewPrepQuestionDto = new InterviewPrepQuestionDto();
-        interviewPrepQuestionDto.setId(interviewPrepQuestion.getId());
-        interviewPrepQuestionDto.setQuestion(interviewPrepQuestion.getQuestion());
-        interviewPrepQuestionDto.setQuestionAudioUrl(interviewPrepQuestion.getQuestionAudioUrl());
-        interviewPrepQuestionDto.setAnswer(interviewPrepQuestion.getAnswer());
-        interviewPrepQuestionDto.setAnswerAudioUrl(interviewPrepQuestion.getAnswerAudioUrl());
-        interviewPrepQuestionDto.setAiAnswer(aiAnswer.getAnswer());
-        interviewPrepQuestionDto.setAiAnswerAudioUrl(aiAnswer.getAnswerAudioUrl());
-        interviewPrepQuestionDto.setUserAnswerScore(aiAnswer.getScoreOfProvidedAnswer());
-        interviewPrepQuestionDto.setReasonForScore(aiAnswer.getReasonForScore());
-        return ResponseEntity.ok(interviewPrepQuestionDto);
+        interviewService.answerQuestionWithAI(id, principal.getId(), interviewPrepQuestion);
+        return ResponseEntity.ok(interviewMapper.toInterviewPrepQuestionDto(interviewPrepQuestion));
     }
 
+    @PostMapping("{id}/prepare/questions/{interviewQuestionId}/answer/feedback")
+    public ResponseEntity<InterviewPrepQuestionDto> getFeedbackForAnswer(
+            @PathVariable Long id,
+            @PathVariable Long interviewQuestionId,
+            @RequestParam("audioFile") MultipartFile audioFile,
+            @AuthenticationPrincipal CustomPrincipal principal) {
+        var interviewQuestion = interviewService.getFeedbackForAnswerFromAI(id, principal.getId(), interviewQuestionId,
+                audioFile);
+        return ResponseEntity.ok(interviewMapper.toInterviewPrepQuestionDto(interviewQuestion));
+    }
 }

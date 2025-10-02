@@ -5,6 +5,7 @@ import org.mapstruct.Mapping;
 
 import com.rizvi.jobee.dtos.interview.InterviewConductorDto;
 import com.rizvi.jobee.dtos.interview.InterviewDto;
+import com.rizvi.jobee.dtos.interview.InterviewPrepQuestionDto;
 import com.rizvi.jobee.dtos.interview.InterviewPreparationDto;
 import com.rizvi.jobee.dtos.interview.InterviewSummaryDto;
 import com.rizvi.jobee.entities.BusinessAccount;
@@ -35,7 +36,9 @@ public interface InterviewMapper {
     @Mapping(target = "name", expression = "java(businessAccount.getFullName())")
     InterviewConductorDto toConductorDto(BusinessAccount businessAccount);
 
-    InterviewPrepQuestion toInterviewPrepQuestionDto(InterviewPreparationQuestion question);
+    InterviewPrepQuestion toInterviewPrepQuestion(InterviewPreparationQuestion question);
+
+    InterviewPrepQuestionDto toInterviewPrepQuestionDto(InterviewPreparationQuestion question);
 
     @Mapping(target = "strengths", expression = "java(interviewPreparation.getStrengthsAsList())")
     @Mapping(target = "weaknesses", expression = "java(interviewPreparation.getWeaknessesAsList())")

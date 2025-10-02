@@ -63,5 +63,11 @@ public class InterviewPreparationQuestion {
         this.setAiAnswerAudioUrl(audioFile);
         this.setUserAnswerScore(response.getScoreOfProvidedAnswer());
         this.setReasonForScore(response.getReasonForScore());
+        this.setAiAnswer(response.getAnswer());
+    }
+
+    public void updateViaAiFeedback(AnswerInterviewQuestionResponse response) {
+        this.setUserAnswerScore(response.getScoreOfProvidedAnswer());
+        this.setReasonForScore(response.getReasonForScore());
     }
 }

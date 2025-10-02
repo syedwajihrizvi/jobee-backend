@@ -27,6 +27,7 @@ import com.rizvi.jobee.helpers.AISchemas.AnswerInterviewQuestionRequest;
 import com.rizvi.jobee.helpers.AISchemas.AnswerInterviewQuestionResponse;
 import com.rizvi.jobee.helpers.AISchemas.InterviewPrepQuestion;
 import com.rizvi.jobee.helpers.AISchemas.PrepareForInterviewRequest;
+import com.rizvi.jobee.helpers.AISchemas.ReferenceToPreviousAnswer;
 import com.rizvi.jobee.repositories.ApplicationRepository;
 import com.rizvi.jobee.repositories.BusinessAccountRepository;
 import com.rizvi.jobee.repositories.InterviewPreparationQuestionRepository;
@@ -69,6 +70,13 @@ public class InterviewService {
 
     public List<Interview> getInterviewsByCandidate(Long candidateId) {
         return interviewRepository.findByCandidateId(candidateId);
+    }
+
+    public InterviewPreparationQuestion getInterviewPreparationQuestion(
+            Long interviewQuestionId) {
+        return interviewPreparationQuestionRepository.findById(interviewQuestionId)
+                .orElseThrow(() -> new InterviewNotFoundException(
+                        "Interview question not found with id: " + interviewQuestionId));
     }
 
     @Transactional
@@ -201,6 +209,7 @@ public class InterviewService {
         if (interview == null || !interview.getCandidate().getId().equals(candidateId)) {
             throw new InterviewNotFoundException("Interview not found with id: " + interviewId);
         }
+        // TODO: Extract to InterviewPreparation Entity
         var interviewQuestion = interviewPrep.getQuestions().stream()
                 .filter(q -> q.getId().equals(question.getId()))
                 .findFirst()
@@ -237,5 +246,41 @@ public class InterviewService {
             return null;
         }
 
+    }
+
+    public InterviewPreparationQuestion getFeedbackForAnswerFromAI(
+            Long interviewId, Long candidateId, Long interviewQuestionId, MultipartFile audioFile) {
+        var interviewPrep = interviewPreparationRepository.findByInterviewId(interviewId);
+        if (interviewPrep == null) {
+            throw new InterviewNotFoundException("Interview preparation not found for interview id: " + interviewId);
+        }
+        var interview = interviewRepository.findInterviewForPreparation(interviewId);
+        if (interview == null || !interview.getCandidate().getId().equals(candidateId)) {
+            throw new InterviewNotFoundException("Interview not found with id: " + interviewId);
+        }
+        var interviewQuestion = interviewPrep.getQuestions().stream()
+                .filter(q -> q.getId().equals(interviewQuestionId))
+                .findFirst()
+                .orElse(null);
+
+        AnswerInterviewQuestionRequest answerInterviewQuestion = new AnswerInterviewQuestionRequest();
+        AIJob aiJob = new AIJob(interview.getJob());
+        AICompany aiCompany = new AICompany(interview.getJob().getBusinessAccount().getCompany());
+        AICandidate aiCandidate = new AICandidate(interview.getCandidate());
+        InterviewPrepQuestion aiQuestion = new InterviewPrepQuestion();
+        answerInterviewQuestion.setJob(aiJob);
+        answerInterviewQuestion.setCompany(aiCompany);
+        answerInterviewQuestion.setCandidate(aiCandidate);
+        answerInterviewQuestion.setQuestion(aiQuestion);
+        var oldAnswer = interviewQuestion.getAnswer();
+        var newAnswer = getInterviewPreparationQuestionSpeechToText(interviewId, interviewQuestionId, audioFile)
+                .getAnswer();
+        var referenceToPreviousAnswer = new ReferenceToPreviousAnswer(interviewQuestion, oldAnswer, newAnswer);
+        AnswerInterviewQuestionResponse response = aiService.getFeedbackForAnswer(answerInterviewQuestion,
+                referenceToPreviousAnswer);
+        response.setAnswerAudioUrl(interviewQuestion.getAiAnswerAudioUrl());
+        interviewQuestion.updateViaAiFeedback(response);
+        var savedInterviewQuestion = interviewPreparationQuestionRepository.save(interviewQuestion);
+        return savedInterviewQuestion;
     }
 }
