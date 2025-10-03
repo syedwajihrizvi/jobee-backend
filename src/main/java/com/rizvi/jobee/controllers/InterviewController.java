@@ -42,7 +42,6 @@ public class InterviewController {
     private final InterviewService interviewService;
     private final UserProfileService userProfileService;
     private final ApplicationService applicationService;
-    private final AIService aiService;
     private final InterviewMapper interviewMapper;
 
     @GetMapping()
@@ -116,6 +115,17 @@ public class InterviewController {
         var interviewPreparation = interviewService.getInterviewPreparationDetails(id);
         var interviewPreparationDto = interviewMapper.toPreparationDto(interviewPreparation);
         return ResponseEntity.ok(interviewPreparationDto);
+    }
+
+    @GetMapping("/{id}/prepare/questions")
+    @Operation(summary = "Get interview preparation questions")
+    public ResponseEntity<List<InterviewPrepQuestionDto>> getInterviewPreparationQuestions(
+            @PathVariable Long id) {
+        var interviewPreparation = interviewService.getInterviewPreparationDetails(id);
+        var interviewPrepQuestionDtos = interviewPreparation.getQuestions().stream()
+                .map(interviewMapper::toInterviewPrepQuestionDto)
+                .toList();
+        return ResponseEntity.ok(interviewPrepQuestionDtos);
     }
 
     @GetMapping("/{id}/prepare/questions/{interviewQuestionId}")
