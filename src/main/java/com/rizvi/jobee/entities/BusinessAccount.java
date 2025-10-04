@@ -17,6 +17,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -52,6 +53,9 @@ public class BusinessAccount {
     @Enumerated(EnumType.STRING)
     @Column(name = "account_type", nullable = false)
     private BusinessType accountType;;
+
+    @OneToOne(mappedBy = "businessAccount", cascade = CascadeType.ALL, orphanRemoval = true)
+    private BusinessProfile profile;
 
     @ManyToOne
     @JoinColumn(name = "company_id", nullable = false)

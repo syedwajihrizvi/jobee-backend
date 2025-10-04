@@ -1,0 +1,9 @@
+CREATE TABLE business_profiles (
+    id BIGSERIAL PRIMARY KEY,
+    business_account_id BIGINT UNIQUE NOT NULL,
+    summary TEXT DEFAULT NULL,
+    title VARCHAR(255) DEFAULT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (business_account_id) REFERENCES business_accounts(id) ON DELETE CASCADE
+)

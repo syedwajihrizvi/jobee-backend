@@ -2,7 +2,7 @@ spring:
   flyway:
     enabled: false
   jpa:
-    show-sql: false
+    show-sql: true
   servlet:
     multipart:
       max-file-size: 100MB
