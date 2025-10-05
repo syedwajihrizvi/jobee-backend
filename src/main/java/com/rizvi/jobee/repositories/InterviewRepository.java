@@ -1,6 +1,7 @@
 package com.rizvi.jobee.repositories;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,6 +10,11 @@ import org.springframework.data.jpa.repository.Query;
 import com.rizvi.jobee.entities.Interview;;
 
 public interface InterviewRepository extends JpaRepository<Interview, Long> {
+
+    @EntityGraph(attributePaths = { "interviewers.profile" })
+    @Query("select i from Interview i where i.id = :id")
+    Optional<Interview> findById(Long id);
+
     // Additional query methods can be defined here if needed
     List<Interview> findByCandidateId(Long candidateId);
 

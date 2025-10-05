@@ -2,7 +2,6 @@ package com.rizvi.jobee.controllers;
 
 import java.util.List;
 
-import org.hibernate.validator.constraints.pl.REGON;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +21,6 @@ import com.rizvi.jobee.dtos.interview.InterviewPreparationDto;
 import com.rizvi.jobee.dtos.interview.InterviewSummaryDto;
 import com.rizvi.jobee.mappers.InterviewMapper;
 import com.rizvi.jobee.principals.CustomPrincipal;
-import com.rizvi.jobee.services.AIService;
 import com.rizvi.jobee.services.AccountService;
 import com.rizvi.jobee.services.ApplicationService;
 import com.rizvi.jobee.services.InterviewService;

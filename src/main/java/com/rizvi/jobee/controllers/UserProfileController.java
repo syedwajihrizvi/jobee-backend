@@ -19,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.rizvi.jobee.dtos.application.ApplicationSummaryDto;
-import com.rizvi.jobee.dtos.job.JobIdDto;
 import com.rizvi.jobee.dtos.job.JobSummaryDto;
 import com.rizvi.jobee.dtos.user.CreateUserProfileDto;
 import com.rizvi.jobee.dtos.user.UpdateUserProfileGeneralInfoDto;
