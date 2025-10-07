@@ -86,12 +86,16 @@ public class UserProfileService {
             userProfile.setTitle(request.getTitle());
         if (request.getCompany() != null)
             userProfile.setCompany(request.getCompany());
-        if (request.getPhone() != null)
-            userProfile.setPhoneNumber(request.getPhone());
+        if (request.getPhoneNumber() != null)
+            userProfile.setPhoneNumber(request.getPhoneNumber());
         if (request.getCity() != null)
             userProfile.setCity(request.getCity());
         if (request.getCountry() != null)
             userProfile.setCountry(request.getCountry());
+        if (request.getState() != null)
+            userProfile.setState(request.getState());
+        if (request.getProvince() != null)
+            userProfile.setProvince(request.getProvince());
         if (request.getEmail() != null) {
             var userAccount = userAccountRepository.findById(accountId)
                     .orElseThrow(() -> new AccountNotFoundException("User account not found"));

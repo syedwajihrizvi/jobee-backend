@@ -63,6 +63,12 @@ public class UserProfile {
     @Column(name = "country", nullable = true)
     private String country;
 
+    @Column(name = "state", nullable = true)
+    private String state;
+
+    @Column(name = "province", nullable = true)
+    private String province;
+
     @Column(name = "phone_number", nullable = true)
     private String phoneNumber;
 
@@ -112,6 +118,10 @@ public class UserProfile {
 
     public void setAccount(UserAccount account) {
         this.account = account;
+    }
+
+    public String getLocation() {
+        return city + ", " + (state != null ? state : province) + ", " + country;
     }
 
     public String getFullName() {

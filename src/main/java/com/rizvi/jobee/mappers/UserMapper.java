@@ -27,6 +27,6 @@ public interface UserMapper {
                         userProfile.getSummary() != null &&
                         !userProfile.getSummary().isEmpty())""")
         @Mapping(target = "email", source = "account.email")
-        @Mapping(target = "location", expression = "java(userProfile.getCity() + \", \" + userProfile.getCountry())")
+        @Mapping(target = "location", expression = "java(userProfile.getLocation())")
         UserProfileSummaryDto toProfileSummaryDto(UserProfile userProfile);
 }

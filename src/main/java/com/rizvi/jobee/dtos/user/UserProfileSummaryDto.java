@@ -18,7 +18,11 @@ public class UserProfileSummaryDto {
     private Integer age;
     private String summary;
     private String title;
+    private String city;
+    private String country;
     private String location;
+    private String state;
+    private String province;
     private String company;
     private String email;
     private String phoneNumber;

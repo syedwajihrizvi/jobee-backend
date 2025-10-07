@@ -1,106 +1,106 @@
-INSERT INTO companies (id, name) VALUES 
-(1, 'Tech Innovators Inc.'),
-(2, 'Health Solutions Ltd.'),
-(3, 'Finance Gurus LLC'),
-(4, 'EduTech Partners'),
-(5, 'Green Energy Co.'),
-(6, 'Retail Giants'),
-(7, 'Travel Experts'),
-(8, 'Foodies United'),
-(9, 'Media Masters'),
-(10, 'Auto Dynamics'),
-(11, 'Fashion Forward'),
-(12, 'Real Estate Pros'),
-(13, 'Consulting Champs'),
-(14, 'Logistics Leaders'),
-(15, 'Entertainment Hub'),
-(16, 'NonProfit Heroes'),
-(17, 'Agriculture Allies'),
-(18, 'Telecom Titans'),
-(19, 'Pharma Pioneers'),
-(20, 'Construction Crew'),
-(21, 'Aerospace Aces'),
-(22, 'Cybersecurity Squad'),
-(23, 'AI Innovators'),
-(24, 'Blockchain Builders'),
-(25, 'Cloud Computing Co.'),
-(26, 'Big Data Experts'),
-(27, 'IoT Integrators'),
-(28, 'VR Visionaries'),
-(29, 'AR Architects'),
-(30, 'Robotics Rulers'),
-(31, '3D Printing Pros'),
-(32, 'Quantum Quest'),
-(33, 'Space Explorers'),
-(34, 'Renewable Resources Inc.'),
-(35, 'Smart Home Solutions'),
-(36, 'Wearable Tech Co.'),
-(37, 'E-commerce Experts'),
-(38, 'Digital Marketing Masters'),
-(39, 'Social Media Strategists'),
-(40, 'Content Creators Inc.'),
-(41, 'SEO Specialists'),
-(42, 'PPC Professionals'),
-(43, 'Email Marketing Experts'),
-(44, 'Affiliate Marketing Co.'),
-(45, 'Influencer Agency'),
-(46, 'Web Development Wizards'),
-(47, 'App Development Aces'),
-(48, 'Game Development Gurus'),
-(49, 'UI/UX Designers Inc.'),
-(50, 'Graphic Design Group');
+-- INSERT INTO companies (id, name) VALUES 
+-- (1, 'Tech Innovators Inc.'),
+-- (2, 'Health Solutions Ltd.'),
+-- (3, 'Finance Gurus LLC'),
+-- (4, 'EduTech Partners'),
+-- (5, 'Green Energy Co.'),
+-- (6, 'Retail Giants'),
+-- (7, 'Travel Experts'),
+-- (8, 'Foodies United'),
+-- (9, 'Media Masters'),
+-- (10, 'Auto Dynamics'),
+-- (11, 'Fashion Forward'),
+-- (12, 'Real Estate Pros'),
+-- (13, 'Consulting Champs'),
+-- (14, 'Logistics Leaders'),
+-- (15, 'Entertainment Hub'),
+-- (16, 'NonProfit Heroes'),
+-- (17, 'Agriculture Allies'),
+-- (18, 'Telecom Titans'),
+-- (19, 'Pharma Pioneers'),
+-- (20, 'Construction Crew'),
+-- (21, 'Aerospace Aces'),
+-- (22, 'Cybersecurity Squad'),
+-- (23, 'AI Innovators'),
+-- (24, 'Blockchain Builders'),
+-- (25, 'Cloud Computing Co.'),
+-- (26, 'Big Data Experts'),
+-- (27, 'IoT Integrators'),
+-- (28, 'VR Visionaries'),
+-- (29, 'AR Architects'),
+-- (30, 'Robotics Rulers'),
+-- (31, '3D Printing Pros'),
+-- (32, 'Quantum Quest'),
+-- (33, 'Space Explorers'),
+-- (34, 'Renewable Resources Inc.'),
+-- (35, 'Smart Home Solutions'),
+-- (36, 'Wearable Tech Co.'),
+-- (37, 'E-commerce Experts'),
+-- (38, 'Digital Marketing Masters'),
+-- (39, 'Social Media Strategists'),
+-- (40, 'Content Creators Inc.'),
+-- (41, 'SEO Specialists'),
+-- (42, 'PPC Professionals'),
+-- (43, 'Email Marketing Experts'),
+-- (44, 'Affiliate Marketing Co.'),
+-- (45, 'Influencer Agency'),
+-- (46, 'Web Development Wizards'),
+-- (47, 'App Development Aces'),
+-- (48, 'Game Development Gurus'),
+-- (49, 'UI/UX Designers Inc.'),
+-- (50, 'Graphic Design Group');
 
-INSERT INTO business_accounts (id, email, password, first_name, last_name, account_type, company_id, created_at) VALUES 
-(1, 'emailone@email.com', 'Password', 'John', 'Doe', 'ADMIN', 1, NOW()),
-(2, 'email2@email.com', 'Password', 'Jane', 'Smith', 'ADMIN', 2, NOW()),
-(3, 'emailthree@email.com', 'Password', 'Mike', 'Johnson', 'ADMIN', 3, NOW()),
-(4, 'emailfour@email.com', 'Password', 'Sarah', 'Wilson', 'ADMIN', 4, NOW()),
-(5, 'emailfive@email.com', 'Password', 'David', 'Brown', 'ADMIN', 5, NOW()),
-(6, 'emailsix@email.com', 'Password', 'Lisa', 'Davis', 'ADMIN', 6, NOW()),
-(7, 'emailseven@email.com', 'Password', 'James', 'Miller', 'ADMIN', 7, NOW()),
-(8, 'emaileight@email.com', 'Password', 'Maria', 'Garcia', 'ADMIN', 8, NOW()),
-(9, 'emailnine@email.com', 'Password', 'Robert', 'Rodriguez', 'ADMIN', 9, NOW()),
-(10, 'emailten@email.com', 'Password', 'Jennifer', 'Martinez', 'ADMIN', 10, NOW()),
-(11, 'emaileleven@email.com', 'Password', 'William', 'Anderson', 'ADMIN', 11, NOW()),
-(12, 'emailtwelve@email.com', 'Password', 'Patricia', 'Thomas', 'ADMIN', 12, NOW()),
-(13, 'emailthirteen@email.com', 'Password', 'Charles', 'Jackson', 'ADMIN', 13, NOW()),
-(14, 'emailfourteen@email.com', 'Password', 'Linda', 'White', 'ADMIN', 14, NOW()),
-(15, 'emailfifteen@email.com', 'Password', 'Christopher', 'Harris', 'ADMIN', 15, NOW()),
-(16, 'emailsixteen@email.com', 'Password', 'Barbara', 'Martin', 'ADMIN', 16, NOW()),
-(17, 'emailseventeen@email.com', 'Password', 'Daniel', 'Thompson', 'ADMIN', 17, NOW()),
-(18, 'emaileighteen@email.com', 'Password', 'Elizabeth', 'Garcia', 'ADMIN', 18, NOW()),
-(19, 'emailnineteen@email.com', 'Password', 'Matthew', 'Martinez', 'ADMIN', 19, NOW()),
-(20, 'emailtwenty@email.com', 'Password', 'Susan', 'Robinson', 'ADMIN', 20, NOW()),
-(21, 'emailtwentyone@email.com', 'Password', 'Anthony', 'Clark', 'ADMIN', 21, NOW()),
-(22, 'emailtwentytwo@email.com', 'Password', 'Dorothy', 'Rodriguez', 'ADMIN', 22, NOW()),
-(23, 'emailtwentythree@email.com', 'Password', 'Mark', 'Lewis', 'ADMIN', 23, NOW()),
-(24, 'emailtwentyfour@email.com', 'Password', 'Lisa', 'Lee', 'ADMIN', 24, NOW()),
-(25, 'emailtwentyfive@email.com', 'Password', 'Donald', 'Walker', 'ADMIN', 25, NOW()),
-(26, 'emailtwentysix@email.com', 'Password', 'Nancy', 'Hall', 'ADMIN', 26, NOW()),
-(27, 'emailtwentyseven@email.com', 'Password', 'Paul', 'Allen', 'ADMIN', 27, NOW()),
-(28, 'emailtwentyeight@email.com', 'Password', 'Karen', 'Young', 'ADMIN', 28, NOW()),
-(29, 'emailtwentynine@email.com', 'Password', 'Andrew', 'Hernandez', 'ADMIN', 29, NOW()),
-(30, 'emailthirty@email.com', 'Password', 'Betty', 'King', 'ADMIN', 30, NOW()),
-(31, 'emailthirtyone@email.com', 'Password', 'Joshua', 'Wright', 'ADMIN', 31, NOW()),
-(32, 'emailthirtytwo@email.com', 'Password', 'Helen', 'Lopez', 'ADMIN', 32, NOW()),
-(33, 'emailthirtythree@email.com', 'Password', 'Kenneth', 'Hill', 'ADMIN', 33, NOW()),
-(34, 'emailthirtyfour@email.com', 'Password', 'Sandra', 'Scott', 'ADMIN', 34, NOW()),
-(35, 'emailthirtyfive@email.com', 'Password', 'Kevin', 'Green', 'ADMIN', 35, NOW()),
-(36, 'emailthirtysix@email.com', 'Password', 'Donna', 'Adams', 'ADMIN', 36, NOW()),
-(37, 'emailthirtyseven@email.com', 'Password', 'Brian', 'Baker', 'ADMIN', 37, NOW()),
-(38, 'emailthirtyeight@email.com', 'Password', 'Carol', 'Gonzalez', 'ADMIN', 38, NOW()),
-(39, 'emailthirtynine@email.com', 'Password', 'George', 'Nelson', 'ADMIN', 39, NOW()),
-(40, 'emailforty@email.com', 'Password', 'Ruth', 'Carter', 'ADMIN', 40, NOW()),
-(41, 'emailfortyone@email.com', 'Password', 'Edward', 'Mitchell', 'ADMIN', 41, NOW()),
-(42, 'emailfortytwo@email.com', 'Password', 'Sharon', 'Perez', 'ADMIN', 42, NOW()),
-(43, 'emailfortythree@email.com', 'Password', 'Ronald', 'Roberts', 'ADMIN', 43, NOW()),
-(44, 'emailfortyfour@email.com', 'Password', 'Michelle', 'Turner', 'ADMIN', 44, NOW()),
-(45, 'emailfortyfive@email.com', 'Password', 'Timothy', 'Phillips', 'ADMIN', 45, NOW()),
-(46, 'emailfortysix@email.com', 'Password', 'Laura', 'Campbell', 'ADMIN', 46, NOW()),
-(47, 'emailfortyseven@email.com', 'Password', 'Jason', 'Parker', 'ADMIN', 47, NOW()),
-(48, 'emailfortyeight@email.com', 'Password', 'Sarah', 'Evans', 'ADMIN', 48, NOW()),
-(49, 'emailfortynine@email.com', 'Password', 'Jeffrey', 'Edwards', 'ADMIN', 49, NOW()),
-(50, 'emailfifty@email.com', 'Password', 'Kimberly', 'Collins', 'ADMIN', 50, NOW());
+-- INSERT INTO business_accounts (id, email, password, first_name, last_name, account_type, company_id, created_at) VALUES 
+-- (1, 'emailone@email.com', 'Password', 'John', 'Doe', 'ADMIN', 1, NOW()),
+-- (2, 'email2@email.com', 'Password', 'Jane', 'Smith', 'ADMIN', 2, NOW()),
+-- (3, 'emailthree@email.com', 'Password', 'Mike', 'Johnson', 'ADMIN', 3, NOW()),
+-- (4, 'emailfour@email.com', 'Password', 'Sarah', 'Wilson', 'ADMIN', 4, NOW()),
+-- (5, 'emailfive@email.com', 'Password', 'David', 'Brown', 'ADMIN', 5, NOW()),
+-- (6, 'emailsix@email.com', 'Password', 'Lisa', 'Davis', 'ADMIN', 6, NOW()),
+-- (7, 'emailseven@email.com', 'Password', 'James', 'Miller', 'ADMIN', 7, NOW()),
+-- (8, 'emaileight@email.com', 'Password', 'Maria', 'Garcia', 'ADMIN', 8, NOW()),
+-- (9, 'emailnine@email.com', 'Password', 'Robert', 'Rodriguez', 'ADMIN', 9, NOW()),
+-- (10, 'emailten@email.com', 'Password', 'Jennifer', 'Martinez', 'ADMIN', 10, NOW()),
+-- (11, 'emaileleven@email.com', 'Password', 'William', 'Anderson', 'ADMIN', 11, NOW()),
+-- (12, 'emailtwelve@email.com', 'Password', 'Patricia', 'Thomas', 'ADMIN', 12, NOW()),
+-- (13, 'emailthirteen@email.com', 'Password', 'Charles', 'Jackson', 'ADMIN', 13, NOW()),
+-- (14, 'emailfourteen@email.com', 'Password', 'Linda', 'White', 'ADMIN', 14, NOW()),
+-- (15, 'emailfifteen@email.com', 'Password', 'Christopher', 'Harris', 'ADMIN', 15, NOW()),
+-- (16, 'emailsixteen@email.com', 'Password', 'Barbara', 'Martin', 'ADMIN', 16, NOW()),
+-- (17, 'emailseventeen@email.com', 'Password', 'Daniel', 'Thompson', 'ADMIN', 17, NOW()),
+-- (18, 'emaileighteen@email.com', 'Password', 'Elizabeth', 'Garcia', 'ADMIN', 18, NOW()),
+-- (19, 'emailnineteen@email.com', 'Password', 'Matthew', 'Martinez', 'ADMIN', 19, NOW()),
+-- (20, 'emailtwenty@email.com', 'Password', 'Susan', 'Robinson', 'ADMIN', 20, NOW()),
+-- (21, 'emailtwentyone@email.com', 'Password', 'Anthony', 'Clark', 'ADMIN', 21, NOW()),
+-- (22, 'emailtwentytwo@email.com', 'Password', 'Dorothy', 'Rodriguez', 'ADMIN', 22, NOW()),
+-- (23, 'emailtwentythree@email.com', 'Password', 'Mark', 'Lewis', 'ADMIN', 23, NOW()),
+-- (24, 'emailtwentyfour@email.com', 'Password', 'Lisa', 'Lee', 'ADMIN', 24, NOW()),
+-- (25, 'emailtwentyfive@email.com', 'Password', 'Donald', 'Walker', 'ADMIN', 25, NOW()),
+-- (26, 'emailtwentysix@email.com', 'Password', 'Nancy', 'Hall', 'ADMIN', 26, NOW()),
+-- (27, 'emailtwentyseven@email.com', 'Password', 'Paul', 'Allen', 'ADMIN', 27, NOW()),
+-- (28, 'emailtwentyeight@email.com', 'Password', 'Karen', 'Young', 'ADMIN', 28, NOW()),
+-- (29, 'emailtwentynine@email.com', 'Password', 'Andrew', 'Hernandez', 'ADMIN', 29, NOW()),
+-- (30, 'emailthirty@email.com', 'Password', 'Betty', 'King', 'ADMIN', 30, NOW()),
+-- (31, 'emailthirtyone@email.com', 'Password', 'Joshua', 'Wright', 'ADMIN', 31, NOW()),
+-- (32, 'emailthirtytwo@email.com', 'Password', 'Helen', 'Lopez', 'ADMIN', 32, NOW()),
+-- (33, 'emailthirtythree@email.com', 'Password', 'Kenneth', 'Hill', 'ADMIN', 33, NOW()),
+-- (34, 'emailthirtyfour@email.com', 'Password', 'Sandra', 'Scott', 'ADMIN', 34, NOW()),
+-- (35, 'emailthirtyfive@email.com', 'Password', 'Kevin', 'Green', 'ADMIN', 35, NOW()),
+-- (36, 'emailthirtysix@email.com', 'Password', 'Donna', 'Adams', 'ADMIN', 36, NOW()),
+-- (37, 'emailthirtyseven@email.com', 'Password', 'Brian', 'Baker', 'ADMIN', 37, NOW()),
+-- (38, 'emailthirtyeight@email.com', 'Password', 'Carol', 'Gonzalez', 'ADMIN', 38, NOW()),
+-- (39, 'emailthirtynine@email.com', 'Password', 'George', 'Nelson', 'ADMIN', 39, NOW()),
+-- (40, 'emailforty@email.com', 'Password', 'Ruth', 'Carter', 'ADMIN', 40, NOW()),
+-- (41, 'emailfortyone@email.com', 'Password', 'Edward', 'Mitchell', 'ADMIN', 41, NOW()),
+-- (42, 'emailfortytwo@email.com', 'Password', 'Sharon', 'Perez', 'ADMIN', 42, NOW()),
+-- (43, 'emailfortythree@email.com', 'Password', 'Ronald', 'Roberts', 'ADMIN', 43, NOW()),
+-- (44, 'emailfortyfour@email.com', 'Password', 'Michelle', 'Turner', 'ADMIN', 44, NOW()),
+-- (45, 'emailfortyfive@email.com', 'Password', 'Timothy', 'Phillips', 'ADMIN', 45, NOW()),
+-- (46, 'emailfortysix@email.com', 'Password', 'Laura', 'Campbell', 'ADMIN', 46, NOW()),
+-- (47, 'emailfortyseven@email.com', 'Password', 'Jason', 'Parker', 'ADMIN', 47, NOW()),
+-- (48, 'emailfortyeight@email.com', 'Password', 'Sarah', 'Evans', 'ADMIN', 48, NOW()),
+-- (49, 'emailfortynine@email.com', 'Password', 'Jeffrey', 'Edwards', 'ADMIN', 49, NOW()),
+-- (50, 'emailfifty@email.com', 'Password', 'Kimberly', 'Collins', 'ADMIN', 50, NOW());
 
 -- -- INSERT into jobs (id, title, description, location, employment_type, min_salary, max_salary, business_account_id, created_at) VALUES
 -- -- (1, 'Software Engineer', 'Develop and maintain software applications.', 'New York, NY', 'FULL_TIME', 70000, 120000, 1, NOW()),
@@ -409,8 +409,8 @@ INSERT INTO business_accounts (id, email, password, first_name, last_name, accou
 -- (4, 2, 'Blog Application', 'Built a blog application with user authentication and CRUD functionality.', 'https://blogapp.example.com', NOW(), 2023),
 -- (5, 2, 'Chat Application', 'Developed a real-time chat application using Node.js and Socket.io.', 'https://chatapp.example.com', NOW(), 2022);
 
-INSERT INTO business_profiles (id, business_account_id, summary, title, created_at) VALUES
-(54, 54, 'Provides AWS support for media and enterainment', 'AWS Support Engineer', NOW());
+-- INSERT INTO business_profiles (id, business_account_id, summary, title, created_at) VALUES
+-- (54, 54, 'Provides AWS support for media and enterainment', 'AWS Support Engineer', NOW());
 -- (1, 1, 'Leading provider of innovative tech solutions.', 'Senior Software Engineer', NOW()),
 -- (2, 2, 'Cutting-edge data analytics company.', 'Data Scientist', NOW()),
 -- (3, 3, 'Global project management consultancy.', 'Project Manager', NOW()),
@@ -462,3 +462,121 @@ INSERT INTO business_profiles (id, business_account_id, summary, title, created_
 -- (49, 49, 'Graphic design and visual communication agency.', 'Graphic Design Specialist', NOW()),
 -- (50, 50, 'Human resources and recruitment services.', 'HR & Recruitment Specialist', NOW());
 
+-- UPDATE user_profiles SET city = 'Seattle', state = 'WA', country = 'United States' WHERE id = 1;
+-- UPDATE user_profiles SET city = 'San Francisco', state = 'CA', country = 'United States' WHERE id = 2;
+-- UPDATE user_profiles SET city = 'New York', state = 'NY', country = 'United States' WHERE id = 3;
+-- UPDATE user_profiles SET city = 'Los Angeles', state = 'CA', country = 'United States' WHERE id = 4;
+-- UPDATE user_profiles SET city = 'Chicago', state = 'IL', country = 'United States' WHERE id = 5;
+-- UPDATE user_profiles SET city = 'Houston', state = 'TX', country = 'United States' WHERE id = 6;
+-- UPDATE user_profiles SET city = 'Toronto', province = 'ON', country = 'Canada' WHERE id = 7;
+-- UPDATE user_profiles SET city = 'Vancouver', province = 'BC', country = 'Canada' WHERE id = 8;
+-- UPDATE user_profiles SET city = 'Phoenix', state = 'AZ', country = 'United States' WHERE id = 9;
+-- UPDATE user_profiles SET city = 'Philadelphia', state = 'PA', country = 'United States' WHERE id = 10;
+-- UPDATE user_profiles SET city = 'San Antonio', state = 'TX', country = 'United States' WHERE id = 11;
+-- UPDATE user_profiles SET city = 'San Diego', state = 'CA', country = 'United States' WHERE id = 12;
+-- UPDATE user_profiles SET city = 'Dallas', state = 'TX', country = 'United States' WHERE id = 13;
+-- UPDATE user_profiles SET city = 'San Jose', state = 'CA', country = 'United States' WHERE id = 14;
+-- UPDATE user_profiles SET city = 'Austin', state = 'TX', country = 'United States' WHERE id = 15;
+-- UPDATE user_profiles SET city = 'Jacksonville', state = 'FL', country = 'United States' WHERE id = 16;
+-- UPDATE user_profiles SET city = 'Fort Worth', state = 'TX', country = 'United States' WHERE id = 17;
+-- UPDATE user_profiles SET city = 'Columbus', state = 'OH', country = 'United States' WHERE id = 18;
+-- UPDATE user_profiles SET city = 'Charlotte', state = 'NC', country = 'United States' WHERE id = 19;
+-- UPDATE user_profiles SET city = 'Montreal', province = 'QC', country = 'Canada' WHERE id = 20;
+-- UPDATE user_profiles SET city = 'Calgary', province = 'AB', country = 'Canada' WHERE id = 21;
+-- UPDATE user_profiles SET city = 'Indianapolis', state = 'IN', country = 'United States' WHERE id = 22;
+-- UPDATE user_profiles SET city = 'Denver', state = 'CO', country = 'United States' WHERE id = 23;
+-- UPDATE user_profiles SET city = 'Washington', state = 'DC', country = 'United States' WHERE id = 24;
+-- UPDATE user_profiles SET city = 'Boston', state = 'MA', country = 'United States' WHERE id = 25;
+-- UPDATE user_profiles SET city = 'El Paso', state = 'TX', country = 'United States' WHERE id = 26;
+-- UPDATE user_profiles SET city = 'Detroit', state = 'MI', country = 'United States' WHERE id = 27;
+-- UPDATE user_profiles SET city = 'Nashville', state = 'TN', country = 'United States' WHERE id = 28;
+-- UPDATE user_profiles SET city = 'Portland', state = 'OR', country = 'United States' WHERE id = 29;
+-- UPDATE user_profiles SET city = 'Oklahoma City', state = 'OK', country = 'United States' WHERE id = 30;
+-- UPDATE user_profiles SET city = 'Las Vegas', state = 'NV', country = 'United States' WHERE id = 31;
+-- UPDATE user_profiles SET city = 'Louisville', state = 'KY', country = 'United States' WHERE id = 32;
+-- UPDATE user_profiles SET city = 'Baltimore', state = 'MD', country = 'United States' WHERE id = 33;
+-- UPDATE user_profiles SET city = 'Milwaukee', state = 'WI', country = 'United States' WHERE id = 34;
+-- UPDATE user_profiles SET city = 'Albuquerque', state = 'NM', country = 'United States' WHERE id = 35;
+-- UPDATE user_profiles SET city = 'Tucson', state = 'AZ', country = 'United States' WHERE id = 36;
+-- UPDATE user_profiles SET city = 'Fresno', state = 'CA', country = 'United States' WHERE id = 37;
+-- UPDATE user_profiles SET city = 'Mesa', state = 'AZ', country = 'United States' WHERE id = 38;
+-- UPDATE user_profiles SET city = 'Sacramento', state = 'CA', country = 'United States' WHERE id = 39;
+-- UPDATE user_profiles SET city = 'Atlanta', state = 'GA', country = 'United States' WHERE id = 40;
+-- UPDATE user_profiles SET city = 'Kansas City', state = 'MO', country = 'United States' WHERE id = 41;
+-- UPDATE user_profiles SET city = 'Colorado Springs', state = 'CO', country = 'United States' WHERE id = 42;
+-- UPDATE user_profiles SET city = 'Omaha', state = 'NE', country = 'United States' WHERE id = 43;
+-- UPDATE user_profiles SET city = 'Raleigh', state = 'NC', country = 'United States' WHERE id = 44;
+-- UPDATE user_profiles SET city = 'Miami', state = 'FL', country = 'United States' WHERE id = 45;
+-- UPDATE user_profiles SET city = 'Long Beach', state = 'CA', country = 'United States' WHERE id = 46;
+-- UPDATE user_profiles SET city = 'Virginia Beach', state = 'VA', country = 'United States' WHERE id = 47;
+-- UPDATE user_profiles SET city = 'Oakland', state = 'CA', country = 'United States' WHERE id = 48;
+-- UPDATE user_profiles SET city = 'Minneapolis', state = 'MN', country = 'United States' WHERE id = 49;
+-- UPDATE user_profiles SET city = 'Tulsa', state = 'OK', country = 'United States' WHERE id = 50;
+-- UPDATE user_profiles SET city = 'Tampa', state = 'FL', country = 'United States' WHERE id = 51;
+-- UPDATE user_profiles SET city = 'Arlington', state = 'TX', country = 'United States' WHERE id = 52;
+-- UPDATE user_profiles SET city = 'New Orleans', state = 'LA', country = 'United States' WHERE id = 53;
+-- UPDATE user_profiles SET city = 'Wichita', state = 'KS', country = 'United States' WHERE id = 54;
+-- UPDATE user_profiles SET city = 'Cleveland', state = 'OH', country = 'United States' WHERE id = 55;
+-- UPDATE user_profiles SET city = 'Tampa', state = 'FL', country = 'United States' WHERE id = 56;
+-- UPDATE user_profiles SET city = 'Bakersfield', state = 'CA', country = 'United States' WHERE id = 57;
+-- UPDATE user_profiles SET city = 'Aurora', state = 'CO', country = 'United States' WHERE id = 58;
+-- UPDATE user_profiles SET city = 'Anaheim', state = 'CA', country = 'United States' WHERE id = 59;
+-- UPDATE user_profiles SET city = 'Honolulu', state = 'HI', country = 'United States' WHERE id = 60;
+-- UPDATE user_profiles SET city = 'Santa Ana', state = 'CA', country = 'United States' WHERE id = 61;
+-- UPDATE user_profiles SET city = 'Corpus Christi', state = 'TX', country = 'United States' WHERE id = 62;
+-- UPDATE user_profiles SET city = 'Riverside', state = 'CA', country = 'United States' WHERE id = 63;
+-- UPDATE user_profiles SET city = 'Lexington', state = 'KY', country = 'United States' WHERE id = 64;
+-- UPDATE user_profiles SET city = 'Stockton', state = 'CA', country = 'United States' WHERE id = 65;
+-- UPDATE user_profiles SET city = 'Henderson', state = 'NV', country = 'United States' WHERE id = 66;
+-- UPDATE user_profiles SET city = 'Saint Paul', state = 'MN', country = 'United States' WHERE id = 67;
+-- UPDATE user_profiles SET city = 'St. Louis', state = 'MO', country = 'United States' WHERE id = 68;
+-- UPDATE user_profiles SET city = 'Cincinnati', state = 'OH', country = 'United States' WHERE id = 69;
+-- UPDATE user_profiles SET city = 'Pittsburgh', state = 'PA', country = 'United States' WHERE id = 70;
+-- UPDATE user_profiles SET city = 'Greensboro', state = 'NC', country = 'United States' WHERE id = 71;
+-- UPDATE user_profiles SET city = 'Lincoln', state = 'NE', country = 'United States' WHERE id = 72;
+-- UPDATE user_profiles SET city = 'Plano', state = 'TX', country = 'United States' WHERE id = 73;
+-- UPDATE user_profiles SET city = 'Anchorage', state = 'AK', country = 'United States' WHERE id = 74;
+-- UPDATE user_profiles SET city = 'Orlando', state = 'FL', country = 'United States' WHERE id = 75;
+-- UPDATE user_profiles SET city = 'Irvine', state = 'CA', country = 'United States' WHERE id = 76;
+-- UPDATE user_profiles SET city = 'Newark', state = 'NJ', country = 'United States' WHERE id = 77;
+-- UPDATE user_profiles SET city = 'Durham', state = 'NC', country = 'United States' WHERE id = 78;
+-- UPDATE user_profiles SET city = 'Chula Vista', state = 'CA', country = 'United States' WHERE id = 79;
+-- UPDATE user_profiles SET city = 'Toledo', state = 'OH', country = 'United States' WHERE id = 80;
+-- UPDATE user_profiles SET city = 'Fort Wayne', state = 'IN', country = 'United States' WHERE id = 81;
+-- UPDATE user_profiles SET city = 'St. Petersburg', state = 'FL', country = 'United States' WHERE id = 82;
+-- UPDATE user_profiles SET city = 'Laredo', state = 'TX', country = 'United States' WHERE id = 83;
+-- UPDATE user_profiles SET city = 'Jersey City', state = 'NJ', country = 'United States' WHERE id = 84;
+-- UPDATE user_profiles SET city = 'Chandler', state = 'AZ', country = 'United States' WHERE id = 85;
+-- UPDATE user_profiles SET city = 'Madison', state = 'WI', country = 'United States' WHERE id = 86;
+-- UPDATE user_profiles SET city = 'Lubbock', state = 'TX', country = 'United States' WHERE id = 87;
+-- UPDATE user_profiles SET city = 'Norfolk', state = 'VA', country = 'United States' WHERE id = 88;
+-- UPDATE user_profiles SET city = 'Baton Rouge', state = 'LA', country = 'United States' WHERE id = 89;
+-- UPDATE user_profiles SET city = 'Buffalo', state = 'NY', country = 'United States' WHERE id = 90;
+-- UPDATE user_profiles SET city = 'Ottawa', province = 'ON', country = 'Canada' WHERE id = 91;
+-- UPDATE user_profiles SET city = 'Edmonton', province = 'AB', country = 'Canada' WHERE id = 92;
+-- UPDATE user_profiles SET city = 'Mississauga', province = 'ON', country = 'Canada' WHERE id = 93;
+-- UPDATE user_profiles SET city = 'Winnipeg', province = 'MB', country = 'Canada' WHERE id = 94;
+-- UPDATE user_profiles SET city = 'Quebec City', province = 'QC', country = 'Canada' WHERE id = 95;
+-- UPDATE user_profiles SET city = 'Hamilton', province = 'ON', country = 'Canada' WHERE id = 96;
+-- UPDATE user_profiles SET city = 'Brampton', province = 'ON', country = 'Canada' WHERE id = 97;
+-- UPDATE user_profiles SET city = 'Surrey', province = 'BC', country = 'Canada' WHERE id = 98;
+-- UPDATE user_profiles SET city = 'Laval', province = 'QC', country = 'Canada' WHERE id = 99;
+-- UPDATE user_profiles SET city = 'Halifax', province = 'NS', country = 'Canada' WHERE id = 100;
+
+UPDATE user_skills SET experience = 1 WHERE id = 691;
+UPDATE user_skills SET experience = 2 WHERE id = 692;
+UPDATE user_skills SET experience = 1 WHERE id = 693;
+UPDATE user_skills SET experience = 4 WHERE id = 694;
+UPDATE user_skills SET experience = 3 WHERE id = 695;
+UPDATE user_skills SET experience = 5 WHERE id = 696;
+UPDATE user_skills SET experience = 2 WHERE id = 697;
+UPDATE user_skills SET experience = 7 WHERE id = 698;
+UPDATE user_skills SET experience = 3 WHERE id = 699;
+UPDATE user_skills SET experience = 6 WHERE id = 700;
+UPDATE user_skills SET experience = 1 WHERE id = 701;
+UPDATE user_skills SET experience = 9 WHERE id = 702;
+UPDATE user_skills SET experience = 4 WHERE id = 703;
+UPDATE user_skills SET experience = 8 WHERE id = 704;
+UPDATE user_skills SET experience = 2 WHERE id = 705;
+UPDATE user_skills SET experience = 5 WHERE id = 706;
+UPDATE user_skills SET experience = 3 WHERE id = 707;
