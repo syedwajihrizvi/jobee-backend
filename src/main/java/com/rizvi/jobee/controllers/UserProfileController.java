@@ -145,7 +145,8 @@ public class UserProfileController {
                 var userProfile = userProfileRepository.findById(userId)
                                 .orElseThrow(() -> new AccountNotFoundException("User profile not found"));
                 var jobs = jobRecommenderService.getRecommendedJobsForUser(userProfile);
-                var jobDtos = jobs.stream().map(jobMapper::toSummaryDto).toList();
+                var jobDtos = jobs.stream().filter((j) -> !j.hasUserApplied(userId)).map(jobMapper::toSummaryDto)
+                                .toList();
                 return ResponseEntity.ok(jobDtos);
         }
 
