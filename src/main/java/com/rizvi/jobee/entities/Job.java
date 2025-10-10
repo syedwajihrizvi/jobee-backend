@@ -109,4 +109,8 @@ public class Job {
         return tags.stream().map(Tag::getName).toList();
     }
 
+    public boolean hasUserApplied(Long userId) {
+        return applications.stream().anyMatch((app) -> app.getUserProfile().getId().equals(userId));
+    }
+
 }

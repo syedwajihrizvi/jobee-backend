@@ -2,6 +2,8 @@ package com.rizvi.jobee.entities;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import com.rizvi.jobee.enums.ApplicationStatus;
 
 import jakarta.persistence.Column;
@@ -14,6 +16,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,7 +29,9 @@ import lombok.Setter;
 @Entity
 @Builder
 @AllArgsConstructor
-@Table(name = "applications")
+@Table(name = "applications", uniqueConstraints = {
+        @UniqueConstraint(name = "unique_user_job_application", columnNames = { "user_profile_id", "job_id" })
+})
 public class Application {
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
@@ -42,7 +47,8 @@ public class Application {
     @Column(name = "short_listed", nullable = true, insertable = false, updatable = true)
     private Boolean shortListed = false;
 
-    @Column(name = "created_at", nullable = true, insertable = false, updatable = false)
+    @Column(name = "created_at", nullable = true, updatable = false)
+    @CreationTimestamp
     private LocalDateTime createdAt;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)

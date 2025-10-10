@@ -1,7 +1,9 @@
 package com.rizvi.jobee.controllers;
 
+import java.net.URI;
 import java.util.List;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +20,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.rizvi.jobee.dtos.application.ApplicantSummaryForBusinessDto;
 import com.rizvi.jobee.dtos.application.ApplicationDetailsForBusinessDto;
 import com.rizvi.jobee.dtos.application.ApplicationDto;
+import com.rizvi.jobee.dtos.application.BatchQuickApplyDto;
+import com.rizvi.jobee.dtos.application.BatchQuickApplySuccessDto;
 import com.rizvi.jobee.dtos.application.CreateApplicationDto;
 import com.rizvi.jobee.dtos.job.JobApplicationStatusDto;
 import com.rizvi.jobee.entities.Application;
@@ -58,11 +62,13 @@ public class ApplicationController {
             if (userProfile == null) {
                 throw new AccountNotFoundException("User profile not found for user id: " + userId);
             }
-            var applications = applicationRepository.findByUserProfile(userProfile);
+            var sort = Sort.by("createdAt").descending();
+            var applications = applicationRepository.findByUserProfile(userProfile, sort);
             var applicationDtos = applications.stream().map(application -> {
                 var dto = new JobApplicationStatusDto();
                 dto.setJob(jobMapper.toSummaryDto(application.getJob()));
                 dto.setStatus(application.getStatus());
+                dto.setAppliedAt(application.getCreatedAt().toString());
                 return dto;
             }).toList();
             return ResponseEntity.ok(applicationDtos);
@@ -119,6 +125,56 @@ public class ApplicationController {
         var uri = uriComponentsBuilder.path("/applications/{id}")
                 .buildAndExpand(savedApplication.getId()).toUri();
         return ResponseEntity.created(uri).body(applicationMapper.toDto(savedApplication));
+    }
+
+    @PostMapping("/quickApplyBatch")
+    @Operation(summary = "Quick apply to multiple jobs with logged in user")
+    public ResponseEntity<BatchQuickApplySuccessDto> quickApplyToMultipleJobs(
+            @RequestBody BatchQuickApplyDto batchQuickApplyDto,
+            @AuthenticationPrincipal CustomPrincipal customPrincipal,
+            UriComponentsBuilder uriComponentsBuilder) {
+        var userId = customPrincipal.getId();
+        var userProfile = userProfileRepository.findUserById(userId).get();
+        if (userProfile == null) {
+            throw new AccountNotFoundException("User account with ID " + userId + " not found");
+        }
+        var primaryResume = userProfile.getPrimaryResume();
+        if (primaryResume == null) {
+            throw new UserDocumentNotFoundException("User does not have a primary resume set");
+        }
+        var savedApplications = batchQuickApplyDto.getJobIds().stream().map(jobId -> {
+            var job = jobRepository.findById(jobId).orElse(null);
+            if (job == null) {
+                throw new JobNotFoundException("Job with ID " + jobId + " not found");
+            }
+            if (!job.hasUserApplied(userId)) {
+                var application = new Application();
+                application.setJob(job);
+                application.setUserProfile(userProfile);
+                application.setResumeDocument(primaryResume);
+                System.out.println("SUCCESS: User applying to job with ID " + jobId);
+                return applicationRepository.save(application);
+            }
+            System.out.println("ERROR: User has already applied to job with ID " + jobId);
+            return null;
+        }).toList();
+        var applicationDtos = savedApplications.stream()
+                .filter(app -> app != null)
+                .map(applicationMapper::toDto)
+                .toList();
+        List<URI> uris = savedApplications.stream()
+                .filter(app -> app != null)
+                .map(app -> {
+                    System.out.println("Building URI for application ID: " + app.getId());
+                    return uriComponentsBuilder.cloneBuilder()
+                            .path("/applications/{id}")
+                            .buildAndExpand(app.getId()).toUri();
+                })
+                .toList();
+        System.out.println("Applications: " + applicationDtos);
+        var responseDto = new BatchQuickApplySuccessDto(applicationDtos, uris);
+        System.out.println("SUCCESSFULLY APPLIED TO JOBS: " + applicationDtos.size());
+        return ResponseEntity.ok(responseDto);
     }
 
     @PostMapping

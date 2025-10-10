@@ -1,5 +1,6 @@
 package com.rizvi.jobee.repositories;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,7 +24,7 @@ public interface ApplicationRepository extends JpaRepository<Application, Long>,
     Application findByJobIdAndUserProfileId(Long jobId, Long userProfileId);
 
     @EntityGraph(attributePaths = { "job", "job.businessAccount", "job.businessAccount.company", "job.tags" })
-    List<Application> findByUserProfile(UserProfile userProfile);
+    List<Application> findByUserProfile(UserProfile userProfile, Sort sort);
 
     @EntityGraph(attributePaths = { "job", "job.businessAccount", "job.businessAccount.company" })
     @Query("select a from Application a where a.userProfile.id = :userProfileId")

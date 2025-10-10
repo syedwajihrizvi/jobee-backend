@@ -8,4 +8,5 @@ import lombok.Data;
 public class JobApplicationStatusDto {
     private JobSummaryDto job;
     private ApplicationStatus status;
+    private String appliedAt;
 }
