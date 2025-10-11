@@ -12,4 +12,10 @@ import lombok.Data;
 public class PaginatedJobDto {
     private boolean hasMore;
     private List<Job> jobs;
+    private Long totalElements;
+
+    public PaginatedJobDto(boolean hasMore, List<Job> jobs) {
+        this.hasMore = hasMore;
+        this.jobs = jobs;
+    }
 }

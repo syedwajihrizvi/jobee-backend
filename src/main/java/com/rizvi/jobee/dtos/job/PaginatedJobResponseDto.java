@@ -10,4 +10,10 @@ import lombok.Data;
 public class PaginatedJobResponseDto<T> {
     private boolean hasMore;
     private List<T> content;
+    private Long totalElements;
+
+    public PaginatedJobResponseDto(boolean hasMore, List<T> content) {
+        this.hasMore = hasMore;
+        this.content = content;
+    }
 }

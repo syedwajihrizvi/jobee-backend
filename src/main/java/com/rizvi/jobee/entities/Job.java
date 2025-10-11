@@ -42,6 +42,9 @@ public class Job {
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @Column(name = "views", nullable = false)
+    private Integer views;
+
     @Column(name = "title", nullable = false)
     private String title;
 

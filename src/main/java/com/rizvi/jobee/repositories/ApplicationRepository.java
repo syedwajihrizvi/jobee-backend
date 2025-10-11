@@ -16,7 +16,8 @@ import java.util.Optional;
 public interface ApplicationRepository extends JpaRepository<Application, Long>, JpaSpecificationExecutor<Application> {
 
     @EntityGraph(attributePaths = { "userProfile", "userProfile.account", "userProfile.skills",
-            "userProfile.skills.skill", "userProfile.education", "userProfile.experiences", "resumeDocument",
+            "userProfile.skills.skill", "userProfile.education", "userProfile.experiences", "userProfile.projects",
+            "resumeDocument",
             "coverLetterDocument" })
     Optional<Application> findById(Long id);
 

@@ -14,6 +14,7 @@ public class JobDetailedSummaryForBusinessDto {
     private String description;
     private String employmentType;
     private String location;
+    private Long views;
     private Integer minSalary;
     private Integer maxSalary;
     private String setting;

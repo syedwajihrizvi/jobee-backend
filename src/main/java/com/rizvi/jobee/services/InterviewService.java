@@ -2,6 +2,7 @@ package com.rizvi.jobee.services;
 
 import java.util.List;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,6 +14,7 @@ import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.Interview;
 import com.rizvi.jobee.entities.InterviewPreparation;
 import com.rizvi.jobee.entities.InterviewPreparationQuestion;
+import com.rizvi.jobee.entities.InterviewTip;
 import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.enums.ApplicationStatus;
@@ -69,7 +71,10 @@ public class InterviewService {
     }
 
     public List<Interview> getInterviewsByCandidate(Long candidateId) {
-        return interviewRepository.findByCandidateId(candidateId);
+        var sort = Sort.by(
+                Sort.Order.asc("interviewDate"),
+                Sort.Order.desc("createdAt"));
+        return interviewRepository.findByCandidateId(candidateId, sort);
     }
 
     public InterviewPreparationQuestion getInterviewPreparationQuestion(
@@ -106,6 +111,10 @@ public class InterviewService {
             } else {
                 interview.addInterviewer(interviewer);
             }
+        }
+        for (String tip : request.getPreparationTipsFromInterviewer()) {
+            InterviewTip interviewTip = InterviewTip.builder().tip(tip).interview(interview).build();
+            interview.getInterviewTips().add(interviewTip);
         }
         var savedInterview = interviewRepository.save(interview);
         application.setStatus(ApplicationStatus.INTERVIEW_SCHEDULED);

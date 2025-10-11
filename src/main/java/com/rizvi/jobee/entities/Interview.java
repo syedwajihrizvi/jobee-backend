@@ -87,7 +87,7 @@ public class Interview {
 
     @OneToMany(mappedBy = "interview", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @Builder.Default
-    private Set<InterviewTips> interviewTips = new HashSet<>();
+    private Set<InterviewTip> interviewTips = new HashSet<>();
 
     @Enumerated(value = EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -140,7 +140,7 @@ public class Interview {
 
     public List<String> getPreparationTipsAsList() {
         List<String> tips = new ArrayList<>();
-        for (InterviewTips tip : this.interviewTips) {
+        for (InterviewTip tip : this.interviewTips) {
             tips.add(tip.getTip());
         }
         return tips;

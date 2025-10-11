@@ -25,4 +25,5 @@ public class CreateInterviewDto {
     private String meetingLink;
     private String phoneNumber;
     private List<ConductorDto> conductors;
+    private List<String> preparationTipsFromInterviewer;
 }

@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -65,7 +66,6 @@ public class JobController {
         return ResponseEntity.ok(jobMapper.toSummaryDto(job));
     }
 
-    // # TODO: Should be in user profile controller
     @GetMapping("/applied")
     public ResponseEntity<List<Long>> getAppliedJobs(
             @AuthenticationPrincipal CustomPrincipal principal) {
@@ -90,9 +90,10 @@ public class JobController {
         var paginatedJobData = jobService.getJobsByCompany(jobQuery, companyId, pageNumber, pageSize);
         var jobs = paginatedJobData.getJobs();
         var hasMore = paginatedJobData.isHasMore();
+        var totalElements = paginatedJobData.getTotalElements();
         var jobDtos = jobs.stream().map(jobMapper::toSummaryForBusinessDto).toList();
         PaginatedJobResponseDto<JobSummaryForBusinessDto> response = new PaginatedJobResponseDto<JobSummaryForBusinessDto>(
-                hasMore, jobDtos);
+                hasMore, jobDtos, totalElements);
         return ResponseEntity.ok(response);
     }
 
@@ -104,7 +105,6 @@ public class JobController {
         return ResponseEntity.ok(jobMapper.toDetailedSummaryForBusinessDto(job));
     }
 
-    // # TODO: Should be in user profile controller
     @GetMapping("/favorites")
     @Operation(summary = "Get all favorite jobs for the authenticated user")
     public ResponseEntity<List<JobSummaryDto>> getFavoriteJobs(
@@ -143,5 +143,13 @@ public class JobController {
         var job = jobService.getJobById(id);
         var shortListedApplicants = job.getShortListedApplications().stream().map(Application::getId).toList();
         return ResponseEntity.ok(shortListedApplicants);
+    }
+
+    @PatchMapping("/{id}/views")
+    @Operation(summary = "Increment the job view count")
+    public ResponseEntity<Void> incrementJobViews(@PathVariable Long id) {
+        jobService.incrementJobViews(id);
+        return ResponseEntity.noContent().build();
+
     }
 }

@@ -39,8 +39,6 @@ public interface ApplicationMapper {
     @Mapping(target = "location", expression = "java(application.getUserProfile().getCity() + \", \" + application.getUserProfile().getCountry())")
     ApplicantSummaryForBusinessDto toApplicantSummaryForBusinessDto(Application application);
 
-    @EntityGraph(attributePaths = { "userProfile", "userProfile.account", "resumeDocument", "coverLetterDocument",
-            "job" })
     @Mapping(target = "appliedAt", source = "createdAt")
     @Mapping(target = "resumeUrl", source = "application.resumeDocument.documentUrl")
     @Mapping(target = "coverLetterUrl", source = "application.coverLetterDocument.documentUrl")

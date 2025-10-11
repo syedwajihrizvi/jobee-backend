@@ -49,7 +49,8 @@ public class JobService {
         Page<Job> page = jobRepository.findAll(JobSpecifications.withFilters(jobQuery), pageRequest);
         var jobs = page.getContent();
         var hasMore = pageNumber < page.getTotalPages() - 1;
-        return new PaginatedJobDto(hasMore, jobs);
+        var totalElements = page.getTotalElements();
+        return new PaginatedJobDto(hasMore, jobs, totalElements);
     }
 
     public Job getCompanyJobById(Long jobId) {
@@ -93,5 +94,11 @@ public class JobService {
         var savedJob = jobRepository.save(job);
         return savedJob;
 
+    }
+
+    public void incrementJobViews(Long jobId) {
+        var job = jobRepository.findById(jobId).orElseThrow(() -> new JobNotFoundException("Job not found"));
+        job.setViews(job.getViews() + 1);
+        jobRepository.save(job);
     }
 }
