@@ -43,6 +43,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
+// TODO: Refactor into ApplicationService
+
 @RestController
 @AllArgsConstructor
 @RequestMapping("/applications")
@@ -56,8 +58,10 @@ public class ApplicationController {
 
     @GetMapping()
     public ResponseEntity<List<?>> getAllApplications(
-            @RequestParam(required = false) Long userId) {
-        if (userId != null) {
+            @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) Long jobId) {
+        System.out.println("Received request with userId: " + userId + " and jobId: " + jobId);
+        if (userId != null && jobId == null) {
             var userProfile = userProfileRepository.findById(userId).orElse(null);
             if (userProfile == null) {
                 throw new AccountNotFoundException("User profile not found for user id: " + userId);
@@ -73,6 +77,13 @@ public class ApplicationController {
             }).toList();
             return ResponseEntity.ok(applicationDtos);
         }
+        if (userId != null && jobId != null) {
+            var applications = applicationRepository.findByUserProfileIdAndJobId(userId, jobId);
+            var applicationDtos = applications.stream().map(applicationMapper::toApplicationDetailsForBusinessDto)
+                    .toList();
+            return ResponseEntity.ok(applicationDtos);
+        }
+
         var applications = applicationRepository.findAll();
         var applicationDtos = applications.stream().map(applicationMapper::toDto).toList();
         return ResponseEntity.ok(applicationDtos);

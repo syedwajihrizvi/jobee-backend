@@ -64,10 +64,13 @@ public class InterviewService {
     }
 
     public List<Interview> getInterviewsByJobId(Long jobId, Number limit) {
+        var sort = Sort.by(
+                Sort.Order.asc("interviewDate"),
+                Sort.Order.desc("createdAt"));
         if (limit != null) {
-            return interviewRepository.findByJobIdWithLimit(jobId, limit);
+            return interviewRepository.findByJobIdWithLimit(jobId, limit, sort);
         }
-        return interviewRepository.findByJobId(jobId);
+        return interviewRepository.findByJobId(jobId, sort);
     }
 
     public List<Interview> getInterviewsByCandidate(Long candidateId) {

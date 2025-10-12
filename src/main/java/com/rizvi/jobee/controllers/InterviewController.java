@@ -69,12 +69,12 @@ public class InterviewController {
 
     @GetMapping("/job/{jobId}")
     @Operation(summary = "Get interviews for a specific job")
-    public ResponseEntity<List<InterviewDto>> getInterviewsByJobId(
+    public ResponseEntity<List<InterviewSummaryDto>> getInterviewsByJobId(
             @PathVariable Long jobId,
             @RequestParam(required = false) Number limit) {
         var interviews = interviewService.getInterviewsByJobId(jobId, limit);
         var interviewDtos = interviews.stream()
-                .map(interviewMapper::toDto)
+                .map(interviewMapper::toSummaryDto)
                 .toList();
         return ResponseEntity.ok(interviewDtos);
     }

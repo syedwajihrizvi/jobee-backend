@@ -19,6 +19,7 @@ public class JobDetailedSummaryForBusinessDto {
     private Integer maxSalary;
     private String setting;
     private Integer applicants;
+    private Integer interviews;
     private List<TagDto> tags;
     private LocalDateTime createdAt;
     private Integer totalShortListedCandidates;

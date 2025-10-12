@@ -21,6 +21,7 @@ public interface JobMapper {
     JobSummaryForBusinessDto toSummaryForBusinessDto(Job job);
 
     @Mapping(target = "applicants", expression = "java(job.getApplications().size())")
+    @Mapping(target = "interviews", expression = "java(job.getInterviews().size())")
     @Mapping(target = "totalShortListedCandidates", expression = "java(job.getShortListedApplications().size())")
     JobDetailedSummaryForBusinessDto toDetailedSummaryForBusinessDto(Job job);
 

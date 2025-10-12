@@ -34,4 +34,11 @@ public interface ApplicationRepository extends JpaRepository<Application, Long>,
     @EntityGraph(attributePaths = { "job", "userProfile", "userProfile.account" })
     List<Application> findAll(Specification<Application> spec);
 
+    @EntityGraph(attributePaths = { "userProfile", "userProfile.account", "userProfile.skills",
+            "userProfile.skills.skill", "userProfile.education", "userProfile.experiences", "userProfile.projects",
+            "resumeDocument",
+            "coverLetterDocument" })
+    @Query("select a from Application a where a.userProfile.id = :userId and a.job.id = :jobId")
+    List<Application> findByUserProfileIdAndJobId(Long userId, Long jobId);
+
 }
