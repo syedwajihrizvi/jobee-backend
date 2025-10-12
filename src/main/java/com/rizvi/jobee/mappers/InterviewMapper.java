@@ -20,6 +20,7 @@ public interface InterviewMapper {
     @Mapping(target = "jobTitle", source = "job.title")
     @Mapping(target = "createdById", source = "createdBy.id")
     @Mapping(target = "candidateId", source = "candidate.id")
+    @Mapping(target = "applicationId", source = "application.id")
     @Mapping(target = "candidateEmail", source = "candidate.account.email")
     @Mapping(target = "candidateName", expression = "java(interview.getCandidate().getFullName())")
     @Mapping(target = "companyName", source = "job.businessAccount.company.name")
@@ -29,6 +30,7 @@ public interface InterviewMapper {
 
     @Mapping(target = "jobTitle", source = "job.title")
     @Mapping(target = "companyName", source = "job.businessAccount.company.name")
+    @Mapping(target = "candidateName", expression = "java(interview.getCandidate().getFullName())")
     InterviewSummaryDto toSummaryDto(Interview interview);
 
     @Mapping(target = "id", source = "businessAccount.id")

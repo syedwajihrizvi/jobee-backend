@@ -19,6 +19,7 @@ import com.rizvi.jobee.dtos.interview.InterviewDto;
 import com.rizvi.jobee.dtos.interview.InterviewPrepQuestionDto;
 import com.rizvi.jobee.dtos.interview.InterviewPreparationDto;
 import com.rizvi.jobee.dtos.interview.InterviewSummaryDto;
+import com.rizvi.jobee.dtos.application.ApplicationDto;
 import com.rizvi.jobee.mappers.InterviewMapper;
 import com.rizvi.jobee.principals.CustomPrincipal;
 import com.rizvi.jobee.services.AccountService;
@@ -73,10 +74,19 @@ public class InterviewController {
             @PathVariable Long jobId,
             @RequestParam(required = false) Number limit) {
         var interviews = interviewService.getInterviewsByJobId(jobId, limit);
-        var interviewDtos = interviews.stream()
+        var interviewSummaryDtos = interviews.stream()
                 .map(interviewMapper::toSummaryDto)
                 .toList();
-        return ResponseEntity.ok(interviewDtos);
+        return ResponseEntity.ok(interviewSummaryDtos);
+    }
+
+    @GetMapping("/application")
+    @Operation(summary = "Get application by job ID and candidate ID")
+    public ResponseEntity<ApplicationDto> getApplicationByJobAndCandidate(
+            @RequestParam Long jobId,
+            @RequestParam Long candidateId) {
+        var application = applicationService.getApplicationByJobAndCandidate(jobId, candidateId);
+        return ResponseEntity.ok(application);
     }
 
     @PostMapping()

@@ -1,5 +1,7 @@
 package com.rizvi.jobee.dtos.interview;
 
+import java.util.List;
+
 import lombok.Data;
 
 @Data
@@ -10,8 +12,11 @@ public class InterviewSummaryDto {
     private String startTime;
     private String endTime;
     private String description;
+    private String candidateName;
     private String jobTitle;
     private String companyName;
     private String interviewType;
     private String timezone;
+    private List<InterviewConductorDto> interviewers;
+    private List<ConductorDto> otherInterviewers;
 }

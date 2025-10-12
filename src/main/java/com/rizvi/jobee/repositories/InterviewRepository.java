@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import com.rizvi.jobee.entities.Interview;;
+import com.rizvi.jobee.entities.Interview;
 
 public interface InterviewRepository extends JpaRepository<Interview, Long> {
 
@@ -22,6 +22,7 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
     @Query("select i from Interview i where i.job.id = :jobId and i.candidate.id = :candidateId")
     Interview findByJobIdAndCandidateId(Long jobId, Long candidateId);
 
+    @EntityGraph(attributePaths = { "candidate" })
     @Query("select i from Interview i where i.job.id = :jobId")
     List<Interview> findByJobId(Long jobId, Sort sort);
 

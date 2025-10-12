@@ -23,6 +23,7 @@ public class InterviewDto {
     private Long createdById;
     private String jobTitle;
     private Long candidateId;
+    private Long applicationId;
     private String candidateName;
     private String candidateEmail;
     private String interviewType;

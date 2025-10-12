@@ -104,6 +104,10 @@ public class Interview {
     private BusinessAccount createdBy;
 
     @ManyToOne
+    @JoinColumn(name = "application_id", nullable = true)
+    private Application application;
+
+    @ManyToOne
     @JoinColumn(name = "job_id", nullable = false)
     private Job job;
 
