@@ -24,6 +24,7 @@ public class InterviewDto {
     private String jobTitle;
     private Long candidateId;
     private Long applicationId;
+    private String candidateProfileImageUrl;
     private String candidateName;
     private String candidateEmail;
     private String interviewType;

@@ -91,6 +91,7 @@ public class InterviewService {
     public Interview createInterview(
             CreateInterviewDto request, BusinessAccount businessAccount,
             UserProfile candidate, Job job, Application application) {
+        System.out.println("Creating interview with request: " + request);
         var interview = Interview.builder()
                 .job(job)
                 .candidate(candidate)
@@ -120,6 +121,17 @@ public class InterviewService {
             interview.getInterviewTips().add(interviewTip);
         }
         var savedInterview = interviewRepository.save(interview);
+        Long previousInterviewId = request.getPreviousInterviewId();
+        if (previousInterviewId != null) {
+            // Update the status of the previous interview
+            var previousInterview = interviewRepository.findById(
+                    previousInterviewId)
+                    .orElseThrow(() -> new InterviewNotFoundException(
+                            "Previous interview not found with id: " + previousInterviewId));
+            previousInterview.setStatus(InterviewStatus.COMPLETED);
+            interviewRepository.save(previousInterview);
+
+        }
         application.setStatus(ApplicationStatus.INTERVIEW_SCHEDULED);
         applicationRepository.save(application);
         return savedInterview;
