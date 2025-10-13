@@ -28,6 +28,8 @@ public class InterviewDto {
     private String candidateName;
     private String candidateEmail;
     private String interviewType;
+    private String decisionDate;
+    private String decisionResult;
     private String location;
     private String meetingLink;
     private String phoneNumber;

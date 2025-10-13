@@ -16,6 +16,9 @@ public class InterviewSummaryDto {
     private String jobTitle;
     private String companyName;
     private String interviewType;
+    private String status;
+    private String decisionDate;
+    private String decisionResult;
     private String timezone;
     private List<InterviewConductorDto> interviewers;
     private List<ConductorDto> otherInterviewers;

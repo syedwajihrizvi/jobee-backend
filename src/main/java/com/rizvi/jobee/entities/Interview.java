@@ -12,6 +12,7 @@ import java.util.List;
 import org.hibernate.annotations.Type;
 
 import com.rizvi.jobee.dtos.interview.ConductorDto;
+import com.rizvi.jobee.enums.InterviewDecisionResult;
 import com.rizvi.jobee.enums.InterviewStatus;
 import com.rizvi.jobee.enums.InterviewType;
 import com.rizvi.jobee.enums.PreparationStatus;
@@ -92,6 +93,13 @@ public class Interview {
     @Enumerated(value = EnumType.STRING)
     @Column(name = "status", nullable = false)
     private InterviewStatus status;
+
+    @Column(name = "decision_date", nullable = true)
+    private LocalDateTime decisionDate;
+
+    @Enumerated(value = EnumType.STRING)
+    @Column(name = "decision_result", nullable = true)
+    private InterviewDecisionResult decisionResult;
 
     @Column(name = "created_at", nullable = true, insertable = false, updatable = false)
     private LocalDateTime createdAt;

@@ -97,10 +97,10 @@ public class JobController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/companies/{companyId}/jobs/{jobId}")
+    @GetMapping("/companies/jobs/{jobId}")
     @Operation(summary = "Get detailed job information for a specific job of a company")
     public ResponseEntity<JobDetailedSummaryForBusinessDto> getDetailedJobForBusiness(
-            @PathVariable Long companyId, @PathVariable Long jobId) {
+            @PathVariable Long jobId) {
         var job = jobService.getCompanyJobById(jobId);
         return ResponseEntity.ok(jobMapper.toDetailedSummaryForBusinessDto(job));
     }
