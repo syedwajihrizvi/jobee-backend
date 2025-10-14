@@ -16,11 +16,13 @@ public class JobSummaryDto {
     private Long businessAccountId;
     private String businessName;
     private String location;
+    private String views;
     private String employmentType;
     private String setting;
     private Integer minSalary;
     private Integer maxSalary;
     private Integer experience;
+    private Integer applicants;
     private LocalDateTime appDeadline;
     private List<TagDto> tags;
 }
