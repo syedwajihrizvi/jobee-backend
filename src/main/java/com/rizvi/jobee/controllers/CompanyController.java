@@ -13,9 +13,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.rizvi.jobee.dtos.company.CompanyDto;
 import com.rizvi.jobee.dtos.company.CreateCompanyDto;
+import com.rizvi.jobee.dtos.company.TopHiringCompanyDto;
 import com.rizvi.jobee.entities.Company;
 import com.rizvi.jobee.mappers.CompanyMapper;
 import com.rizvi.jobee.repositories.CompanyRepository;
+import com.rizvi.jobee.services.CompanyService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
@@ -25,6 +27,7 @@ import lombok.AllArgsConstructor;
 @RequestMapping("/api/companies")
 public class CompanyController {
     private final CompanyRepository companyRepository;
+    private final CompanyService companyService;
     private final CompanyMapper companyMapper;
 
     @GetMapping()
@@ -41,6 +44,25 @@ public class CompanyController {
                 .map(companyMapper::toCompanyDto);
         return company.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/top-hiring-companies")
+    @Operation(summary = "Get top hiring companies who have posted the most jobs")
+    public ResponseEntity<List<TopHiringCompanyDto>> getTopHiringCompanies() {
+        var raw_results = companyService.fetchTopHiringCompanies();
+        System.out.println(raw_results);
+        raw_results.stream().forEach(entry -> {
+            System.out.println("Company: " + entry.keySet().iterator().next().getName() + ", Job Count: "
+                    + entry.values().iterator().next());
+        });
+        List<TopHiringCompanyDto> topCompanies = raw_results.stream()
+                .map(entry -> companyMapper.map(new Object[] {
+                        entry.keySet().iterator().next().getId(),
+                        entry.keySet().iterator().next().getName(),
+                        entry.values().iterator().next()
+                }))
+                .toList();
+        return ResponseEntity.ok(topCompanies);
     }
 
     @PostMapping()

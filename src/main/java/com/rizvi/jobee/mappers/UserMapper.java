@@ -4,6 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import com.rizvi.jobee.dtos.user.UserAccountSummaryDto;
+import com.rizvi.jobee.dtos.user.UserProfileDashboardSummaryDto;
 import com.rizvi.jobee.dtos.user.UserProfileSummaryDto;
 import com.rizvi.jobee.entities.UserAccount;
 import com.rizvi.jobee.entities.UserProfile;
@@ -29,4 +30,10 @@ public interface UserMapper {
         @Mapping(target = "email", source = "account.email")
         @Mapping(target = "location", expression = "java(userProfile.getLocation())")
         UserProfileSummaryDto toProfileSummaryDto(UserProfile userProfile);
+
+        @Mapping(target = "fullName", expression = "java(userProfile.getFullName())")
+        @Mapping(target = "totalApplications", expression = "java(userProfile.getTotalApplications())")
+        @Mapping(target = "totalRejections", expression = "java(userProfile.getRejectedApplications())")
+        @Mapping(target = "totalInConsideration", expression = "java(userProfile.getInConsiderationApplications())")
+        UserProfileDashboardSummaryDto toDashboardSummaryDto(UserProfile userProfile);
 }

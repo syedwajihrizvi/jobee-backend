@@ -197,4 +197,11 @@ public class UserProfileService {
         }
         return savedProfile;
     }
+
+    public void incrementProfileViews(Long profileId) {
+        var userProfile = userProfileRepository.findById(profileId)
+                .orElseThrow(() -> new AccountNotFoundException("User profile not found"));
+        userProfile.setProfileViews(userProfile.getProfileViews() + 1);
+        userProfileRepository.save(userProfile);
+    }
 }

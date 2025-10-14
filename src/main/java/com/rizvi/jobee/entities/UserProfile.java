@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.rizvi.jobee.enums.ApplicationStatus;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -75,6 +77,9 @@ public class UserProfile {
     @Column(name = "company", nullable = true)
     private String company;
 
+    @Column(name = "profile_views", nullable = false)
+    private Integer profileViews;
+
     @OneToOne(optional = false)
     @JoinColumn(name = "account_id", nullable = false, unique = true)
     private UserAccount account;
@@ -95,6 +100,11 @@ public class UserProfile {
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(name = "user_favorite_jobs", joinColumns = @JoinColumn(name = "user_profile_id"), inverseJoinColumns = @JoinColumn(name = "job_id"))
     private Set<Job> favoriteJobs = new HashSet<>();
+
+    @Builder.Default
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(name = "favorite_companies", joinColumns = @JoinColumn(name = "user_profile_id"), inverseJoinColumns = @JoinColumn(name = "company_id"))
+    private Set<Company> favoriteCompanies = new HashSet<>();
 
     @OneToMany(mappedBy = "userProfile", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
@@ -126,6 +136,30 @@ public class UserProfile {
 
     public String getFullName() {
         return firstName + " " + lastName;
+    }
+
+    public Integer getTotalApplications() {
+        return this.applications.size();
+    }
+
+    public Integer getRejectedApplications() {
+        return (int) this.applications.stream()
+                .filter(app -> app.getStatus() == ApplicationStatus.REJECTED)
+                .count();
+    }
+
+    public Integer getInConsiderationApplications() {
+        return (int) this.applications.stream()
+                .filter(app -> app.getStatus() != ApplicationStatus.REJECTED)
+                .count();
+    }
+
+    public Application getLastApplication() {
+        this.applications.stream().sorted((a1, a2) -> a2.getCreatedAt().compareTo(a1.getCreatedAt()));
+        if (this.applications.size() > 0) {
+            return this.applications.iterator().next();
+        }
+        return null;
     }
 
     public void toggleFavoriteJob(Job job) {

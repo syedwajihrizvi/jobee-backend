@@ -23,6 +23,7 @@ import com.rizvi.jobee.dtos.job.JobSummaryDto;
 import com.rizvi.jobee.dtos.user.CreateUserProfileDto;
 import com.rizvi.jobee.dtos.user.UpdateUserProfileGeneralInfoDto;
 import com.rizvi.jobee.dtos.user.UpdateUserProfileSummaryDto;
+import com.rizvi.jobee.dtos.user.UserProfileDashboardSummaryDto;
 import com.rizvi.jobee.dtos.user.UserProfileSummaryDto;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.AmazonS3Exception;
@@ -89,6 +90,19 @@ public class UserProfileController {
                 }
                 var userProfileDto = userMapper.toProfileSummaryDto(userProfile);
                 return ResponseEntity.ok(userProfileDto);
+        }
+
+        @GetMapping("/dashboard")
+        @Operation(summary = "Get the authenticated user's dashboard data")
+        public ResponseEntity<UserProfileDashboardSummaryDto> getUserDashboardData(
+                        @AuthenticationPrincipal CustomPrincipal principal) {
+                var userId = principal.getId();
+                var userProfile = userProfileService.getAuthenticatedUserProfile(userId);
+                if (userProfile == null) {
+                        throw new AccountNotFoundException("User profile not found");
+                }
+                var dashboardData = userMapper.toDashboardSummaryDto(userProfile);
+                return ResponseEntity.ok(dashboardData);
         }
 
         // TODO: Should be in the ApplicationController
@@ -180,6 +194,13 @@ public class UserProfileController {
                 userProfile.toggleFavoriteJob(job);
                 userProfileRepository.save(userProfile);
                 return ResponseEntity.ok().build();
+        }
+
+        @PatchMapping("/views")
+        @Operation(summary = "Increment the profile view count")
+        public ResponseEntity<Void> incrementProfileViews(@RequestParam Long profileId) {
+                userProfileService.incrementProfileViews(profileId);
+                return ResponseEntity.noContent().build();
         }
 
         @PatchMapping("/update-profile-image")

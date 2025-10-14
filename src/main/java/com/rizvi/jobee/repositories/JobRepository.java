@@ -31,4 +31,7 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
         @EntityGraph(attributePaths = { "tags", "businessAccount", "businessAccount.company" })
         @Query("select distinct j from Job j join j.tags t where lower(trim(t.slug)) in :skills")
         List<Job> findJobsWithSkills(List<String> skills);
+
+        @Query("select j.businessAccount.company.id, j.businessAccount.company.name, count(j) as jobCount from Job j group by j.businessAccount.company.id, j.businessAccount.company.name order by jobCount desc limit :limit")
+        List<Object[]> findTopHiringCompanies(Integer limit);
 }
