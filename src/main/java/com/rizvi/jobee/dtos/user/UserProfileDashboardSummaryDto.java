@@ -9,7 +9,6 @@ import lombok.Data;
 public class UserProfileDashboardSummaryDto {
     private Long id;
     private String fullName;
-    private Long profileCompletionPercentage;
     private Integer totalApplications;
     private Integer profileViews;
     private Integer totalRejections;

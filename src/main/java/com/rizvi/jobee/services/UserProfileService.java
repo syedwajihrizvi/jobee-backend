@@ -13,7 +13,9 @@ import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.enums.UserDocumentType;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.AmazonS3Exception;
+import com.rizvi.jobee.exceptions.CompanyNotFoundException;
 import com.rizvi.jobee.exceptions.InvalidDocumentException;
+import com.rizvi.jobee.repositories.CompanyRepository;
 import com.rizvi.jobee.repositories.UserAccountRepository;
 import com.rizvi.jobee.repositories.UserProfileRepository;
 
@@ -29,6 +31,7 @@ import lombok.AllArgsConstructor;
 public class UserProfileService {
     private final UserProfileRepository userProfileRepository;
     private final UserAccountRepository userAccountRepository;
+    private final CompanyRepository companyRepository;
     private final UserDocumentService userDocumentService;
     private final S3Service s3Service;
 
@@ -202,6 +205,51 @@ public class UserProfileService {
         var userProfile = userProfileRepository.findById(profileId)
                 .orElseThrow(() -> new AccountNotFoundException("User profile not found"));
         userProfile.setProfileViews(userProfile.getProfileViews() + 1);
+        userProfileRepository.save(userProfile);
+    }
+
+    public Integer calculateProfileCompleteness(Long profileId) {
+        var userProfile = userProfileRepository.findById(profileId)
+                .orElseThrow(() -> new AccountNotFoundException("User profile not found"));
+        int completeness = 0;
+        if (userProfile.getFirstName() != null && !userProfile.getFirstName().isEmpty())
+            completeness += 2;
+        if (userProfile.getLastName() != null && !userProfile.getLastName().isEmpty())
+            completeness += 2;
+        if (userProfile.getAccount().getEmail() != null && !userProfile.getAccount().getEmail().isEmpty())
+            completeness += 2;
+        if (userProfile.getPhoneNumber() != null && !userProfile.getPhoneNumber().isEmpty())
+            completeness += 2;
+        if (userProfile.getProfileImageUrl() != null && !userProfile.getProfileImageUrl().isEmpty())
+            completeness += 10;
+        if (userProfile.getTitle() != null && !userProfile.getTitle().isEmpty())
+            completeness += 2;
+        if (userProfile.getSummary() != null && !userProfile.getSummary().isEmpty())
+            completeness += 10;
+        if (userProfile.getSkills().size() > 0)
+            completeness += 10;
+        if (userProfile.getEducation().size() > 0)
+            completeness += 10;
+        if (userProfile.getExperiences().size() > 0)
+            completeness += 10;
+        if (userProfile.getProjects().size() > 0)
+            completeness += 10;
+        if (userProfile.getPrimaryResume() != null)
+            completeness += 30;
+        return Math.min(completeness, 100);
+    }
+
+    public void toggleFavoriteCompany(Long companyId, Long userId) {
+        var userProfile = userProfileRepository.findByAccountId(userId)
+                .orElseThrow(() -> new AccountNotFoundException("User profile not found"));
+        var favoriteCompanies = userProfile.getFavoriteCompanies();
+        var company = companyRepository.findById(userId).orElseThrow(() -> new CompanyNotFoundException());
+        if (favoriteCompanies.contains(company)) {
+            favoriteCompanies.remove(company);
+        } else {
+            favoriteCompanies.add(company);
+        }
+        userProfile.setFavoriteCompanies(favoriteCompanies);
         userProfileRepository.save(userProfile);
     }
 }

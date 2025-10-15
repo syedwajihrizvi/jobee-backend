@@ -21,6 +21,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.rizvi.jobee.dtos.application.ApplicationSummaryDto;
 import com.rizvi.jobee.dtos.job.JobSummaryDto;
 import com.rizvi.jobee.dtos.user.CreateUserProfileDto;
+import com.rizvi.jobee.dtos.user.ProfileCompletenessDto;
 import com.rizvi.jobee.dtos.user.UpdateUserProfileGeneralInfoDto;
 import com.rizvi.jobee.dtos.user.UpdateUserProfileSummaryDto;
 import com.rizvi.jobee.dtos.user.UserProfileDashboardSummaryDto;
@@ -105,7 +106,28 @@ public class UserProfileController {
                 return ResponseEntity.ok(dashboardData);
         }
 
-        // TODO: Should be in the ApplicationController
+        @GetMapping("/profile-completeness")
+        @Operation(summary = "Get the authenticated user's profile completeness percentage")
+        public ResponseEntity<ProfileCompletenessDto> getProfileCompleteness(
+                        @AuthenticationPrincipal CustomPrincipal principal) {
+                var userId = principal.getId();
+                var comleteness = userProfileService.calculateProfileCompleteness(userId);
+                var dto = new ProfileCompletenessDto();
+                dto.setId(userId);
+                dto.setCompleteness(comleteness);
+                return ResponseEntity.ok(dto);
+        }
+
+        @PatchMapping("/favorite-company")
+        @Operation(summary = "Add or remove a company from the authenticated user's favorite companies")
+        public ResponseEntity<Void> favoriteCompany(
+                        @RequestParam Long companyId,
+                        @AuthenticationPrincipal CustomPrincipal principal) {
+                var userId = principal.getId();
+                userProfileService.toggleFavoriteCompany(companyId, userId);
+                return ResponseEntity.ok().build();
+        }
+
         @GetMapping("appliedJobs")
         @Operation(summary = "Get all the jobs the user has applied to")
         public ResponseEntity<List<?>> getUserAppliedJobs(
@@ -118,7 +140,6 @@ public class UserProfileController {
                 return ResponseEntity.ok(applicationDtos);
         }
 
-        // # TODO: Should be in the ApplicationController
         @GetMapping("appliedJobs/{jobId}")
         @Operation(summary = "Get the users applications for a specific job")
         public ResponseEntity<ApplicationSummaryDto> getUserApplicationForJob(
