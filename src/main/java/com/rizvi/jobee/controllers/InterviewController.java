@@ -68,6 +68,18 @@ public class InterviewController {
         return ResponseEntity.ok(interviewSummaryDtos);
     }
 
+    @GetMapping("/business")
+    @Operation(summary = "Get interviews for the authenticated business.")
+    public ResponseEntity<List<InterviewSummaryDto>> getInterviewsByBusinessId(
+            @AuthenticationPrincipal CustomPrincipal principal) {
+        var businessId = principal.getId();
+        var interviews = interviewService.getInterviewsForBusinessAccount(businessId);
+        var interviewSummaryDtos = interviews.stream()
+                .map(interviewMapper::toSummaryDto)
+                .toList();
+        return ResponseEntity.ok(interviewSummaryDtos);
+    }
+
     @GetMapping("/job/{jobId}")
     @Operation(summary = "Get interviews for a specific job")
     public ResponseEntity<List<InterviewSummaryDto>> getInterviewsByJobId(

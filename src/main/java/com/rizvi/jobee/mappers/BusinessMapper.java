@@ -12,6 +12,13 @@ import com.rizvi.jobee.entities.BusinessProfile;
 public interface BusinessMapper {
     @Mapping(target = "companyName", source = "company.name")
     @Mapping(target = "companyId", source = "company.id")
+    @Mapping(target = "title", source = "profile.title")
+    @Mapping(target = "profileImageUrl", source = "profile.profileImageUrl")
+    @Mapping(target = "verified", source = "profile.verified")
+    @Mapping(target = "location", source = "profile.location")
+    @Mapping(target = "city", source = "profile.city")
+    @Mapping(target = "state", source = "profile.state")
+    @Mapping(target = "country", source = "profile.country")
     BusinessAccountDto toDto(BusinessAccount businessAccount);
 
     @Mapping(target = "email", source = "businessAccount.email")

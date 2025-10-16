@@ -34,4 +34,10 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
 
         @Query("select j.businessAccount.company.id, j.businessAccount.company.name, count(j) as jobCount from Job j group by j.businessAccount.company.id, j.businessAccount.company.name order by jobCount desc limit :limit")
         List<Object[]> findTopHiringCompanies(Integer limit);
+
+        @Query("select j from Job j where j.businessAccount.id = :accountId")
+        List<Job> findByBusinessAccountId(Long accountId);
+
+        @Query("select j from Job j where j.businessAccount.id = :accountId and lower(j.title) like lower(concat('%', :search, '%'))")
+        List<Job> findByBusinessAccountIdAndTitle(Long accountId, String search);
 }

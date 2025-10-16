@@ -65,6 +65,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/experiences/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/business-accounts/me").permitAll()
                         .requestMatchers(HttpMethod.GET, "/business-profiles").permitAll()
+                        .requestMatchers(HttpMethod.PATCH, "/business-profiles/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user-documents").permitAll()
                         .requestMatchers(HttpMethod.GET, "/profiles/**").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/profiles/**").permitAll()
@@ -96,7 +97,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/jobs").hasAuthority(Roles.BUSINESS.name())
                         .requestMatchers(HttpMethod.DELETE, "/jobs/**").hasAuthority(Roles.BUSINESS.name())
                         .requestMatchers(HttpMethod.POST, "/applications/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/interviews").permitAll())
+                        .requestMatchers(HttpMethod.POST, "/interviews").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/interviews/**").permitAll())
                 // .requestMatchers(HttpMethod.POST,
                 // "/interviews").hasAuthority(Roles.BUSINESS.name()))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

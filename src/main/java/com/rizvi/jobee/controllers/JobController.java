@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -116,6 +117,19 @@ public class JobController {
         List<JobSummaryDto> jobDtos = jobs.stream()
                 .map(jobMapper::toSummaryDto)
                 .toList();
+        return ResponseEntity.ok(jobDtos);
+    }
+
+    @GetMapping("/businessUser")
+    @Operation(summary = "Get jobs posted by the authenticated business user")
+    public ResponseEntity<List<JobSummaryForBusinessDto>> getJobsForAuthenticatedBusinessUser(
+            @RequestParam(required = false) String search,
+            @AuthenticationPrincipal CustomPrincipal principal) {
+        var accountId = principal.getId();
+        List<Job> jobs;
+        jobs = jobService.getJobsByBusinessAccountId(accountId, search);
+
+        var jobDtos = jobs.stream().map(jobMapper::toSummaryForBusinessDto).toList();
         return ResponseEntity.ok(jobDtos);
     }
 

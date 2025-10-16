@@ -134,6 +134,20 @@ public class Interview {
     @Builder.Default
     private List<ConductorDto> otherInterviewers = new ArrayList<>();
 
+    public boolean interviewersInclude(String email) {
+        for (BusinessAccount interviewer : interviewers) {
+            if (interviewer.getEmail().equalsIgnoreCase(email)) {
+                return true;
+            }
+        }
+        for (ConductorDto interviewer : otherInterviewers) {
+            if (interviewer.getEmail().equalsIgnoreCase(email)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void addOtherInterviewer(ConductorDto interviewer) {
         otherInterviewers.add(interviewer);
     }

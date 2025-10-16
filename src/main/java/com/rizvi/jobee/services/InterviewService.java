@@ -20,6 +20,7 @@ import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.enums.ApplicationStatus;
 import com.rizvi.jobee.enums.InterviewStatus;
 import com.rizvi.jobee.enums.PreparationStatus;
+import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.InterviewNotFoundException;
 import com.rizvi.jobee.helpers.AISchemas.AICandidate;
 import com.rizvi.jobee.helpers.AISchemas.AICompany;
@@ -78,6 +79,20 @@ public class InterviewService {
                 Sort.Order.asc("interviewDate"),
                 Sort.Order.desc("createdAt"));
         return interviewRepository.findByCandidateId(candidateId, sort);
+    }
+
+    public List<Interview> getInterviewsForBusinessAccount(Long businessAccountId) {
+        var businessAccount = businessAccountRepository.findById(businessAccountId).orElseThrow(
+                () -> new AccountNotFoundException("Business account not found with id: " + businessAccountId));
+        var sort = Sort.by(
+                Sort.Order.asc("interviewDate"),
+                Sort.Order.desc("createdAt"));
+        var companyId = businessAccount.getCompany().getId();
+        var interviews = interviewRepository.findByCompanyId(companyId, sort);
+        // Filter to only include interviews that have the user's account email in them
+        // as interviews
+        return interviews.stream().filter((interview) -> interview.interviewersInclude(businessAccount.getEmail()))
+                .toList();
     }
 
     public InterviewPreparationQuestion getInterviewPreparationQuestion(

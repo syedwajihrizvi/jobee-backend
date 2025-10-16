@@ -243,10 +243,13 @@ public class UserProfileService {
         var userProfile = userProfileRepository.findByAccountId(userId)
                 .orElseThrow(() -> new AccountNotFoundException("User profile not found"));
         var favoriteCompanies = userProfile.getFavoriteCompanies();
-        var company = companyRepository.findById(userId).orElseThrow(() -> new CompanyNotFoundException());
+        var company = companyRepository.findById(companyId).orElseThrow(() -> new CompanyNotFoundException());
+        System.out.println("Looking for company: " + companyId);
         if (favoriteCompanies.contains(company)) {
+            System.out.println("Removing company from favorites: " + companyId);
             favoriteCompanies.remove(company);
         } else {
+            System.out.println("Adding company to favorites: " + companyId);
             favoriteCompanies.add(company);
         }
         userProfile.setFavoriteCompanies(favoriteCompanies);

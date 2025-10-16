@@ -101,4 +101,11 @@ public class JobService {
         job.setViews(job.getViews() + 1);
         jobRepository.save(job);
     }
+
+    public List<Job> getJobsByBusinessAccountId(Long accountId, String search) {
+        if (search != null && !search.isEmpty()) {
+            return jobRepository.findByBusinessAccountIdAndTitle(accountId, search);
+        }
+        return jobRepository.findByBusinessAccountId(accountId);
+    }
 }

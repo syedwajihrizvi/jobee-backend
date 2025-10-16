@@ -10,4 +10,11 @@ public class BusinessAccountDto {
     private Long companyId;
     private String firstName;
     private String lastName;
+    private String title;
+    private String location;
+    private String city;
+    private String state;
+    private String country;
+    private Boolean verified;
+    private String profileImageUrl;
 }

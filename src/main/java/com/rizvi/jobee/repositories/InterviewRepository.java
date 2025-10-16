@@ -32,4 +32,8 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
     @EntityGraph(attributePaths = { "job", "candidate", "createdBy", "createdBy.company", "interviewTips" })
     @Query("select i from Interview i where i.id = :interviewId")
     Interview findInterviewForPreparation(Long interviewId);
+
+    @EntityGraph(attributePaths = { "job", "candidate", "createdBy", "createdBy.company", "interviewers.profile" })
+    @Query("select i from Interview i where i.job.businessAccount.company.id = :companyId")
+    List<Interview> findByCompanyId(Long companyId, Sort sort);
 }

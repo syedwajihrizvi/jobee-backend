@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -32,9 +33,15 @@ public class CompanyController {
 
     @GetMapping()
     @Operation(summary = "Get all companies")
-    public ResponseEntity<List<CompanyDto>> getAllCompanies() {
-        var companies = companyRepository.findAll().stream().map(companyMapper::toCompanyDto).toList();
-        return ResponseEntity.ok(companies);
+    public ResponseEntity<List<CompanyDto>> getAllCompanies(
+            @RequestParam(required = false) String search) {
+        List<Company> companies;
+        if (search == null || search.isBlank()) {
+            companies = companyRepository.findAll();
+        } else {
+            companies = companyRepository.findByNameContainingIgnoreCase(search);
+        }
+        return ResponseEntity.ok(companies.stream().map(companyMapper::toCompanyDto).toList());
     }
 
     @GetMapping("/{id}")

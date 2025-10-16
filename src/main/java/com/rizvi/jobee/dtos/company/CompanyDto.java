@@ -11,5 +11,8 @@ public class CompanyDto {
     private Integer numEmployees;
     private String industry;
     private String description;
+    private String hqCity;
+    private String hqState;
+    private String hqCountry;
     private String location;
 }
