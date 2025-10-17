@@ -69,8 +69,7 @@ public class UserProfileService {
         try {
             s3Service.uploadProfileImage(accountId, profileImage);
             userProfile.setProfileImageUrl(accountId.toString() + "_" + profileImage.getOriginalFilename());
-            var savedProfile = userProfileRepository.save(userProfile);
-            return savedProfile;
+            return userProfileRepository.save(userProfile);
         } catch (Exception e) {
             throw new AmazonS3Exception(e.getMessage());
         }

@@ -21,7 +21,7 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
 
         @EntityGraph(attributePaths = { "businessAccount", "businessAccount.company",
                         "applications" })
-        @Query("select j from Job j where j.businessAccount.company.id = :companyId")
+        @Query("select j from Job j where j.businessAccount.company.id = :companyId order by j.createdAt desc")
         List<Job> findByCompanyId(Long companyId);
 
         @EntityGraph(attributePaths = { "applications", "tags" })
@@ -40,4 +40,5 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
 
         @Query("select j from Job j where j.businessAccount.id = :accountId and lower(j.title) like lower(concat('%', :search, '%'))")
         List<Job> findByBusinessAccountIdAndTitle(Long accountId, String search);
+
 }

@@ -3,7 +3,9 @@ package com.rizvi.jobee.controllers;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,8 +17,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.rizvi.jobee.dtos.company.CompanyDto;
 import com.rizvi.jobee.dtos.company.CreateCompanyDto;
 import com.rizvi.jobee.dtos.company.TopHiringCompanyDto;
+import com.rizvi.jobee.dtos.company.UpdateCompanyDto;
 import com.rizvi.jobee.entities.Company;
 import com.rizvi.jobee.mappers.CompanyMapper;
+import com.rizvi.jobee.principals.CustomPrincipal;
 import com.rizvi.jobee.repositories.CompanyRepository;
 import com.rizvi.jobee.services.CompanyService;
 
@@ -84,5 +88,16 @@ public class CompanyController {
         return ResponseEntity.created(uri).body(companyMapper.toCompanyDto(savedCompany));
     }
 
-    // Endpoint for updating company fields
+    @PatchMapping("/{id}")
+    @Operation(summary = "Update a company by ID")
+    public ResponseEntity<CompanyDto> updateCompany(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomPrincipal principal,
+            @RequestBody UpdateCompanyDto request) {
+        var company = companyService.updateCompany(id, request);
+        if (company == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(companyMapper.toCompanyDto(company));
+    }
 }

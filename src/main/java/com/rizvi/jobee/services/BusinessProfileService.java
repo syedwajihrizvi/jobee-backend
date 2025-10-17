@@ -1,6 +1,7 @@
 package com.rizvi.jobee.services;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.rizvi.jobee.dtos.user.UpdateBusinessProfileGeneralInfoDto;
 import com.rizvi.jobee.entities.BusinessProfile;
@@ -8,6 +9,8 @@ import com.rizvi.jobee.repositories.BusinessAccountRepository;
 import com.rizvi.jobee.repositories.BusinessProfileRepository;
 
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
+import com.rizvi.jobee.exceptions.AmazonS3Exception;
+
 import lombok.AllArgsConstructor;
 
 @Service
@@ -15,6 +18,7 @@ import lombok.AllArgsConstructor;
 public class BusinessProfileService {
     private final BusinessProfileRepository businessProfileRepository;
     private final BusinessAccountRepository businessAccountRepository;
+    private final S3Service s3Service;
 
     public BusinessProfile getBusinessProfileByEmail(String email) {
         return businessProfileRepository.findBusinessProfileByEmail(email.replace(" ", ""));
@@ -50,4 +54,27 @@ public class BusinessProfileService {
         businessAccountRepository.save(businessAccount);
         return businessProfileRepository.save(businessProfile);
     }
+
+    public BusinessProfile updateProfileImage(MultipartFile profileImage, Long userId) throws AmazonS3Exception {
+        var businessProfile = businessProfileRepository.findById(userId).orElse(null);
+        if (businessProfile == null) {
+            throw new AccountNotFoundException("Business profile not found");
+        }
+        try {
+            s3Service.updateBusinessProfileImage(userId, profileImage);
+            businessProfile.setProfileImageUrl(userId.toString() + "_" + profileImage.getOriginalFilename());
+            return businessProfileRepository.save(businessProfile);
+        } catch (Exception e) {
+            throw new AmazonS3Exception(e.getMessage());
+        }
+    }
+
+    public Long getCompanyIdForBusinessProfileId(Long businessProfileId) {
+        var businessProfile = businessProfileRepository.findById(businessProfileId).orElse(null);
+        if (businessProfile == null) {
+            throw new AccountNotFoundException("Business profile not found");
+        }
+        return businessProfile.getBusinessAccount().getCompany().getId();
+    }
+
 }

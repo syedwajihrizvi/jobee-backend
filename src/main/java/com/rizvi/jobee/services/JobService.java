@@ -108,4 +108,9 @@ public class JobService {
         }
         return jobRepository.findByBusinessAccountId(accountId);
     }
+
+    public List<Job> getJobsByCompanyId(Long companyId) {
+        return jobRepository.findByCompanyId(companyId);
+    }
+
 }

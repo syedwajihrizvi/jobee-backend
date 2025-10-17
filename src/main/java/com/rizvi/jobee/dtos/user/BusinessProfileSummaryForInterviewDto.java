@@ -10,4 +10,5 @@ public class BusinessProfileSummaryForInterviewDto {
     private String email;
     private String title;
     private String summary;
+    private String profileImageUrl;
 }

@@ -25,6 +25,7 @@ import com.rizvi.jobee.dtos.application.BatchQuickApplySuccessDto;
 import com.rizvi.jobee.dtos.application.CreateApplicationDto;
 import com.rizvi.jobee.dtos.job.JobApplicationStatusDto;
 import com.rizvi.jobee.entities.Application;
+import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.exceptions.JobNotFoundException;
 import com.rizvi.jobee.exceptions.UserDocumentNotFoundException;
 import com.rizvi.jobee.exceptions.ApplicationNotFoundException;
@@ -37,6 +38,7 @@ import com.rizvi.jobee.repositories.ApplicationRepository;
 import com.rizvi.jobee.repositories.JobRepository;
 import com.rizvi.jobee.repositories.UserDocumentRepository;
 import com.rizvi.jobee.repositories.UserProfileRepository;
+import com.rizvi.jobee.services.JobService;
 import com.rizvi.jobee.specifications.ApplicantSpecification;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -51,6 +53,7 @@ import lombok.AllArgsConstructor;
 public class ApplicationController {
     private final ApplicationRepository applicationRepository;
     private final JobRepository jobRepository;
+    private final JobService jobService;
     private final JobMapper jobMapper;
     private final UserProfileRepository userProfileRepository;
     private final UserDocumentRepository userDocumentRepository;
@@ -106,6 +109,25 @@ public class ApplicationController {
         var applications = applicationRepository.findAll(ApplicantSpecification.withFilters(query));
         var applicationDtos = applications.stream().map(applicationMapper::toApplicantSummaryForBusinessDto).toList();
         return ResponseEntity.ok(applicationDtos);
+    }
+
+    @GetMapping("/me")
+    @Operation(summary = "Get applications for jobs posted by the authenticated business user")
+    public ResponseEntity<List<ApplicantSummaryForBusinessDto>> getApplicationsForJobsPostedByUser(
+            @RequestParam(required = false) String pending,
+            @AuthenticationPrincipal CustomPrincipal principal) {
+        var userId = principal.getId();
+        var jobs = jobService.getJobsByBusinessAccountId(userId, null);
+        var applications = Job.getApplicationsFromJobs(jobs);
+        var response = applications.stream()
+                .map(applicationMapper::toApplicantSummaryForBusinessDto)
+                .sorted((a1, a2) -> a2.getAppliedAt().compareTo(a1.getAppliedAt()))
+                .toList();
+        if (pending != null && pending.equals("true")) {
+            response = response.stream().filter(app -> app.getStatus().equals("PENDING")).toList();
+        }
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/quickApply")

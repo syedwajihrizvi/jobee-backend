@@ -1,6 +1,7 @@
 package com.rizvi.jobee.entities;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -114,6 +115,14 @@ public class Job {
 
     public boolean hasUserApplied(Long userId) {
         return applications.stream().anyMatch((app) -> app.getUserProfile().getId().equals(userId));
+    }
+
+    public static List<Application> getApplicationsFromJobs(List<Job> jobs) {
+        List<Application> applications = new ArrayList<>();
+        for (Job job : jobs) {
+            applications.addAll(job.getApplications());
+        }
+        return applications;
     }
 
 }

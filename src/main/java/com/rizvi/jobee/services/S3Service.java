@@ -52,6 +52,19 @@ public class S3Service {
                                                 profileImage.getSize()));
         }
 
+        public void updateBusinessProfileImage(Long userId, MultipartFile profileImage) throws IOException {
+                final String key = "business-profile-images/" + userId + "_" + profileImage.getOriginalFilename();
+                System.out.println("Uploading profile image to S3 with key: " + key);
+                s3Client.putObject(
+                                PutObjectRequest.builder()
+                                                .bucket(awsProperties.getBucket())
+                                                .key(key).contentType(profileImage.getContentType())
+                                                .build(),
+                                software.amazon.awssdk.core.sync.RequestBody.fromInputStream(
+                                                profileImage.getInputStream(),
+                                                profileImage.getSize()));
+        }
+
         public void uploadVideoIntro(Long userId, MultipartFile videoIntro) throws IOException {
                 final String key = "user-video-intros/" + userId;
                 System.out.println("Uploading video intro to S3 with key: " + key);

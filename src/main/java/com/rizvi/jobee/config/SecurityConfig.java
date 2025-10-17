@@ -47,7 +47,6 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
-    // TODO: Fix all endpoints to use the correct roles
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -61,10 +60,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/accounts/register", "/accounts/login")
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/companies/**").permitAll()
+                        .requestMatchers(HttpMethod.PATCH, "/api/companies/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/user-documents/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/experiences/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/business-accounts/me").permitAll()
                         .requestMatchers(HttpMethod.GET, "/business-profiles").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/business-profiles/dashboard").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/business-profiles/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user-documents").permitAll()
                         .requestMatchers(HttpMethod.GET, "/profiles/**").permitAll()
