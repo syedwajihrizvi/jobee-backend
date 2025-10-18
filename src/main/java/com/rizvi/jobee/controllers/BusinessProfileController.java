@@ -62,10 +62,16 @@ public class BusinessProfileController {
             lastJobPosted = jobs.get(0);
         }
         var mostAppliedJobs = jobs.stream()
-                .sorted((j1, j2) -> Integer.compare(j1.getApplications().size(), j2.getApplications().size()))
-                .limit(3).map(jobMapper::toDetailedSummaryForBusinessDto).toList().reversed();
-        var mostViewedJobs = jobs.stream().sorted((j1, j2) -> Integer.compare(j1.getViews(), j2.getViews()))
-                .limit(3).map(jobMapper::toDetailedSummaryForBusinessDto).toList().reversed();
+                .sorted((j1, j2) -> Integer.compare(j2.getApplications().size(), j1.getApplications().size()))
+                .limit(3)
+                .map(jobMapper::toDetailedSummaryForBusinessDto)
+                .toList();
+        var mostViewedJobs = jobs.stream()
+                .sorted((j1, j2) -> Integer.compare(j2.getViews() != null ? j2.getViews() : 0,
+                        j1.getViews() != null ? j1.getViews() : 0))
+                .limit(3)
+                .map(jobMapper::toDetailedSummaryForBusinessDto)
+                .toList();
 
         var response = BusinessProfileDashboardSummaryDto.builder()
                 .totalJobsPosted(totalJobs)

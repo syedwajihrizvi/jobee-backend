@@ -158,7 +158,6 @@ public class UserProfileController {
                 return ResponseEntity.ok(applicationDto);
         }
 
-        // # Should be in the JobController
         @GetMapping("/favorite-jobs")
         @Operation(summary = "Get all favorite jobs for the authenticated user")
         public ResponseEntity<List<JobSummaryDto>> getFavoriteJobs(

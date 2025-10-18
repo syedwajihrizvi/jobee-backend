@@ -4,8 +4,8 @@ public enum EducationLevel {
     HIGH_SCHOOL,
     DIPLOMA,
     ASSOCIATES,
-    UNDERGRADUATE,
-    POSTGRADUATE,
+    BACHELORS,
+    MASTERS,
     PHD,
     POSTDOCTORATE
 }

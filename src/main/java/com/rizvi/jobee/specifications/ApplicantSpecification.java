@@ -22,6 +22,15 @@ public class ApplicantSpecification {
             Join<Application, Job> jobJoin = root.join("job");
             Join<Application, UserProfile> userProfileJoin = root.join("userProfile");
             predicates.add(cb.equal(jobJoin.get("id"), query.getJobId()));
+            if (query.getSearch() != null && !query.getSearch().isEmpty()) {
+                String search = query.getSearch().toLowerCase().trim();
+                predicates.add(cb.or(
+                        cb.like(cb.lower(userProfileJoin.get("firstName")), "%" + search + "%"),
+                        cb.like(cb.lower(userProfileJoin.get("lastName")), "%" + search + "%"),
+                        cb.like(cb.lower(userProfileJoin.get("country")), "%" + search + "%"),
+                        cb.like(cb.lower(userProfileJoin.get("city")), "%" + search + "%"),
+                        cb.like(cb.lower(userProfileJoin.get("title")), "%" + search + "%")));
+            }
             if (query.getLocations() != null && !query.getLocations().isEmpty()) {
                 List<Predicate> locationPredicates = new ArrayList<>();
                 for (String loc : query.getLocations()) {

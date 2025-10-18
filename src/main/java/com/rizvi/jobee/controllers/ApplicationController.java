@@ -107,7 +107,6 @@ public class ApplicationController {
             @ModelAttribute ApplicationQuery query,
             @PathVariable Long id) {
         query.setJobId(id);
-        System.out.println("Application Query: " + query);
         var applications = applicationRepository.findAll(ApplicantSpecification.withFilters(query));
         var applicationDtos = applications.stream().map(applicationMapper::toApplicantSummaryForBusinessDto).toList();
         return ResponseEntity.ok(applicationDtos);

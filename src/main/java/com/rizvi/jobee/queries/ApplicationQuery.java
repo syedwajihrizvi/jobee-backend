@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Data
 public class ApplicationQuery {
+    private String search;
     private List<String> locations;
     private Long jobId;
     private List<String> skills;
