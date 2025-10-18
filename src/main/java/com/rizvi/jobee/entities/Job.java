@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.rizvi.jobee.enums.ApplicationStatus;
 import com.rizvi.jobee.enums.EmploymentType;
 import com.rizvi.jobee.enums.JobSetting;
 
@@ -98,6 +99,11 @@ public class Job {
     public void setBusinessAccount(BusinessAccount businessAccount) {
         this.businessAccount = businessAccount;
         businessAccount.getJobs().add(this);
+    }
+
+    public List<Application> getPendingApplications() {
+        return applications.stream().filter(application -> application.getStatus() == ApplicationStatus.PENDING)
+                .toList();
     }
 
     public List<Application> getShortListedApplications() {

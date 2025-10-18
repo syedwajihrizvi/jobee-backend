@@ -220,6 +220,7 @@ public class UserProfileController {
         @PatchMapping("/views")
         @Operation(summary = "Increment the profile view count")
         public ResponseEntity<Void> incrementProfileViews(@RequestParam Long profileId) {
+                System.out.println("Incrementing profile views for profile ID: " + profileId);
                 userProfileService.incrementProfileViews(profileId);
                 return ResponseEntity.noContent().build();
         }

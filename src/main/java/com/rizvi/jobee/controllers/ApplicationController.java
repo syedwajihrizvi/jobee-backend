@@ -26,6 +26,7 @@ import com.rizvi.jobee.dtos.application.CreateApplicationDto;
 import com.rizvi.jobee.dtos.job.JobApplicationStatusDto;
 import com.rizvi.jobee.entities.Application;
 import com.rizvi.jobee.entities.Job;
+import com.rizvi.jobee.enums.ApplicationStatus;
 import com.rizvi.jobee.exceptions.JobNotFoundException;
 import com.rizvi.jobee.exceptions.UserDocumentNotFoundException;
 import com.rizvi.jobee.exceptions.ApplicationNotFoundException;
@@ -106,6 +107,7 @@ public class ApplicationController {
             @ModelAttribute ApplicationQuery query,
             @PathVariable Long id) {
         query.setJobId(id);
+        System.out.println("Application Query: " + query);
         var applications = applicationRepository.findAll(ApplicantSpecification.withFilters(query));
         var applicationDtos = applications.stream().map(applicationMapper::toApplicantSummaryForBusinessDto).toList();
         return ResponseEntity.ok(applicationDtos);
@@ -267,5 +269,19 @@ public class ApplicationController {
         application.setShortListed(false);
         applicationRepository.save(application);
         return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{id}/updateStatus")
+    @Operation(summary = "Update application status")
+    public ResponseEntity<ApplicationDto> updateApplicationStatus(
+            @PathVariable Long id,
+            @RequestParam ApplicationStatus status) {
+        System.out.println("Updating application ID " + id + " to status " + status);
+        var application = applicationRepository.findById(id)
+                .orElseThrow(() -> new ApplicationNotFoundException("Application with ID " + id + " not found"));
+        // Ensure application status is valid
+        application.setStatus(status);
+        var savedApplication = applicationRepository.save(application);
+        return ResponseEntity.ok(applicationMapper.toDto(savedApplication));
     }
 }

@@ -9,4 +9,8 @@ public class ApplicationQuery {
     private Long jobId;
     private List<String> skills;
     private String educationLevel;
+    private String experienceLevel;
+    private Boolean hasCoverLetter;
+    private Boolean hasVideoIntro;
+    private Integer applicationDateRange;
 }

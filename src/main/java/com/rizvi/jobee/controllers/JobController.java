@@ -68,6 +68,7 @@ public class JobController {
     }
 
     @GetMapping("/applied")
+    @Operation(summary = "Get all applied jobs for the authenticated user")
     public ResponseEntity<List<Long>> getAppliedJobs(
             @AuthenticationPrincipal CustomPrincipal principal) {
         var userId = principal.getId();

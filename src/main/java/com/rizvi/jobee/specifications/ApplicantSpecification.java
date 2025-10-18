@@ -49,6 +49,18 @@ public class ApplicantSpecification {
                         cb.lower(educationJoin.get("level")),
                         query.getEducationLevel().toLowerCase().trim()));
             }
+            if (query.getApplicationDateRange() != null) {
+                System.out.println("Filtering applications from last " + query.getApplicationDateRange() + " days");
+                predicates.add(cb.greaterThanOrEqualTo(
+                        root.get("createdAt"),
+                        cb.literal(java.time.LocalDateTime.now().minusDays(query.getApplicationDateRange()))));
+            }
+            if (query.getHasCoverLetter() != null) {
+                predicates.add(cb.isNotNull(root.get("coverLetter")).in(query.getHasCoverLetter()));
+            }
+            if (query.getHasVideoIntro() != null) {
+                predicates.add(cb.isNotNull(userProfileJoin.get("videoIntroUrl")).in(query.getHasVideoIntro()));
+            }
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
