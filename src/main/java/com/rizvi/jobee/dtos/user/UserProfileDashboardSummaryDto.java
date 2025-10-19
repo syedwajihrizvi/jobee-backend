@@ -13,6 +13,8 @@ public class UserProfileDashboardSummaryDto {
     private Integer profileViews;
     private Integer totalRejections;
     private Integer totalInConsideration;
+    private Integer totalInterviews;
+    private Integer totalOffers;
     private ApplicationDto lastApplication;
     private CompanyDto[] favoriteCompanies;
 }

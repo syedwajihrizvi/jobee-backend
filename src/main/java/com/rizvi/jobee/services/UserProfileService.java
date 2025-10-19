@@ -1,5 +1,7 @@
 package com.rizvi.jobee.services;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -8,6 +10,7 @@ import com.rizvi.jobee.dtos.user.CompleteProfileDto;
 import com.rizvi.jobee.dtos.user.CreateUserProfileDto;
 import com.rizvi.jobee.dtos.user.UpdateUserProfileGeneralInfoDto;
 import com.rizvi.jobee.dtos.user.UpdateUserProfileSummaryDto;
+import com.rizvi.jobee.entities.QuickApplyTS;
 import com.rizvi.jobee.entities.UserAccount;
 import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.enums.UserDocumentType;
@@ -16,6 +19,7 @@ import com.rizvi.jobee.exceptions.AmazonS3Exception;
 import com.rizvi.jobee.exceptions.CompanyNotFoundException;
 import com.rizvi.jobee.exceptions.InvalidDocumentException;
 import com.rizvi.jobee.repositories.CompanyRepository;
+import com.rizvi.jobee.repositories.QuickApplyTSRepository;
 import com.rizvi.jobee.repositories.UserAccountRepository;
 import com.rizvi.jobee.repositories.UserProfileRepository;
 
@@ -31,6 +35,7 @@ import lombok.AllArgsConstructor;
 public class UserProfileService {
     private final UserProfileRepository userProfileRepository;
     private final UserAccountRepository userAccountRepository;
+    private final QuickApplyTSRepository quickApplyTSRepository;
     private final CompanyRepository companyRepository;
     private final UserDocumentService userDocumentService;
     private final S3Service s3Service;
@@ -253,5 +258,42 @@ public class UserProfileService {
         }
         userProfile.setFavoriteCompanies(favoriteCompanies);
         userProfileRepository.save(userProfile);
+    }
+
+    public boolean canQuickApplyBatch(Long userId) {
+        var quickApplyTS = quickApplyTSRepository.findByUserProfileId(userId);
+        if (quickApplyTS == null) {
+            return true;
+        }
+        var lastQuickApply = quickApplyTS.getLastQuickApply();
+        var now = java.time.Instant.now();
+        var hoursSinceLastApply = java.time.Duration.between(lastQuickApply, now).toHours();
+        return hoursSinceLastApply >= 6;
+    }
+
+    public QuickApplyTS updateQuickApplyTimestamp(Long userId) {
+        var quickApplyTS = quickApplyTSRepository.findByUserProfileId(userId);
+        if (quickApplyTS == null) {
+            var userProfile = userProfileRepository.findById(userId)
+                    .orElseThrow(() -> new AccountNotFoundException("User profile not found"));
+            quickApplyTS = QuickApplyTS.builder()
+                    .userProfile(userProfile)
+                    .quickApplyCount(1)
+                    .lastQuickApply(java.time.Instant.now())
+                    .build();
+        } else {
+            quickApplyTS.setQuickApplyCount(quickApplyTS.getQuickApplyCount() + 1);
+            quickApplyTS.setLastQuickApply(java.time.Instant.now());
+        }
+        return quickApplyTSRepository.save(quickApplyTS);
+    }
+
+    public Instant getNextQuickApplyBatchTime(Long userId) {
+        var quickApplyTS = quickApplyTSRepository.findByUserProfileId(userId);
+        if (quickApplyTS == null) {
+            return java.time.Instant.now();
+        }
+        var lastQuickApply = quickApplyTS.getLastQuickApply();
+        return lastQuickApply.plus(6, ChronoUnit.HOURS);
     }
 }

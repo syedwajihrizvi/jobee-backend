@@ -35,5 +35,6 @@ public interface UserMapper {
         @Mapping(target = "totalApplications", expression = "java(userProfile.getTotalApplications())")
         @Mapping(target = "totalRejections", expression = "java(userProfile.getRejectedApplications())")
         @Mapping(target = "totalInConsideration", expression = "java(userProfile.getInConsiderationApplications())")
+        @Mapping(target = "totalInterviews", expression = "java(userProfile.geTotalApplicationsInInterview())")
         UserProfileDashboardSummaryDto toDashboardSummaryDto(UserProfile userProfile);
 }

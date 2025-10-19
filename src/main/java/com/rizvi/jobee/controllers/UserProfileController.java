@@ -86,10 +86,16 @@ public class UserProfileController {
         public ResponseEntity<UserProfileSummaryDto> getMyProfile(
                         @AuthenticationPrincipal CustomPrincipal principal) {
                 var userProfile = userProfileService.getAuthenticatedUserProfile(principal.getId());
+                var canQuickApplyBatch = userProfileService.canQuickApplyBatch(principal.getId());
                 if (userProfile == null) {
                         throw new AccountNotFoundException("User profile not found");
                 }
                 var userProfileDto = userMapper.toProfileSummaryDto(userProfile);
+                userProfileDto.setCanQuickApplyBatch(canQuickApplyBatch);
+                if (canQuickApplyBatch == false) {
+                        var nextQuickApplyTime = userProfileService.getNextQuickApplyBatchTime(principal.getId());
+                        userProfileDto.setNextQuickApplyBatchTime(nextQuickApplyTime);
+                }
                 return ResponseEntity.ok(userProfileDto);
         }
 
@@ -148,7 +154,7 @@ public class UserProfileController {
                 var userId = principal.getId();
                 var application = applicationRepository.findByJobIdAndUserProfileId(jobId, userId);
                 if (application == null) {
-                        return ResponseEntity.notFound().build();
+                        return ResponseEntity.ok().build();
                 }
                 var applicationDto = applicationMapper.toSummaryDto(application);
                 var interview = interviewService.getInterviewByJobIdAndCandidateId(jobId, userId);

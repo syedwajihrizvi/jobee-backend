@@ -1,5 +1,6 @@
 package com.rizvi.jobee.dtos.user;
 
+import java.time.Instant;
 import java.util.List;
 
 import com.rizvi.jobee.dtos.education.EducationDto;
@@ -15,7 +16,9 @@ public class UserProfileSummaryDto {
     private Long id;
     private String firstName;
     private String lastName;
+    private Boolean canQuickApplyBatch;
     private Integer age;
+    private Instant nextQuickApplyBatchTime;
     private String summary;
     private String title;
     private String city;

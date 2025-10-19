@@ -40,9 +40,11 @@ import com.rizvi.jobee.repositories.JobRepository;
 import com.rizvi.jobee.repositories.UserDocumentRepository;
 import com.rizvi.jobee.repositories.UserProfileRepository;
 import com.rizvi.jobee.services.JobService;
+import com.rizvi.jobee.services.UserProfileService;
 import com.rizvi.jobee.specifications.ApplicantSpecification;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
@@ -56,6 +58,7 @@ public class ApplicationController {
     private final JobRepository jobRepository;
     private final JobService jobService;
     private final JobMapper jobMapper;
+    private final UserProfileService userProfileService;
     private final UserProfileRepository userProfileRepository;
     private final UserDocumentRepository userDocumentRepository;
     private final ApplicationMapper applicationMapper;
@@ -64,7 +67,6 @@ public class ApplicationController {
     public ResponseEntity<List<?>> getAllApplications(
             @RequestParam(required = false) Long userId,
             @RequestParam(required = false) Long jobId) {
-        System.out.println("Received request with userId: " + userId + " and jobId: " + jobId);
         if (userId != null && jobId == null) {
             var userProfile = userProfileRepository.findById(userId).orElse(null);
             if (userProfile == null) {
@@ -75,6 +77,7 @@ public class ApplicationController {
             var applicationDtos = applications.stream().map(application -> {
                 var dto = new JobApplicationStatusDto();
                 dto.setJob(jobMapper.toSummaryDto(application.getJob()));
+                dto.setApplicationId(application.getId());
                 dto.setStatus(application.getStatus());
                 dto.setAppliedAt(application.getCreatedAt().toString());
                 return dto;
@@ -163,6 +166,7 @@ public class ApplicationController {
 
     @PostMapping("/quickApplyBatch")
     @Operation(summary = "Quick apply to multiple jobs with logged in user")
+    @Transactional
     public ResponseEntity<BatchQuickApplySuccessDto> quickApplyToMultipleJobs(
             @RequestBody BatchQuickApplyDto batchQuickApplyDto,
             @AuthenticationPrincipal CustomPrincipal customPrincipal,
@@ -205,9 +209,8 @@ public class ApplicationController {
                             .buildAndExpand(app.getId()).toUri();
                 })
                 .toList();
-        System.out.println("Applications: " + applicationDtos);
         var responseDto = new BatchQuickApplySuccessDto(applicationDtos, uris);
-        System.out.println("SUCCESSFULLY APPLIED TO JOBS: " + applicationDtos.size());
+        userProfileService.updateQuickApplyTimestamp(userId);
         return ResponseEntity.ok(responseDto);
     }
 

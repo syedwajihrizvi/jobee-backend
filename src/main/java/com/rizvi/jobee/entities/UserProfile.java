@@ -154,12 +154,17 @@ public class UserProfile {
                 .count();
     }
 
+    public Integer geTotalApplicationsInInterview() {
+        return (int) this.applications.stream()
+                .filter(app -> app.getStatus() == ApplicationStatus.INTERVIEW_SCHEDULED)
+                .count();
+    }
+
     public Application getLastApplication() {
-        this.applications.stream().sorted((a1, a2) -> a2.getCreatedAt().compareTo(a1.getCreatedAt()));
-        if (this.applications.size() > 0) {
-            return this.applications.iterator().next();
-        }
-        return null;
+        return this.applications.stream()
+                .sorted((a1, a2) -> a2.getCreatedAt().compareTo(a1.getCreatedAt()))
+                .findFirst()
+                .orElse(null);
     }
 
     public void toggleFavoriteJob(Job job) {
