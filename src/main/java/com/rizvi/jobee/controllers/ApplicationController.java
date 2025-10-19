@@ -48,8 +48,6 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
-// TODO: Refactor into ApplicationService
-
 @RestController
 @AllArgsConstructor
 @RequestMapping("/applications")

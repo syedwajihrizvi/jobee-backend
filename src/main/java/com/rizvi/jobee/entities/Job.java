@@ -53,6 +53,9 @@ public class Job {
     @Column(name = "description", nullable = false)
     private String description;
 
+    @Column(name = "department", nullable = true)
+    private String department;
+
     @Column(name = "created_at", nullable = true, insertable = false, updatable = false)
     private LocalDateTime createdAt;
 

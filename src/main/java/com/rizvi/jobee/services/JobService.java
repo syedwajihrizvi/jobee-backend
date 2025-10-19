@@ -113,4 +113,8 @@ public class JobService {
         return jobRepository.findByCompanyId(companyId);
     }
 
+    public List<Job> getMostRecentJobsByCompany(Long companyId, Long limit) {
+        var jobs = jobRepository.findMostRecentJobsByCompanyId(companyId);
+        return jobs.size() > limit ? jobs.subList(0, limit.intValue()) : jobs;
+    }
 }

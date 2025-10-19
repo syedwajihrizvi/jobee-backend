@@ -17,12 +17,14 @@ public class JobSummaryDto {
     private String businessName;
     private String location;
     private String views;
+    private String department;
     private String employmentType;
     private String setting;
     private Integer minSalary;
     private Integer maxSalary;
     private Integer experience;
     private Integer applicants;
+    private LocalDateTime createdAt;
     private LocalDateTime appDeadline;
     private List<TagDto> tags;
 }

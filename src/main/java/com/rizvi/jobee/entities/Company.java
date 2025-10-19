@@ -1,5 +1,6 @@
 package com.rizvi.jobee.entities;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -44,6 +45,9 @@ public class Company {
 
     @Column(name = "hq_country", nullable = true)
     private String hqCountry;
+
+    @Column(name = "rating", nullable = true)
+    private BigDecimal rating;
 
     @Column(name = "founded_year", nullable = true)
     private Integer foundedYear;

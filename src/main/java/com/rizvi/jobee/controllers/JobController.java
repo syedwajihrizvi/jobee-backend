@@ -82,6 +82,24 @@ public class JobController {
         return ResponseEntity.ok(jobDtos);
     }
 
+    @GetMapping("/companies/{companyId}/job-count")
+    @Operation(summary = "Get total job count for a specific company")
+    public ResponseEntity<Integer> getJobCountByCompany(
+            @PathVariable Long companyId) {
+        var jobCount = jobService.getJobsByCompanyId(companyId).size();
+        return ResponseEntity.ok(jobCount);
+    }
+
+    @GetMapping("/companies/{companyId}/recent-jobs")
+    @Operation(summary = "Get most recent jobs for a specific company")
+    public ResponseEntity<List<JobSummaryDto>> getMostRecentJobsByCompany(
+            @RequestParam(required = false, defaultValue = "3") Long limit,
+            @PathVariable Long companyId) {
+        var jobs = jobService.getMostRecentJobsByCompany(companyId, limit);
+        var jobDtos = jobs.stream().map(jobMapper::toSummaryDto).toList();
+        return ResponseEntity.ok(jobDtos);
+    }
+
     @GetMapping("/companies/{companyId}/jobs")
     @Operation(summary = "Get all jobs for a specific company with optional filters and search")
     public ResponseEntity<PaginatedJobResponseDto<JobSummaryForBusinessDto>> getJobsByCompany(
