@@ -1,0 +1,2 @@
+ALTER TABLE jobs
+ADD COLUMN level VARCHAR(50);

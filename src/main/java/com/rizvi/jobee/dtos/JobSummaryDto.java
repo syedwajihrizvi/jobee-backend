@@ -1,9 +1,6 @@
-package com.rizvi.jobee.dtos.job;
+package com.rizvi.jobee.dtos;
 
-import java.time.LocalDateTime;
 import java.util.List;
-
-import com.rizvi.jobee.dtos.tag.TagDto;
 
 import lombok.Data;
 
@@ -12,20 +9,12 @@ public class JobSummaryDto {
     private Long id;
     private String title;
     private String description;
-    private Long companyId;
     private Long businessAccountId;
     private String businessName;
     private String location;
-    private String views;
-    private String level;
-    private String department;
     private String employmentType;
-    private String setting;
     private Integer minSalary;
     private Integer maxSalary;
     private Integer experience;
-    private Integer applicants;
-    private LocalDateTime createdAt;
-    private LocalDateTime appDeadline;
     private List<TagDto> tags;
 }

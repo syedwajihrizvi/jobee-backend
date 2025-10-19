@@ -12,6 +12,7 @@ public class CompanyDto {
     private Integer foundedYear;
     private BigDecimal rating;
     private Integer numEmployees;
+    private String logoUrl;
     private String industry;
     private String description;
     private String hqCity;

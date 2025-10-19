@@ -7,4 +7,5 @@ public class TopHiringCompanyDto {
     private Long id;
     private String name;
     private Long jobCount;
+    private String logoUrl;
 }

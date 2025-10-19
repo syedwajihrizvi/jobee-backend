@@ -84,8 +84,8 @@ public class JobSpecifications {
             if (query.getMaxSalary() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("maxSalary"), query.getMaxSalary()));
             }
-            if (query.getMinExperience() != null && query.getMaxExperience() != null) {
-                predicates.add(cb.between(root.get("experience"), query.getMinExperience(), query.getMaxExperience()));
+            if (query.getExperience() != null && !query.getExperience().isEmpty()) {
+                predicates.add(cb.equal(root.get("level"), query.getExperience()));
             }
             return cb.and(predicates.toArray(new Predicate[0]));
         };

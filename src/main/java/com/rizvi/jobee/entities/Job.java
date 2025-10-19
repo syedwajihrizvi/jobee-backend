@@ -8,6 +8,7 @@ import java.util.Set;
 
 import com.rizvi.jobee.enums.ApplicationStatus;
 import com.rizvi.jobee.enums.EmploymentType;
+import com.rizvi.jobee.enums.JobLevel;
 import com.rizvi.jobee.enums.JobSetting;
 
 import jakarta.persistence.CascadeType;
@@ -65,6 +66,10 @@ public class Job {
     @Enumerated(value = EnumType.STRING)
     @Column(name = "employment_type", nullable = true)
     private EmploymentType employmentType;
+
+    @Enumerated(value = EnumType.STRING)
+    @Column(name = "level", nullable = true)
+    private JobLevel level;
 
     @Enumerated(value = EnumType.STRING)
     @Column(name = "setting", nullable = false)
