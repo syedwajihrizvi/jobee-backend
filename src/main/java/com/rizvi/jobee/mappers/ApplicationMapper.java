@@ -43,5 +43,7 @@ public interface ApplicationMapper {
     @Mapping(target = "resumeUrl", source = "application.resumeDocument.documentUrl")
     @Mapping(target = "coverLetterUrl", source = "application.coverLetterDocument.documentUrl")
     @Mapping(target = "jobId", source = "job.id")
+    @Mapping(target = "jobTitle", source = "job.title")
+    @Mapping(target = "companyName", source = "job.businessAccount.company.name")
     ApplicationDetailsForBusinessDto toApplicationDetailsForBusinessDto(Application application);
 }

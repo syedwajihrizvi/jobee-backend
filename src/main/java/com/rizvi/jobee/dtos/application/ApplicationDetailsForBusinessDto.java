@@ -14,6 +14,8 @@ public class ApplicationDetailsForBusinessDto {
     private String resumeUrl;
     private String coverLetterUrl;
     private Long jobId;
+    private String jobTitle;
+    private String companyName;
     private ApplicationStatus status;
     private Boolean shortListed;
     private UserProfileSummaryForBusinessDto userProfile;
