@@ -1,6 +1,8 @@
 package com.rizvi.jobee.controllers;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import jakarta.transaction.Transactional;
 
@@ -20,12 +22,14 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.rizvi.jobee.dtos.application.ApplicationSummaryDto;
 import com.rizvi.jobee.dtos.job.JobSummaryDto;
+import com.rizvi.jobee.dtos.job.RecommendedJobDto;
 import com.rizvi.jobee.dtos.user.CreateUserProfileDto;
 import com.rizvi.jobee.dtos.user.ProfileCompletenessDto;
 import com.rizvi.jobee.dtos.user.UpdateUserProfileGeneralInfoDto;
 import com.rizvi.jobee.dtos.user.UpdateUserProfileSummaryDto;
 import com.rizvi.jobee.dtos.user.UserProfileDashboardSummaryDto;
 import com.rizvi.jobee.dtos.user.UserProfileSummaryDto;
+import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.AmazonS3Exception;
 import com.rizvi.jobee.exceptions.JobNotFoundException;
@@ -39,6 +43,7 @@ import com.rizvi.jobee.repositories.UserProfileRepository;
 import com.rizvi.jobee.services.AccountService;
 import com.rizvi.jobee.services.InterviewService;
 import com.rizvi.jobee.services.JobRecommenderService;
+import com.rizvi.jobee.services.UserDocumentService;
 import com.rizvi.jobee.services.UserProfileService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -51,6 +56,7 @@ public class UserProfileController {
         private final UserProfileRepository userProfileRepository;
         private final ApplicationRepository applicationRepository;
         private final JobRepository jobRepository;
+        private final UserDocumentService userDocumentService;
         private final UserProfileService userProfileService;
         private final InterviewService interviewService;
         private final JobRecommenderService jobRecommenderService;
@@ -179,15 +185,20 @@ public class UserProfileController {
 
         @GetMapping("/recommended-jobs")
         @Operation(summary = "Get AI recommended jobs for the authenticated user")
-        public ResponseEntity<List<JobSummaryDto>> getRecommendedJobs(
+        public ResponseEntity<List<RecommendedJobDto>> getRecommendedJobs(
                         @AuthenticationPrincipal CustomPrincipal principal) {
                 var userId = principal.getId();
                 var userProfile = userProfileRepository.findById(userId)
                                 .orElseThrow(() -> new AccountNotFoundException("User profile not found"));
                 var jobs = jobRecommenderService.getRecommendedJobsForUser(userProfile);
-                var jobDtos = jobs.stream().filter((j) -> !j.hasUserApplied(userId)).map(jobMapper::toSummaryDto)
-                                .toList();
-                return ResponseEntity.ok(jobDtos);
+                List<RecommendedJobDto> result = new ArrayList<>();
+                for (Map.Entry<Job, Long> entry : jobs.entrySet()) {
+                        var recommendedJobDto = new RecommendedJobDto();
+                        recommendedJobDto.setJob(jobMapper.toSummaryDto(entry.getKey()));
+                        recommendedJobDto.setMatch(entry.getValue());
+                        result.add(recommendedJobDto);
+                }
+                return ResponseEntity.ok(result);
         }
 
         @PostMapping()
@@ -225,7 +236,6 @@ public class UserProfileController {
         @PatchMapping("/views")
         @Operation(summary = "Increment the profile view count")
         public ResponseEntity<Void> incrementProfileViews(@RequestParam Long profileId) {
-                System.out.println("Incrementing profile views for profile ID: " + profileId);
                 userProfileService.incrementProfileViews(profileId);
                 return ResponseEntity.noContent().build();
         }
@@ -306,6 +316,20 @@ public class UserProfileController {
                 var userProfile = userProfileService.updateUserProfileViaCompleteProfile(
                                 document, profileImage, videoIntro, resumeTitle, request, userId);
                 return ResponseEntity.ok().body(userMapper.toProfileSummaryDto(userProfile));
+        }
+
+        @PatchMapping("/update-primary-resume")
+        @Operation(summary = "Update primary resume for the authenticated user")
+        public ResponseEntity<UserProfileSummaryDto> updatePrimaryResume(
+                        @RequestParam("resumeId") Long resumeId,
+                        @AuthenticationPrincipal CustomPrincipal principal) {
+                var userId = principal.getId();
+                var document = userDocumentService.userDocumentExists(resumeId, userId);
+                if (document == null) {
+                        return ResponseEntity.notFound().build();
+                }
+                var savedProfile = userProfileService.updatePrimaryResume(document, userId);
+                return ResponseEntity.ok().body(userMapper.toProfileSummaryDto(savedProfile));
         }
 
 }

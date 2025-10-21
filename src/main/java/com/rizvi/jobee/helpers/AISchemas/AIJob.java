@@ -8,6 +8,7 @@ import com.rizvi.jobee.helpers.ListUtils;
 
 import lombok.Data;
 
+// TODO: Update experience to level
 @Data
 public class AIJob {
     @JsonPropertyDescription("Job Title")
@@ -32,14 +33,12 @@ public class AIJob {
         this.minSalary = job.getMinSalary();
         this.maxSalary = job.getMaxSalary();
         this.location = job.getLocation();
-        this.experience = job.getExperience();
     }
 
     public String toJsonString() {
         return """
-                {"title": "%s", "description": "%s", "skills": [%s], "minSalary": %d, "maxSalary": %d, "location": "%s", "experience": %d}
+                {"title": "%s", "description": "%s", "skills": [%s], "minSalary": %d, "maxSalary": %d, "location": "%s"}
                 """
-                .formatted(title, description, ListUtils.listToJsonArrayString(skills), minSalary, maxSalary, location,
-                        experience);
+                .formatted(title, description, ListUtils.listToJsonArrayString(skills), minSalary, maxSalary, location);
     }
 }

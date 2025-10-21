@@ -12,6 +12,7 @@ import com.rizvi.jobee.dtos.user.UpdateUserProfileGeneralInfoDto;
 import com.rizvi.jobee.dtos.user.UpdateUserProfileSummaryDto;
 import com.rizvi.jobee.entities.QuickApplyTS;
 import com.rizvi.jobee.entities.UserAccount;
+import com.rizvi.jobee.entities.UserDocument;
 import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.enums.UserDocumentType;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
@@ -295,5 +296,14 @@ public class UserProfileService {
         }
         var lastQuickApply = quickApplyTS.getLastQuickApply();
         return lastQuickApply.plus(6, ChronoUnit.HOURS);
+    }
+
+    public UserProfile updatePrimaryResume(UserDocument resume, Long userId) {
+        var userProfile = userProfileRepository.findByAccountId(userId).orElse(null);
+        if (userProfile == null) {
+            throw new AccountNotFoundException("User profile not found");
+        }
+        userProfile.setPrimaryResume(resume);
+        return userProfileRepository.save(userProfile);
     }
 }

@@ -3,6 +3,7 @@ package com.rizvi.jobee.services;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import com.rizvi.jobee.dtos.job.PaginatedJobDto;
 import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.entities.Tag;
+import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.exceptions.JobNotFoundException;
 import com.rizvi.jobee.queries.JobQuery;
 import com.rizvi.jobee.repositories.JobRepository;
@@ -76,6 +78,7 @@ public class JobService {
             }
             tagEntities.add(tag);
         }
+
         var job = Job.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
@@ -85,7 +88,7 @@ public class JobService {
                 .appDeadline(request.getAppDeadline())
                 .minSalary(request.getMinSalary())
                 .maxSalary(request.getMaxSalary())
-                .experience(request.getExperience())
+                .level(request.getExperience())
                 .build();
         job.setBusinessAccount(businessAccount);
         for (Tag tag : tagEntities) {
@@ -106,7 +109,8 @@ public class JobService {
         if (search != null && !search.isEmpty()) {
             return jobRepository.findByBusinessAccountIdAndTitle(accountId, search);
         }
-        return jobRepository.findByBusinessAccountId(accountId);
+        var sort = Sort.by("createdAt").descending();
+        return jobRepository.findByBusinessAccountId(accountId, sort);
     }
 
     public List<Job> getJobsByCompanyId(Long companyId) {
@@ -117,4 +121,68 @@ public class JobService {
         var jobs = jobRepository.findMostRecentJobsByCompanyId(companyId);
         return jobs.size() > limit ? jobs.subList(0, limit.intValue()) : jobs;
     }
+
+    public Long checkJobMatch(Long jobId, UserProfile userProfile) {
+        var job = getJobById(jobId);
+        var score = 0;
+        var maxScore = 100;
+        var userSkills = userProfile.getSkills().stream()
+                .map(skill -> skill.getSkillSlug().toLowerCase())
+                .toList();
+        var jobTags = job.getTags().stream()
+                .map(tag -> tag.getSlug().toLowerCase())
+                .toList();
+
+        if (!jobTags.isEmpty()) {
+            long matchingSkills = userSkills.stream()
+                    .mapToLong(userSkill -> jobTags.contains(userSkill) ? 1 : 0)
+                    .sum();
+            score += (int) ((matchingSkills * 40) / jobTags.size());
+        }
+        System.out.println("Skill Match Score for Job ID " + jobId + ": " + score + "/40");
+        var totalExperience = userProfile.getExperiences().stream()
+                .mapToLong(exp -> {
+                    String fromYear = exp.getFrom().replace(" ", "");
+                    String toYear = exp.getTo().replace(" ", "");
+                    System.out.println(fromYear + " - " + toYear);
+                    if (fromYear != null && !toYear.equals("present")) {
+                        System.out.println("present".equals(toYear));
+                        return Long.parseLong(toYear) - Long.parseLong(fromYear);
+                    } else if (toYear.equals("present")) {
+                        var currentYear = String.valueOf(java.time.LocalDate.now().getYear());
+                        return Long.parseLong(currentYear) - Long.parseLong(fromYear);
+                    }
+                    return 0L;
+                })
+                .sum();
+
+        var experienceScore = job.getUserMatchWithExperience(totalExperience);
+        score += (experienceScore * 30) / 100;
+        System.out.println("Experience Match Score for Job ID " + jobId + ": " + (experienceScore * 30) / 100 + "/30");
+        var jobLocation = job.getLocation();
+        List<String> userLocations = new ArrayList<>();
+        userLocations.addAll(userProfile.getExperiences().stream()
+                .map(exp -> exp.getCity() + ", " + exp.getCountry())
+                .toList());
+        userLocations.add(userProfile.getLocation());
+        if (job.getSetting() != null && job.getSetting().toString().equalsIgnoreCase("REMOTE")) {
+            score += 20;
+        } else if (jobLocation != null && userLocations.stream()
+                .anyMatch(userLoc -> userLoc != null &&
+                        userLoc.toLowerCase().contains(jobLocation.toLowerCase()))) {
+            score += 20;
+        }
+        var hasRelevantEducation = userProfile.getEducation().stream()
+                .anyMatch(edu -> edu.getLevel() != null &&
+                        (edu.getLevel().toString().toLowerCase().contains("bachelor") ||
+                                edu.getLevel().toString().toLowerCase().contains("master") ||
+                                edu.getLevel().toString().toLowerCase().contains("phd")));
+        if (hasRelevantEducation) {
+            score += 10;
+        }
+        System.out.println("Location Match Score for Job ID " + jobId + ": " + (score * 20) / 100 + "/20");
+        System.out.println("Job Match Score for Job ID " + jobId + ": " + score + "/" + maxScore);
+        return Long.valueOf(Math.min(score, maxScore));
+    }
+
 }

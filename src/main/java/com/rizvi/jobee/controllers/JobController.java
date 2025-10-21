@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.rizvi.jobee.dtos.job.CheckMatchDto;
 import com.rizvi.jobee.dtos.job.CreateJobDto;
 import com.rizvi.jobee.dtos.job.JobDetailedSummaryForBusinessDto;
 import com.rizvi.jobee.dtos.job.JobSummaryDto;
@@ -154,7 +155,7 @@ public class JobController {
 
     @PostMapping
     @Operation(summary = "Create a new job posting")
-    public ResponseEntity<?> createJob(
+    public ResponseEntity<JobSummaryDto> createJob(
             @RequestBody CreateJobDto request,
             @AuthenticationPrincipal CustomPrincipal principal,
             UriComponentsBuilder uriComponentsBuilder) throws RuntimeException {
@@ -185,4 +186,18 @@ public class JobController {
         return ResponseEntity.noContent().build();
 
     }
+
+    @GetMapping("/{id}/check-match")
+    @Operation(summary = "Check if the authenticated user's profile matches the job requirements")
+    public ResponseEntity<CheckMatchDto> checkJobMatch(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomPrincipal principal) {
+        var userId = principal.getId();
+        var userProfile = userProfileService.getAuthenticatedUserProfile(userId);
+        var matchResult = jobService.checkJobMatch(id, userProfile);
+        CheckMatchDto dto = new CheckMatchDto();
+        dto.setMatch(matchResult);
+        return ResponseEntity.ok(dto);
+    }
+
 }

@@ -11,4 +11,7 @@ public interface UserDocumentRepository extends JpaRepository<UserDocument, Long
     // Define methods for CRUD operations if needed
     @Query("select d from UserDocument d where d.user.id = :userId")
     List<UserDocument> findByUserId(Long userId);
+
+    @Query("select d from UserDocument d where d.id = :documentId and d.user.id = :userId")
+    UserDocument findByIdAndUserId(Long documentId, Long userId);
 }

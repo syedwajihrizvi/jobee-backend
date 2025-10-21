@@ -3,6 +3,7 @@ package com.rizvi.jobee.repositories;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -36,7 +37,7 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
         List<Object[]> findTopHiringCompanies(Integer limit);
 
         @Query("select j from Job j where j.businessAccount.id = :accountId")
-        List<Job> findByBusinessAccountId(Long accountId);
+        List<Job> findByBusinessAccountId(Long accountId, Sort sort);
 
         @Query("select j from Job j where j.businessAccount.id = :accountId and lower(j.title) like lower(concat('%', :search, '%'))")
         List<Job> findByBusinessAccountIdAndTitle(Long accountId, String search);

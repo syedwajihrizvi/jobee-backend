@@ -1,6 +1,7 @@
 package com.rizvi.jobee.services;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
@@ -14,13 +15,20 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class JobRecommenderService {
     private final JobRepository jobRepository;
+    private final JobService jobService;
 
-    public List<Job> getRecommendedJobsForUser(UserProfile user) {
+    public Map<Job, Long> getRecommendedJobsForUser(UserProfile user) {
         // Placeholder logic for job recommendation
         // In a real-world scenario, this would involve complex algorithms and possibly
         // AI/ML models
         // Right now, just find jobs that match user's skills, interests
+        Map<Job, Long> recommendedJobs = new HashMap<>();
         var skills = user.getSkills().stream().map(s -> s.getSkill().getSlug().toLowerCase().trim()).toList();
-        return jobRepository.findJobsWithSkills(skills);
+        var jobs = jobRepository.findJobsWithSkills(skills);
+        for (Job job : jobs) {
+            var matchScore = jobService.checkJobMatch(job.getId(), user);
+            recommendedJobs.put(job, matchScore);
+        }
+        return recommendedJobs;
     }
 }

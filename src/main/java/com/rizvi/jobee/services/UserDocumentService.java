@@ -81,4 +81,9 @@ public class UserDocumentService {
             return false;
         }
     }
+
+    public UserDocument userDocumentExists(Long documentId, Long userId) {
+        var document = userDocumentRepository.findByIdAndUserId(documentId, userId);
+        return document;
+    }
 }

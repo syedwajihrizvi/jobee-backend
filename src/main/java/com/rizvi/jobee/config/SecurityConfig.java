@@ -86,6 +86,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/profiles/education/**").permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/profiles/experiences/**").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/profiles/favorite-company").permitAll()
+                        .requestMatchers(HttpMethod.PATCH, "/profiles/update-primary-resume").permitAll()
                         .requestMatchers(HttpMethod.GET, "/jobs/companies/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/jobs").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/jobs/*/views").permitAll()

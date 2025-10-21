@@ -2,8 +2,10 @@ package com.rizvi.jobee.entities;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.rizvi.jobee.enums.ApplicationStatus;
@@ -81,9 +83,6 @@ public class Job {
     @Column(name = "max_salary", nullable = true)
     private Integer maxSalary;
 
-    @Column(name = "experience", nullable = false)
-    private Integer experience;
-
     @Column(name = "app_deadline", nullable = false)
     private LocalDateTime appDeadline;
 
@@ -139,4 +138,35 @@ public class Job {
         return applications;
     }
 
+    private static Map<JobLevel, List<Float>> experienceMap = new HashMap<>() {
+        {
+            put(JobLevel.INTERN, List.of(0f, 1f));
+            put(JobLevel.ENTRY, List.of(0f, 1f));
+            put(JobLevel.JUNIOR_LEVEL, List.of(1f, 3f));
+            put(JobLevel.MID_LEVEL, List.of(3f, 5f));
+            put(JobLevel.SENIOR_LEVEL, List.of(5f, 10f));
+            put(JobLevel.LEAD, List.of(10f, Float.MAX_VALUE));
+        }
+    };
+
+    public Float getUserMatchWithExperience(Long experienceYears) {
+
+        var requiredExperienceRange = experienceMap.get(this.level);
+        Float minExp = requiredExperienceRange.get(0);
+        Float maxExp = requiredExperienceRange.get(1);
+
+        if (experienceYears <= maxExp && experienceYears >= minExp) {
+            return 100f;
+        }
+        if (experienceYears < minExp) {
+            Float diff = minExp - experienceYears;
+            return Math.max(0, 100 - diff * 20);
+        }
+        if (experienceYears > maxExp) {
+            Float diff = experienceYears - maxExp;
+            return Math.max(0, 100 - diff * 10);
+        }
+
+        return 0f;
+    }
 }

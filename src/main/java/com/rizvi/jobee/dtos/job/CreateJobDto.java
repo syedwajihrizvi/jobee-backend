@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.rizvi.jobee.enums.EmploymentType;
+import com.rizvi.jobee.enums.JobLevel;
 import com.rizvi.jobee.enums.JobSetting;
 
 import lombok.Data;
@@ -19,6 +20,6 @@ public class CreateJobDto {
     private Integer minSalary;
     private Integer maxSalary;
     private List<String> tags;
-    private Integer experience;
+    private JobLevel experience;
     private LocalDateTime appDeadline;
 }
