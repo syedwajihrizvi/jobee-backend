@@ -1,5 +1,6 @@
 package com.rizvi.jobee.repositories;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -19,5 +20,9 @@ public interface UserProfileRepository extends JpaRepository<UserProfile, Long> 
 
     @Query("select p from UserProfile p where p.id = :id")
     Optional<UserProfile> findUserById(@Param("id") Long id);
+
+    @EntityGraph(attributePaths = { "account", "skills", "skills.skill", "documents", "favoriteJobs", "education" })
+    @Query("select p from UserProfile p")
+    List<UserProfile> findAllUserProfilesWithDetails();
 
 }

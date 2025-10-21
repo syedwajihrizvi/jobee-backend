@@ -19,7 +19,6 @@ import com.rizvi.jobee.mappers.BusinessMapper;
 import com.rizvi.jobee.mappers.JobMapper;
 import com.rizvi.jobee.principals.CustomPrincipal;
 import com.rizvi.jobee.services.BusinessProfileService;
-import com.rizvi.jobee.services.CompanyService;
 import com.rizvi.jobee.services.JobService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,7 +28,6 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 @RequestMapping("/business-profiles")
 public class BusinessProfileController {
-    private final CompanyService companyService;
     private final JobService jobService;
     private final BusinessProfileService businessProfileService;
     private final BusinessMapper businessMapper;
@@ -108,4 +106,5 @@ public class BusinessProfileController {
         var dto = businessMapper.toBusinessProfileSummaryForInterviewDto(businessProfile);
         return ResponseEntity.ok(dto);
     }
+
 }

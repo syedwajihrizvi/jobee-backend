@@ -21,6 +21,7 @@ public class UserProfileSummaryForBusinessDto {
     private String company;
     private String email;
     private String phoneNumber;
+    private UserDocumentDto primaryResume;
     private String profileImageUrl;
     private String videoIntroUrl;
     private List<UserSkillDto> skills;

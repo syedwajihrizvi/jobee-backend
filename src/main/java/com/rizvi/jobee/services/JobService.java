@@ -1,7 +1,10 @@
 package com.rizvi.jobee.services;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.PriorityQueue;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Page;
@@ -28,6 +31,8 @@ import lombok.AllArgsConstructor;
 public class JobService {
     private final JobRepository jobRepository;
     private final TagRepository tagRepository;
+    private final UserProfileService userProfileService;
+    private static final int MAX_CANDIDATES_FOR_JOB = 5;
 
     public PaginatedJobDto getAllJobs(JobQuery jobQuery, int pageNumber, int pageSize) {
         PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
@@ -143,12 +148,12 @@ public class JobService {
         var totalExperience = userProfile.getExperiences().stream()
                 .mapToLong(exp -> {
                     String fromYear = exp.getFrom().replace(" ", "");
-                    String toYear = exp.getTo().replace(" ", "");
+                    String toYear = exp.getTo() != null ? exp.getTo().replace(" ", "") : "present";
                     System.out.println(fromYear + " - " + toYear);
-                    if (fromYear != null && !toYear.equals("present")) {
+                    if (fromYear != null && toYear != null && !toYear.equals("present")) {
                         System.out.println("present".equals(toYear));
                         return Long.parseLong(toYear) - Long.parseLong(fromYear);
-                    } else if (toYear.equals("present")) {
+                    } else if (toYear == null || toYear.equals("present")) {
                         var currentYear = String.valueOf(java.time.LocalDate.now().getYear());
                         return Long.parseLong(currentYear) - Long.parseLong(fromYear);
                     }
@@ -185,4 +190,33 @@ public class JobService {
         return Long.valueOf(Math.min(score, maxScore));
     }
 
+    public Map<UserProfile, Integer> findCandidatesForJob(Long jobId) {
+        // Get the job
+        // Calculate match score for each user profile
+        // Return list of matching candidates sorted by match score (top 15)
+
+        var job = getJobById(jobId);
+        if (job == null) {
+            throw new JobNotFoundException("Job with id " + jobId + " not found");
+        }
+
+        var userProfiles = userProfileService.getAllUserProfiles();
+        PriorityQueue<int[]> topCandidates = new PriorityQueue<>((a, b) -> a[0] - b[0]);
+        for (var i = 0; i < userProfiles.size(); i++) {
+            var userProfile = userProfiles.get(i);
+            var matchScore = checkJobMatch(jobId, userProfile);
+            topCandidates.add(new int[] { matchScore.intValue(), i });
+            if (topCandidates.size() > MAX_CANDIDATES_FOR_JOB) {
+                topCandidates.remove();
+            }
+        }
+        Map<UserProfile, Integer> result = new HashMap<>();
+        // Process the top candidates
+        for (int[] candidate : topCandidates) {
+            var score = candidate[0];
+            var userProfile = userProfiles.get(candidate[1]);
+            result.put(userProfile, score);
+        }
+        return result;
+    }
 }

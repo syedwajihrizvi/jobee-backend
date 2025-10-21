@@ -2,7 +2,6 @@ package com.rizvi.jobee.mappers;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.springframework.data.jpa.repository.EntityGraph;
 
 import com.rizvi.jobee.dtos.application.ApplicantSummaryForBusinessDto;
 import com.rizvi.jobee.dtos.application.ApplicationDetailsForBusinessDto;

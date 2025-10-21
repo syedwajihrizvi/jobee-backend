@@ -1,6 +1,7 @@
 package com.rizvi.jobee.controllers;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,8 +22,10 @@ import com.rizvi.jobee.dtos.job.JobDetailedSummaryForBusinessDto;
 import com.rizvi.jobee.dtos.job.JobSummaryDto;
 import com.rizvi.jobee.dtos.job.JobSummaryForBusinessDto;
 import com.rizvi.jobee.dtos.job.PaginatedJobResponseDto;
+import com.rizvi.jobee.dtos.user.FindCandidateDto;
 import com.rizvi.jobee.entities.Application;
 import com.rizvi.jobee.entities.Job;
+import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.BusinessNotFoundException;
 import com.rizvi.jobee.mappers.JobMapper;
@@ -200,4 +203,25 @@ public class JobController {
         return ResponseEntity.ok(dto);
     }
 
+    @GetMapping("/{id}/find-candidates")
+    @Operation(summary = "Find matching candidates for a specific job")
+    public ResponseEntity<List<FindCandidateDto>> findMatchingCandidatesForJob(
+            @PathVariable Long id) {
+        Map<UserProfile, Integer> result = jobService.findCandidatesForJob(id);
+        List<FindCandidateDto> candidateDtos = result.entrySet().stream()
+                .map(entry -> {
+                    UserProfile userProfile = entry.getKey();
+                    Integer score = entry.getValue();
+                    FindCandidateDto dto = new FindCandidateDto();
+                    dto.setId(userProfile.getAccount().getId());
+                    dto.setFullName(userProfile.getFullName());
+                    dto.setLocation(userProfile.getLocation());
+                    dto.setProfileImageUrl(userProfile.getProfileImageUrl());
+                    dto.setTitle(userProfile.getTitle());
+                    dto.setMatchScore(score);
+                    return dto;
+                })
+                .toList();
+        return ResponseEntity.ok(candidateDtos);
+    }
 }

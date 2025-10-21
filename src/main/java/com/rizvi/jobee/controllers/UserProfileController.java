@@ -29,6 +29,7 @@ import com.rizvi.jobee.dtos.user.UpdateUserProfileGeneralInfoDto;
 import com.rizvi.jobee.dtos.user.UpdateUserProfileSummaryDto;
 import com.rizvi.jobee.dtos.user.UserProfileDashboardSummaryDto;
 import com.rizvi.jobee.dtos.user.UserProfileSummaryDto;
+import com.rizvi.jobee.dtos.user.UserProfileSummaryForBusinessDto;
 import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.AmazonS3Exception;
@@ -36,6 +37,7 @@ import com.rizvi.jobee.exceptions.JobNotFoundException;
 import com.rizvi.jobee.mappers.ApplicationMapper;
 import com.rizvi.jobee.mappers.JobMapper;
 import com.rizvi.jobee.mappers.UserMapper;
+import com.rizvi.jobee.mappers.UserProfileMapper;
 import com.rizvi.jobee.principals.CustomPrincipal;
 import com.rizvi.jobee.repositories.ApplicationRepository;
 import com.rizvi.jobee.repositories.JobRepository;
@@ -64,6 +66,7 @@ public class UserProfileController {
         private final UserMapper userMapper;
         private final JobMapper jobMapper;
         private final ApplicationMapper applicationMapper;
+        private final UserProfileMapper userAccountMapper;
 
         @GetMapping()
         @Operation(summary = "Get all user profiles")
@@ -78,12 +81,12 @@ public class UserProfileController {
 
         @GetMapping("/{id}")
         @Operation(summary = "Get user profile by ID")
-        public ResponseEntity<UserProfileSummaryDto> getProfileById(@PathVariable Long id) {
+        public ResponseEntity<UserProfileSummaryForBusinessDto> getProfileById(@PathVariable Long id) {
                 var userProfile = userProfileService.getUserProfileById(id);
                 if (userProfile == null) {
                         throw new AccountNotFoundException("User profile not found");
                 }
-                var userProfileDto = userMapper.toProfileSummaryDto(userProfile);
+                var userProfileDto = userAccountMapper.toSummaryDto(userProfile);
                 return ResponseEntity.ok(userProfileDto);
         }
 
