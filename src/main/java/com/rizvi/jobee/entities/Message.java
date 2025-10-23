@@ -13,6 +13,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -56,4 +58,14 @@ public class Message {
     @Column(name = "receiver_type", nullable = false)
     @Enumerated(value = EnumType.STRING)
     private MessagerUserType receiverType;
+
+    @ManyToOne()
+    @JoinColumn(name = "conversation_id", nullable = false)
+    private Conversation conversation;
+
+    public Boolean messageSentByUser(Long userId, String userRole) {
+        var userType = userRole.equals("BUSINESS") || userRole.equals("ADMIN") ? MessagerUserType.BUSINESS
+                : MessagerUserType.USER;
+        return this.senderId.equals(userId) && this.senderType == userType;
+    }
 }

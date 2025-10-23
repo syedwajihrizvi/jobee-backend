@@ -11,6 +11,7 @@ public class ConversationDto {
     private String lastMessageContent;
     private String participantName;
     private String participantProfileImageUrl;
+    private String participantRole;
     private Long participantId;
     private LocalDateTime lastMessageTimestamp;
     private Boolean wasLastMessageSender;

@@ -7,11 +7,7 @@ import lombok.Data;
 @Data
 public class MessageDto {
     private Long id;
-    private String content;
-    private LocalDateTime dateReceived;
-    private String from;
-    private String to;
-    private String senderProfileImageUrl;
-    private String receiverProfileImageUrl;
-    private Boolean read;
+    private String text;
+    private LocalDateTime timestamp;
+    private Boolean sentByUser;
 }

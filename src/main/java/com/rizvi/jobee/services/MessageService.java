@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.rizvi.jobee.dtos.message.ConversationDto;
+import com.rizvi.jobee.dtos.message.ConversationMessageRequestDto;
 import com.rizvi.jobee.entities.Conversation;
 import com.rizvi.jobee.entities.Message;
 import com.rizvi.jobee.enums.MessagerUserType;
@@ -48,6 +49,7 @@ public class MessageService {
                 profileInfos.put("name", name);
                 profileInfos.put("profileImageUrl", profileImageUrl);
                 profileInfos.put("id", businessAccount.getId().toString());
+                profileInfos.put("role", MessagerUserType.BUSINESS.name());
                 return profileInfos;
             }
         } else {
@@ -58,6 +60,7 @@ public class MessageService {
                 profileInfos.put("name", name);
                 profileInfos.put("profileImageUrl", profileImageUrl);
                 profileInfos.put("id", userProfile.getId().toString());
+                profileInfos.put("role", MessagerUserType.USER.name());
                 return profileInfos;
             }
         }
@@ -89,6 +92,7 @@ public class MessageService {
                 conversationDto.setParticipantName(profileInfo.get("name"));
                 conversationDto.setParticipantProfileImageUrl(profileInfo.get("profileImageUrl"));
                 conversationDto.setParticipantId(Long.valueOf(profileInfo.get("id")));
+                conversationDto.setParticipantRole(profileInfo.get("role"));
                 // Set the participant info accoringly
             } else {
                 conversationDto.setWasLastMessageSender(false);
@@ -97,10 +101,19 @@ public class MessageService {
                 conversationDto.setParticipantName(profileInfo.get("name"));
                 conversationDto.setParticipantProfileImageUrl(profileInfo.get("profileImageUrl"));
                 conversationDto.setParticipantId(Long.valueOf(profileInfo.get("id")));
+                conversationDto.setParticipantRole(profileInfo.get("role"));
                 // Set the participant info accordingly
             }
             conversationDtos.add(conversationDto);
         }
         return conversationDtos;
+    }
+
+    public List<Message> getMessagesBetweenUsers(Long userId, String userRole,
+            ConversationMessageRequestDto requestDto) {
+        Long conversationId = requestDto.getConversationId();
+        Sort sort = Sort.by("timestamp").ascending();
+        List<Message> messages = messageRepository.findMessagesByConversationId(conversationId, sort);
+        return messages;
     }
 }
