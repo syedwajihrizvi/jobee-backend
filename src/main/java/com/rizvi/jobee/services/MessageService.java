@@ -19,6 +19,7 @@ import com.rizvi.jobee.repositories.ConversationRepository;
 import com.rizvi.jobee.repositories.MessageRepository;
 import com.rizvi.jobee.repositories.UserProfileRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -71,7 +72,6 @@ public class MessageService {
         var userType = userRole.equals(Role.BUSINESS.name()) || userRole.equals(Role.ADMIN.name())
                 ? MessagerUserType.BUSINESS
                 : MessagerUserType.USER;
-        System.out.println("Determined userType: " + userType);
         Sort sort = Sort.by("updatedAt").descending();
         List<Conversation> conversations = conversationRepository.findConversationsForUserIdAndUserType(userId,
                 userType, sort);
@@ -115,5 +115,67 @@ public class MessageService {
         Sort sort = Sort.by("timestamp").ascending();
         List<Message> messages = messageRepository.findMessagesByConversationId(conversationId, sort);
         return messages;
+    }
+
+    public Conversation getConversationBetweenUsers(Long userId, String userRole,
+            Long otherPartyId, String otherPartyRole) {
+        var userType = userRole.equals("BUSINESS") || userRole.equals("ADMIN")
+                ? MessagerUserType.BUSINESS
+                : MessagerUserType.USER;
+        var otherPartyType = otherPartyRole.equals("BUSINESS") || otherPartyRole.equals("ADMIN")
+                ? MessagerUserType.BUSINESS
+                : MessagerUserType.USER;
+        return conversationRepository.findConversationBetweenParticipants(
+                userId, userType, otherPartyId, otherPartyType);
+    }
+
+    public Conversation createConversationBetweenUsers(
+            Long userId, String userRole,
+            Long otherPartyId, String otherPartyRole) {
+        var userType = userRole.equals("BUSINESS") || userRole.equals("ADMIN")
+                ? MessagerUserType.BUSINESS
+                : MessagerUserType.USER;
+        var otherPartyType = otherPartyRole.equals("BUSINESS") || otherPartyRole.equals("ADMIN")
+                ? MessagerUserType.BUSINESS
+                : MessagerUserType.USER;
+        // Check if conversation already exists
+        Conversation existingConversation = conversationRepository.findConversationBetweenParticipants(
+                userId, userType, otherPartyId, otherPartyType);
+        if (existingConversation != null) {
+            return existingConversation;
+        }
+        // Create new conversation
+        Conversation conversation = new Conversation();
+        conversation.setParticipantOneId(userId);
+        conversation.setParticipantOneType(userType);
+        conversation.setParticipantTwoId(otherPartyId);
+        conversation.setParticipantTwoType(otherPartyType);
+        return conversationRepository.save(conversation);
+    }
+
+    @Transactional
+    public Message saveMessage(Message message) {
+        // Check to see if a conversation exists between the two parties
+        Long senderId = message.getSenderId();
+        Long receiverId = message.getReceiverId();
+        MessagerUserType senderType = message.getSenderType();
+        MessagerUserType receiverType = message.getReceiverType();
+        Conversation conversation = conversationRepository.findConversationBetweenParticipants(
+                senderId, senderType, receiverId, receiverType);
+        // Create new conversation if it does not exist
+        if (conversation == null) {
+            conversation = new Conversation();
+            conversation.setParticipantOneId(senderId);
+            conversation.setParticipantOneType(senderType);
+            conversation.setParticipantTwoId(receiverId);
+            conversation.setParticipantTwoType(receiverType);
+            conversation = conversationRepository.save(conversation);
+        }
+        // Add the message to the conversation
+        message.setConversation(conversation);
+        Message savedMessage = messageRepository.save(message);
+        conversation.setLastMessageId(savedMessage.getId());
+        conversationRepository.save(conversation);
+        return savedMessage;
     }
 }

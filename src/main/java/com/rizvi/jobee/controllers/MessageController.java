@@ -4,16 +4,20 @@ import java.util.List;
 
 import com.rizvi.jobee.dtos.message.ConversationDto;
 import com.rizvi.jobee.dtos.message.ConversationMessageRequestDto;
+import com.rizvi.jobee.dtos.message.CreateConversationDto;
 import com.rizvi.jobee.dtos.message.MessageDto;
+import com.rizvi.jobee.entities.Conversation;
+import com.rizvi.jobee.enums.MessagerUserType;
+import com.rizvi.jobee.mappers.MessageMapper;
 import com.rizvi.jobee.services.MessageService;
-
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 
 import com.rizvi.jobee.principals.CustomPrincipal;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -26,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/messages")
 public class MessageController {
     private final MessageService messageService;
+    private final MessageMapper messageMapper;
 
     @GetMapping("/conversations")
     public ResponseEntity<List<ConversationDto>> getConversationsForAuthenticatedUser(
@@ -34,6 +39,35 @@ public class MessageController {
         var userRole = userPrincipal.getRole();
         var conversations = messageService.getConversationsForUser(userId, userRole);
         return ResponseEntity.ok(conversations);
+    }
+
+    @PostMapping("/conversations")
+    public ResponseEntity<Conversation> createConversationForAuthenticatedUser(
+            @AuthenticationPrincipal CustomPrincipal userPrincipal,
+            @RequestBody CreateConversationDto createConversationDto) {
+        var userId = userPrincipal.getId();
+        var userRole = userPrincipal.getRole();
+        var otherPartyId = Long.valueOf(createConversationDto.getOtherPartyId());
+        var otherPartyRole = createConversationDto.getOtherPartyRole();
+        var conversation = messageService.createConversationBetweenUsers(userId, userRole, otherPartyId,
+                otherPartyRole);
+        return ResponseEntity.ok(conversation);
+    }
+
+    @GetMapping("/conversationBetweenUsers")
+    public ResponseEntity<Long> getConversationBetweenUsers(
+            @AuthenticationPrincipal CustomPrincipal userPrincipal,
+            @RequestParam String otherPartyId,
+            @RequestParam String otherPartyRole) {
+        System.out.println("Other Party ID: " + otherPartyId);
+        var userId = userPrincipal.getId();
+        var userRole = userPrincipal.getRole();
+        var conversation = messageService.getConversationBetweenUsers(userId, userRole, Long.valueOf(otherPartyId),
+                otherPartyRole);
+        if (conversation == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(conversation.getId());
     }
 
     @GetMapping()
@@ -48,16 +82,14 @@ public class MessageController {
         requestDto.setConversationId(conversationId);
         requestDto.setOtherPartyId(otherPartyId);
         requestDto.setOtherPartyRole(otherPartyRole);
+        var userType = userRole.equals("BUSINESS") || userRole.equals("ADMIN")
+                ? MessagerUserType.BUSINESS
+                : MessagerUserType.USER;
         // Possible the conversationId is null
         var messages = messageService.getMessagesBetweenUsers(userId, userRole, requestDto);
-        List<MessageDto> messageDtos = messages.stream().map(message -> {
-            MessageDto messageDto = new MessageDto();
-            messageDto.setId(message.getId());
-            messageDto.setText(message.getText());
-            messageDto.setTimestamp(message.getTimestamp());
-            messageDto.setSentByUser(message.messageSentByUser(userId, userRole));
-            return messageDto;
-        }).toList();
+        List<MessageDto> messageDtos = messages.stream()
+                .map(message -> messageMapper.toMessageDto(message, userId, userType))
+                .toList();
         return ResponseEntity.ok(messageDtos);
     }
 }

@@ -21,12 +21,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 @Entity
 @Table(name = "messages")
 public class Message {
@@ -63,9 +65,13 @@ public class Message {
     @JoinColumn(name = "conversation_id", nullable = false)
     private Conversation conversation;
 
-    public Boolean messageSentByUser(Long userId, String userRole) {
+    public Boolean messageSentByUserWithRole(Long userId, String userRole) {
         var userType = userRole.equals("BUSINESS") || userRole.equals("ADMIN") ? MessagerUserType.BUSINESS
                 : MessagerUserType.USER;
+        return this.senderId.equals(userId) && this.senderType == userType;
+    }
+
+    public Boolean messageSentByUserWithType(Long userId, MessagerUserType userType) {
         return this.senderId.equals(userId) && this.senderType == userType;
     }
 }

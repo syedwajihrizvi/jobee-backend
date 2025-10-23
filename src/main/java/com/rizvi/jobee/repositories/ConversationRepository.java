@@ -14,4 +14,12 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
             "(c.participantOneId = :userId and c.participantOneType = :userType) or " +
             "(c.participantTwoId = :userId and c.participantTwoType = :userType)")
     List<Conversation> findConversationsForUserIdAndUserType(Long userId, MessagerUserType userType, Sort sort);
+
+    @Query("select c from Conversation c where " +
+            "(c.participantOneId = :idOne and c.participantOneType = :typeOne and " +
+            " c.participantTwoId = :idTwo and c.participantTwoType = :typeTwo) or " +
+            "(c.participantOneId = :idTwo and c.participantOneType = :typeTwo and " +
+            " c.participantTwoId = :idOne and c.participantTwoType = :typeOne)")
+    Conversation findConversationBetweenParticipants(Long idOne, MessagerUserType typeOne, Long idTwo,
+            MessagerUserType typeTwo);
 }

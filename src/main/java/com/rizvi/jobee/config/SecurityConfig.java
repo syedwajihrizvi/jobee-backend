@@ -63,6 +63,7 @@ public class SecurityConfig {
                         .requestMatchers("/app/**").permitAll()
                         .requestMatchers("/topic/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/messages/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/messages/conversations").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/companies/**").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/api/companies/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/user-documents/**").permitAll()
