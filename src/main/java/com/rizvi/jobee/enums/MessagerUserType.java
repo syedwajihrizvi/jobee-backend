@@ -1,7 +1,6 @@
 package com.rizvi.jobee.enums;
 
-public enum Roles {
+public enum MessagerUserType {
     USER,
-    BUSINESS,
-    ADMIN
+    BUSINESS
 }

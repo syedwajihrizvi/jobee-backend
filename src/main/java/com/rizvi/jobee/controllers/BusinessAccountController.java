@@ -18,7 +18,7 @@ import com.rizvi.jobee.dtos.user.LoginDto;
 import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.Company;
 import com.rizvi.jobee.enums.BusinessType;
-import com.rizvi.jobee.enums.Roles;
+import com.rizvi.jobee.enums.Role;
 import com.rizvi.jobee.exceptions.AlreadyRegisteredException;
 import com.rizvi.jobee.exceptions.IncorrectEmailOrPasswordException;
 import com.rizvi.jobee.mappers.BusinessMapper;
@@ -75,7 +75,7 @@ public class BusinessAccountController {
         if (businessAccount == null || !passwordEncoder.matches(password, businessAccount.getPassword())) {
             throw new IncorrectEmailOrPasswordException("Invalid email or password");
         }
-        var jwtToken = jwtService.generateToken(businessAccount.getEmail(), Roles.BUSINESS, businessAccount.getId());
+        var jwtToken = jwtService.generateToken(businessAccount.getEmail(), Role.BUSINESS, businessAccount.getId());
         return ResponseEntity.ok(new JwtDto(jwtToken));
     }
 

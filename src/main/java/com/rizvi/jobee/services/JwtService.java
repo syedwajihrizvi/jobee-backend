@@ -6,7 +6,7 @@ import java.util.Date;
 import org.springframework.stereotype.Service;
 
 import com.rizvi.jobee.config.JwtConfig;
-import com.rizvi.jobee.enums.Roles;
+import com.rizvi.jobee.enums.Role;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -17,7 +17,7 @@ import lombok.AllArgsConstructor;
 public class JwtService {
     private JwtConfig jwtConfig;
 
-    public String generateToken(String email, Roles role, Long id) {
+    public String generateToken(String email, Role role, Long id) {
         return Jwts.builder()
                 .subject(email)
                 .claim("role", role)

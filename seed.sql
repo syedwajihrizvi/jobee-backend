@@ -563,20 +563,49 @@
 -- UPDATE user_profiles SET city = 'Laval', province = 'QC', country = 'Canada' WHERE id = 99;
 -- UPDATE user_profiles SET city = 'Halifax', province = 'NS', country = 'Canada' WHERE id = 100;
 
-UPDATE user_skills SET experience = 1 WHERE id = 691;
-UPDATE user_skills SET experience = 2 WHERE id = 692;
-UPDATE user_skills SET experience = 1 WHERE id = 693;
-UPDATE user_skills SET experience = 4 WHERE id = 694;
-UPDATE user_skills SET experience = 3 WHERE id = 695;
-UPDATE user_skills SET experience = 5 WHERE id = 696;
-UPDATE user_skills SET experience = 2 WHERE id = 697;
-UPDATE user_skills SET experience = 7 WHERE id = 698;
-UPDATE user_skills SET experience = 3 WHERE id = 699;
-UPDATE user_skills SET experience = 6 WHERE id = 700;
-UPDATE user_skills SET experience = 1 WHERE id = 701;
-UPDATE user_skills SET experience = 9 WHERE id = 702;
-UPDATE user_skills SET experience = 4 WHERE id = 703;
-UPDATE user_skills SET experience = 8 WHERE id = 704;
-UPDATE user_skills SET experience = 2 WHERE id = 705;
-UPDATE user_skills SET experience = 5 WHERE id = 706;
-UPDATE user_skills SET experience = 3 WHERE id = 707;
+-- UPDATE user_skills SET experience = 1 WHERE id = 691;
+-- UPDATE user_skills SET experience = 2 WHERE id = 692;
+-- UPDATE user_skills SET experience = 1 WHERE id = 693;
+-- UPDATE user_skills SET experience = 4 WHERE id = 694;
+-- UPDATE user_skills SET experience = 3 WHERE id = 695;
+-- UPDATE user_skills SET experience = 5 WHERE id = 696;
+-- UPDATE user_skills SET experience = 2 WHERE id = 697;
+-- UPDATE user_skills SET experience = 7 WHERE id = 698;
+-- UPDATE user_skills SET experience = 3 WHERE id = 699;
+-- UPDATE user_skills SET experience = 6 WHERE id = 700;
+-- UPDATE user_skills SET experience = 1 WHERE id = 701;
+-- UPDATE user_skills SET experience = 9 WHERE id = 702;
+-- UPDATE user_skills SET experience = 4 WHERE id = 703;
+-- UPDATE user_skills SET experience = 8 WHERE id = 704;
+-- UPDATE user_skills SET experience = 2 WHERE id = 705;
+-- UPDATE user_skills SET experience = 5 WHERE id = 706;
+-- UPDATE user_skills SET experience = 3 WHERE id = 707;
+
+-- INSERT INTO conversations (id, participant_one_id, participant_two_id, participant_one_type, participant_two_type) VALUES
+-- (1, 2, 54, 'USER', 'BUSINESS');
+-- INSERT MESSAGES BETWEEN USERS AND BUSINESS PROFILES
+-- INSERT FOR USER WITH ID 2 AND BUSINESS PROFILE ID OF 54
+-- INSERT INTO messages (id, text, sender_id, receiver_id, timestamp, read, sender_type, receiver_type, conversation_id) VALUES
+-- (1, 'Hello, I am interested in the Software Engineer position at your company. Could you provide more details about the role?', 2, 54, NOW() - INTERVAL '5 days', FALSE, 'USER', 'BUSINESS', 1),
+-- (2, 'Thank you for reaching out! The Software Engineer position involves developing and maintaining software applications. We are looking for candidates with experience in Python and React. Would you like to schedule an interview?', 54, 2, NOW() - INTERVAL '4 days 18 hours', FALSE, 'BUSINESS', 'USER', 1),
+-- (3, 'Yes, I would love to schedule an interview. Please let me know the available dates and times.', 2, 54, NOW() - INTERVAL '4 days 16 hours', FALSE, 'USER', 'BUSINESS', 1),
+-- (4, 'Great! We have openings for interviews next week on Tuesday and Thursday at 10 AM or 2 PM. Which time works best for you?', 54, 2, NOW() - INTERVAL '3 days 14 hours', FALSE, 'BUSINESS', 'USER', 1),
+-- (5, 'I can do Thursday at 10 AM. Please send me the details.', 2, 54, NOW() - INTERVAL '3 days 10 hours', FALSE, 'USER', 'BUSINESS', 1),
+-- (6, 'Thursday at 10 AM is confirmed. We will send you a calendar invite with the interview details shortly. Looking forward to speaking with you!', 54, 2, NOW() - INTERVAL '2 days 8 hours', FALSE, 'BUSINESS', 'USER', 1);
+
+-- INSERT INTO conversations (id, participant_one_id, participant_two_id, participant_one_type, participant_two_type) VALUES
+-- (2, 2, 1, 'USER', 'BUSINESS');
+
+-- INSERT MESSAGES BETWEEN USERS AND BUSINESS PROFILES
+-- INSERT FOR USER WITH ID 2 AND BUSINESS PROFILE ID OF 1
+INSERT INTO messages (id, text, sender_id, receiver_id, timestamp, read, sender_type, receiver_type, conversation_id) VALUES
+(7, 'Hello, I would love to speak to you about an opening in our company?', 1, 2, NOW() - INTERVAL '5 days', FALSE, 'BUSINESS', 'USER', 2),
+(8, 'Thank you for reaching out! I''m very interested in learning more about this opportunity.', 2, 1, NOW() - INTERVAL '4 days 20 hours', FALSE, 'USER', 'BUSINESS', 2),
+(9, 'Great! The Software Engineer position involves developing and maintaining software applications. We are looking for candidates with experience in Python and React. Could you tell me about your background?', 1, 2, NOW() - INTERVAL '4 days 15 hours', FALSE, 'BUSINESS', 'USER', 2),
+(10, 'I have 3 years of experience with Python and 2 years with React. I''ve worked on several full-stack applications and have experience with database design and API development.', 2, 1, NOW() - INTERVAL '4 days 10 hours', FALSE, 'USER', 'BUSINESS', 2),
+(11, 'That sounds perfect for our needs! We also work with PostgreSQL and Spring Boot. Are you familiar with those technologies?', 1, 2, NOW() - INTERVAL '4 days 2 hours', FALSE, 'BUSINESS', 'USER', 2),
+(12, 'Yes, I have experience with PostgreSQL and I''ve been learning Spring Boot recently. I''m always eager to expand my skill set.', 2, 1, NOW() - INTERVAL '3 days 18 hours', FALSE, 'USER', 'BUSINESS', 2),
+(13, 'Excellent! Would you like to schedule an interview? We have openings next week on Tuesday and Thursday at 10 AM or 2 PM.', 1, 2, NOW() - INTERVAL '3 days 8 hours', FALSE, 'BUSINESS', 'USER', 2),
+(14, 'I can do Thursday at 10 AM. That would work perfectly for me.', 2, 1, NOW() - INTERVAL '3 days 4 hours', FALSE, 'USER', 'BUSINESS', 2),
+(15, 'Thursday at 10 AM is confirmed. We will send you a calendar invite with the interview details and meeting link shortly. Looking forward to speaking with you!', 1, 2, NOW() - INTERVAL '2 days 22 hours', FALSE, 'BUSINESS', 'USER', 2),
+(16, 'Thank you so much! I received the calendar invite. I''m looking forward to our conversation and learning more about the role and your company culture.', 2, 1, NOW() - INTERVAL '2 days 18 hours', FALSE, 'USER', 'BUSINESS', 2);

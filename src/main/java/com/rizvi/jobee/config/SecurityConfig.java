@@ -17,7 +17,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.rizvi.jobee.enums.Roles;
+import com.rizvi.jobee.enums.Role;
 import com.rizvi.jobee.filters.JwtFilter;
 import com.rizvi.jobee.services.AccountService;
 
@@ -59,6 +59,10 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers(HttpMethod.POST, "/accounts/register", "/accounts/login")
                         .permitAll()
+                        .requestMatchers("/ws-chat/**").permitAll()
+                        .requestMatchers("/app/**").permitAll()
+                        .requestMatchers("/topic/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/messages/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/companies/**").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/api/companies/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/user-documents/**").permitAll()
@@ -98,8 +102,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/applications").permitAll()
                         .requestMatchers(HttpMethod.GET, "/applications/**").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/applications/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/jobs").hasAuthority(Roles.BUSINESS.name())
-                        .requestMatchers(HttpMethod.DELETE, "/jobs/**").hasAuthority(Roles.BUSINESS.name())
+                        .requestMatchers(HttpMethod.POST, "/jobs").hasAuthority(Role.BUSINESS.name())
+                        .requestMatchers(HttpMethod.DELETE, "/jobs/**").hasAuthority(Role.BUSINESS.name())
                         .requestMatchers(HttpMethod.POST, "/applications/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/interviews").permitAll()
                         .requestMatchers(HttpMethod.GET, "/interviews/**").permitAll())

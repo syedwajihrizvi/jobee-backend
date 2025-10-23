@@ -134,7 +134,10 @@
         <artifactId>auth</artifactId>
         <version>2.25.43</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.vladmihalcea</groupId>
             <artifactId>hibernate-types-60</artifactId> <!-- or hibernate-types-52 for Hibernate 5 -->

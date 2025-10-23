@@ -29,7 +29,6 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         var authHeader = request.getHeader("x-auth-token");
-        System.out.println(authHeader);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             System.out.println("No JWT token found in request header");
             filterChain.doFilter(request, response);

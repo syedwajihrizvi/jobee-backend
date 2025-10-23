@@ -17,7 +17,7 @@ import com.rizvi.jobee.dtos.user.UserAccountSummaryDto;
 import com.rizvi.jobee.mappers.UserMapper;
 import com.rizvi.jobee.entities.UserAccount;
 import com.rizvi.jobee.entities.UserProfile;
-import com.rizvi.jobee.enums.Roles;
+import com.rizvi.jobee.enums.Role;
 import com.rizvi.jobee.exceptions.IncorrectEmailOrPasswordException;
 import com.rizvi.jobee.repositories.UserAccountRepository;
 import com.rizvi.jobee.services.JwtService;
@@ -65,7 +65,7 @@ public class UserAccountController {
         if (userAccount == null) {
             throw new IncorrectEmailOrPasswordException("Invalid email or password");
         }
-        var jwtToken = jwtService.generateToken(userAccount.getEmail(), Roles.USER, userAccount.getId());
+        var jwtToken = jwtService.generateToken(userAccount.getEmail(), Role.USER, userAccount.getId());
         return ResponseEntity.ok(new JwtDto(jwtToken));
     }
 
