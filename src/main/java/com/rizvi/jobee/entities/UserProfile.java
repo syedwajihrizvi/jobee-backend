@@ -124,6 +124,10 @@ public class UserProfile {
 
     @OneToMany(mappedBy = "userProfile", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    private Set<Social> socials = new HashSet<>();
+
+    @OneToMany(mappedBy = "userProfile", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private Set<Application> applications = new HashSet<>();
 
     public void setAccount(UserAccount account) {

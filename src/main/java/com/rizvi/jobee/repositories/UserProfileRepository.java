@@ -25,4 +25,7 @@ public interface UserProfileRepository extends JpaRepository<UserProfile, Long> 
     @Query("select p from UserProfile p")
     List<UserProfile> findAllUserProfilesWithDetails();
 
+    @Query("select p from UserProfile p where p.phoneNumber = :phoneNumber")
+    Optional<UserProfile> findByPhoneNumber(String phoneNumber);
+
 }

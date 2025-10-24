@@ -24,6 +24,10 @@ public class BusinessProfileService {
         return businessProfileRepository.findBusinessProfileByEmail(email.replace(" ", ""));
     }
 
+    public BusinessProfile getUserProfileById(Long userId) {
+        return businessProfileRepository.findById(userId).orElse(null);
+    }
+
     public BusinessProfile updateBusinessProfileGeneralInfo(UpdateBusinessProfileGeneralInfoDto request, Long userId) {
         var businessProfile = businessProfileRepository.findById(userId).orElse(null);
         var businessAccount = businessProfile.getBusinessAccount();
