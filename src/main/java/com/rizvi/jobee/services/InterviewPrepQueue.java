@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import com.rizvi.jobee.entities.InterviewPreparation;
 import com.rizvi.jobee.helpers.AISchemas.PrepareForInterviewRequest;
 import com.rizvi.jobee.helpers.AISchemas.PrepareForInterviewResponse;
-import com.rizvi.jobee.intefaces.NotificationService;
+import com.rizvi.jobee.interfaces.NotificationService;
 import com.rizvi.jobee.repositories.InterviewPreparationRepository;
 
 import lombok.AllArgsConstructor;

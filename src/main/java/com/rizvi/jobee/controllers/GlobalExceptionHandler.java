@@ -12,6 +12,7 @@ import com.rizvi.jobee.exceptions.AlreadyRegisteredException;
 import com.rizvi.jobee.exceptions.AmazonS3Exception;
 import com.rizvi.jobee.exceptions.CompanyNotFoundException;
 import com.rizvi.jobee.exceptions.IncorrectEmailOrPasswordException;
+import com.rizvi.jobee.exceptions.InvalidDocumentURLLinkException;
 import com.rizvi.jobee.exceptions.SkillNotFoundException;
 
 @ControllerAdvice
@@ -51,5 +52,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AlreadyRegisteredException.class)
     public ResponseEntity<Map<String, String>> handleAlreadyRegisteredException(AlreadyRegisteredException ex) {
         return ResponseEntity.badRequest().body(Map.of("Error", "Already registered: " + ex.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidDocumentURLLinkException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidDocumentURLLinkException(
+            InvalidDocumentURLLinkException ex) {
+        return ResponseEntity.badRequest().body(Map.of("Error", "Invalid document URL link: " + ex.getMessage()));
     }
 }

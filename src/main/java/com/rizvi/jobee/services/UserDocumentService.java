@@ -7,8 +7,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.rizvi.jobee.entities.UserDocument;
 import com.rizvi.jobee.entities.UserProfile;
+import com.rizvi.jobee.enums.DocumentUrlType;
 import com.rizvi.jobee.enums.UserDocumentType;
 import com.rizvi.jobee.exceptions.InvalidDocumentException;
+import com.rizvi.jobee.exceptions.InvalidDocumentURLLinkException;
 import com.rizvi.jobee.repositories.UserDocumentRepository;
 import com.rizvi.jobee.repositories.UserProfileRepository;
 
@@ -18,6 +20,8 @@ import lombok.AllArgsConstructor;
 @Service
 public class UserDocumentService {
     private final S3Service s3Service;
+    private final GoogleDriveService googleDriveService;
+    private final DropBoxService dropboxService;
     private final UserDocumentRepository userDocumentRepository;
     private final UserProfileRepository userProfileRepository;
     private final AIService aiService;
@@ -85,5 +89,39 @@ public class UserDocumentService {
     public UserDocument userDocumentExists(Long documentId, Long userId) {
         var document = userDocumentRepository.findByIdAndUserId(documentId, userId);
         return document;
+    }
+
+    // TODO: Throw proper exception that inherits from MalformedURLException
+    // TOD0: Throw proper expcetion for IOException
+    public UserDocument createDocumentViaLink(
+            UserProfile userProfile, String documentLink, UserDocumentType documentType, String title,
+            DocumentUrlType documentUrlType) throws InvalidDocumentURLLinkException {
+
+        // Validate Google Drive link
+        System.out.println("Validating Link: " + documentLink);
+        MultipartFile multipartFile = null;
+        if (documentUrlType == DocumentUrlType.GOOGLE_DRIVE) {
+            multipartFile = googleDriveService.createMultiPartFile(documentLink, title, documentType);
+        }
+        if (documentUrlType == DocumentUrlType.DROPBOX) {
+            multipartFile = dropboxService.createMultiPartFile(documentLink, title, documentType);
+        }
+
+        if (multipartFile.getSize() > 200_000) {
+            throw new InvalidDocumentException("File size exceeds the maximum limit of 200KB");
+
+        }
+        if (documentType == UserDocumentType.RESUME) {
+            extractResumeDetailsAndPopulateProfile(multipartFile, userProfile);
+        }
+        var result = uploadDocument(userProfile.getId(), multipartFile, documentType);
+        if (result == null) {
+            return null;
+        }
+        var userDocument = UserDocument.builder().documentType(documentType)
+                .documentUrl(result).title(title).user(userProfile).build();
+        userProfile.addDocument(userDocument);
+        userProfileRepository.save(userProfile);
+        return userDocument;
     }
 }

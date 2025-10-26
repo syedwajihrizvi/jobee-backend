@@ -2,22 +2,26 @@ package com.rizvi.jobee.controllers;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.rizvi.jobee.enums.DocumentUrlType;
 import com.rizvi.jobee.enums.UserDocumentType;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.mappers.UserDocumentMapper;
 import com.rizvi.jobee.principals.CustomPrincipal;
 import com.rizvi.jobee.repositories.UserProfileRepository;
 import com.rizvi.jobee.services.UserDocumentService;
+import com.rizvi.jobee.dtos.user.CreateDocViaLinkDto;
 import com.rizvi.jobee.dtos.user.UserDocumentDto;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -44,7 +48,7 @@ public class UserDocumentController {
 
         @PostMapping()
         @Operation(summary = "Create a user document via file")
-        public ResponseEntity<?> createUserDocumentViaFile(
+        public ResponseEntity<UserDocumentDto> createUserDocumentViaFile(
                         @RequestParam("document") MultipartFile document,
                         @RequestParam("documentType") String documentType,
                         @RequestParam(name = "title", required = false) String title,
@@ -60,6 +64,35 @@ public class UserDocumentController {
                         return ResponseEntity.badRequest().build();
                 }
 
+                var uri = uriComponentsBuilder.path("/user-documents/{id}")
+                                .buildAndExpand(createdDocument.getId())
+                                .toUri();
+                return ResponseEntity.created(uri).body(userDocumentMapper.toDto(createdDocument));
+        }
+
+        @PostMapping("/link")
+        @Operation(summary = "Create a user document via link")
+        public ResponseEntity<UserDocumentDto> createUserDocumentViaLink(
+                        @RequestBody CreateDocViaLinkDto request,
+                        @AuthenticationPrincipal CustomPrincipal principal,
+                        UriComponentsBuilder uriComponentsBuilder) {
+                System.out.println("Received request to create document via link: " +
+                                request);
+                Long userId = principal.getId();
+                var userProfile = userProfileRepository.findById(userId).orElseThrow(
+                                () -> new AccountNotFoundException("User profile not found"));
+                var documentType = UserDocumentType.valueOf(request.getDocumentType());
+                var documentUrlType = DocumentUrlType.valueOf(request.getDocumentUrlType());
+                var createdDocument = userDocumentService.createDocumentViaLink(
+                                userProfile,
+                                request.getDocumentLink(),
+                                documentType,
+                                request.getDocumentTitle(),
+                                documentUrlType);
+                if (createdDocument == null) {
+                        return ResponseEntity.badRequest().build();
+                }
+                System.out.println("Successfully created document via link: " + createdDocument.getId());
                 var uri = uriComponentsBuilder.path("/user-documents/{id}")
                                 .buildAndExpand(createdDocument.getId())
                                 .toUri();

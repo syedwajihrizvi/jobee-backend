@@ -55,7 +55,14 @@ public class UserDocument {
         if (documentUrl == null || !documentUrl.contains("/")) {
             return documentUrl;
         }
-        var res = documentUrl.substring(documentUrl.lastIndexOf('/') + 1, documentUrl.lastIndexOf('.'));
-        return res;
+
+        int lastSlashIndex = documentUrl.lastIndexOf('/');
+        int lastDotIndex = documentUrl.lastIndexOf('.');
+
+        if (lastDotIndex == -1 || lastDotIndex < lastSlashIndex) {
+            return documentUrl.substring(lastSlashIndex + 1);
+        }
+
+        return documentUrl.substring(lastSlashIndex + 1, lastDotIndex);
     }
 }

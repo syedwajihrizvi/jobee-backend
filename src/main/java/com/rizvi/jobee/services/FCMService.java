@@ -2,7 +2,7 @@ package com.rizvi.jobee.services;
 
 import org.springframework.stereotype.Service;
 
-import com.rizvi.jobee.intefaces.NotificationService;
+import com.rizvi.jobee.interfaces.NotificationService;
 
 import lombok.AllArgsConstructor;
 
