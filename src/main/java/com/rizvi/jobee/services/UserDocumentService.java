@@ -30,9 +30,9 @@ public class UserDocumentService {
     private final UserSkillService userSkillService;
 
     public String uploadDocument(
-            Long userId, MultipartFile document, UserDocumentType documentType) {
+            Long userId, MultipartFile document, UserDocumentType documentType, String title) {
         try {
-            var result = s3Service.uploadDocument(userId, document, documentType);
+            var result = s3Service.uploadDocument(userId, document, documentType, title);
             return result;
         } catch (Exception e) {
             return null;
@@ -50,7 +50,7 @@ public class UserDocumentService {
             throw new InvalidDocumentException("File size exceeds the maximum limit of 200KB");
         }
         var userId = userProfile.getId();
-        var result = uploadDocument(userId, document, documentType);
+        var result = uploadDocument(userId, document, documentType, title);
         if (result == null) {
             return null;
         }
@@ -114,7 +114,7 @@ public class UserDocumentService {
         if (documentType == UserDocumentType.RESUME) {
             extractResumeDetailsAndPopulateProfile(multipartFile, userProfile);
         }
-        var result = uploadDocument(userProfile.getId(), multipartFile, documentType);
+        var result = uploadDocument(userProfile.getId(), multipartFile, documentType, title);
         if (result == null) {
             return null;
         }

@@ -27,8 +27,9 @@ public class S3Service {
         private AWSProperties awsProperties;
 
         public String uploadDocument(
-                        Long userId, MultipartFile document, UserDocumentType documentType) throws IOException {
-                String originalName = document.getOriginalFilename();
+                        Long userId, MultipartFile document, UserDocumentType documentType, String title)
+                        throws IOException {
+                String originalName = title;
                 System.out.println("Original file name: " + originalName);
                 String safeFileName = originalName
                                 .trim()
