@@ -68,16 +68,23 @@ public class MessageService {
         return null;
     }
 
-    public List<ConversationDto> getConversationsForUser(Long userId, String userRole) {
+    public List<ConversationDto> getConversationsForUser(Long userId, String userRole, String search) {
         var userType = userRole.equals(Role.BUSINESS.name()) || userRole.equals(Role.ADMIN.name())
                 ? MessagerUserType.BUSINESS
                 : MessagerUserType.USER;
+        System.out.println("Search Param Received in Service: " + search);
         Sort sort = Sort.by("updatedAt").descending();
-        List<Conversation> conversations = conversationRepository.findConversationsForUserIdAndUserType(userId,
-                userType, sort);
+        List<Conversation> conversations = null;
+        if (search != null && !search.isEmpty()) {
+            conversations = conversationRepository.findConversationsForUserIdAndUserTypeWithSearch(userId, userType,
+                    sort, search);
+        } else {
+            conversations = conversationRepository.findConversationsForUserIdAndUserType(userId,
+                    userType, sort);
+        }
         List<ConversationDto> conversationDtos = new ArrayList<>();
         for (Conversation conversation : conversations) {
-            // Get the last message details
+
             Long lastMessageId = conversation.getLastMessageId();
             Message lastMessage = messageRepository.findById(lastMessageId).orElse(null);
             var conversationDto = new ConversationDto();
@@ -93,7 +100,6 @@ public class MessageService {
                 conversationDto.setParticipantProfileImageUrl(profileInfo.get("profileImageUrl"));
                 conversationDto.setParticipantId(Long.valueOf(profileInfo.get("id")));
                 conversationDto.setParticipantRole(profileInfo.get("role"));
-                // Set the participant info accoringly
             } else {
                 conversationDto.setWasLastMessageSender(false);
                 var profileInfo = getMessageProfileImageUrlAndName(lastMessage.getSenderId(),
@@ -144,12 +150,39 @@ public class MessageService {
         if (existingConversation != null) {
             return existingConversation;
         }
+        // Get the names of the participants
+        String participantOneName = null;
+        String participantTwoName = null;
+        if (userType == MessagerUserType.BUSINESS) {
+            var businessAccount = businessAccountRepository.findById(userId).orElse(null);
+            if (businessAccount != null) {
+                participantOneName = businessAccount.getFullName();
+            }
+        } else {
+            var userProfile = userProfileRepository.findById(userId).orElse(null);
+            if (userProfile != null) {
+                participantOneName = userProfile.getFullName();
+            }
+        }
+        if (otherPartyType == MessagerUserType.BUSINESS) {
+            var businessAccount = businessAccountRepository.findById(otherPartyId).orElse(null);
+            if (businessAccount != null) {
+                participantTwoName = businessAccount.getFullName();
+            }
+        } else {
+            var userProfile = userProfileRepository.findById(otherPartyId).orElse(null);
+            if (userProfile != null) {
+                participantTwoName = userProfile.getFullName();
+            }
+        }
         // Create new conversation
         Conversation conversation = new Conversation();
         conversation.setParticipantOneId(userId);
         conversation.setParticipantOneType(userType);
         conversation.setParticipantTwoId(otherPartyId);
         conversation.setParticipantTwoType(otherPartyType);
+        conversation.setParticipantOneName(participantOneName);
+        conversation.setParticipantTwoName(participantTwoName);
         return conversationRepository.save(conversation);
     }
 

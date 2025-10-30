@@ -62,6 +62,7 @@ public class SecurityConfig {
                         .requestMatchers("/ws-chat/**").permitAll()
                         .requestMatchers("/app/**").permitAll()
                         .requestMatchers("/topic/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/oauth2/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/messages/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/messages/conversations").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/companies/**").permitAll()

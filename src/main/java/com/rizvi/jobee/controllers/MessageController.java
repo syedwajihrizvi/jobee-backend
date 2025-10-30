@@ -34,10 +34,11 @@ public class MessageController {
 
     @GetMapping("/conversations")
     public ResponseEntity<List<ConversationDto>> getConversationsForAuthenticatedUser(
+            @RequestParam(required = false) String search,
             @AuthenticationPrincipal CustomPrincipal userPrincipal) {
         var userId = userPrincipal.getId();
         var userRole = userPrincipal.getRole();
-        var conversations = messageService.getConversationsForUser(userId, userRole);
+        var conversations = messageService.getConversationsForUser(userId, userRole, search);
         return ResponseEntity.ok(conversations);
     }
 

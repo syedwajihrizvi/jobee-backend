@@ -309,15 +309,13 @@ public class UserProfileController {
         @Transactional
         @Operation(summary = "User completes their profile using complete profile form on client side")
         public ResponseEntity<UserProfileSummaryDto> completeUserProfile(
-                        @RequestPart("resume") MultipartFile document,
                         @RequestPart("profileImage") MultipartFile profileImage,
                         @RequestPart(name = "videoIntro", required = false) MultipartFile videoIntro,
                         @RequestPart("data") String request,
-                        @RequestPart(name = "resumeTitle", required = false) String resumeTitle,
                         @AuthenticationPrincipal CustomPrincipal principal) throws RuntimeException, AmazonS3Exception {
                 var userId = principal.getId();
                 var userProfile = userProfileService.updateUserProfileViaCompleteProfile(
-                                document, profileImage, videoIntro, resumeTitle, request, userId);
+                                profileImage, videoIntro, request, userId);
                 return ResponseEntity.ok().body(userMapper.toProfileSummaryDto(userProfile));
         }
 

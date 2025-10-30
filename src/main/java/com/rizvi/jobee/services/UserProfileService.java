@@ -14,11 +14,9 @@ import com.rizvi.jobee.entities.QuickApplyTS;
 import com.rizvi.jobee.entities.UserAccount;
 import com.rizvi.jobee.entities.UserDocument;
 import com.rizvi.jobee.entities.UserProfile;
-import com.rizvi.jobee.enums.UserDocumentType;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.AmazonS3Exception;
 import com.rizvi.jobee.exceptions.CompanyNotFoundException;
-import com.rizvi.jobee.exceptions.InvalidDocumentException;
 import com.rizvi.jobee.repositories.CompanyRepository;
 import com.rizvi.jobee.repositories.QuickApplyTSRepository;
 import com.rizvi.jobee.repositories.UserAccountRepository;
@@ -38,7 +36,6 @@ public class UserProfileService {
     private final UserAccountRepository userAccountRepository;
     private final QuickApplyTSRepository quickApplyTSRepository;
     private final CompanyRepository companyRepository;
-    private final UserDocumentService userDocumentService;
     private final S3Service s3Service;
 
     public List<UserProfile> getAllUserProfiles() {
@@ -151,16 +148,12 @@ public class UserProfileService {
 
     @Transactional
     public UserProfile updateUserProfileViaCompleteProfile(
-            MultipartFile resume, MultipartFile profileImage, MultipartFile videoIntro, String resumeTitle,
+            MultipartFile profileImage, MultipartFile videoIntro,
             String request, Long userId)
             throws RuntimeException, AmazonS3Exception {
         var userProfile = userProfileRepository.findByAccountId(userId).orElse(null);
         if (userProfile == null) {
             throw new AccountNotFoundException("User profile not found");
-        }
-        if (resume.getSize() > 200_000) {
-            // TODO: Handle the exception properly
-            throw new InvalidDocumentException("Resume file size exceeds the limit of 200KB");
         }
         CompleteProfileDto completeProfileDto;
         try {
@@ -187,18 +180,6 @@ public class UserProfileService {
             } catch (Exception e) {
                 throw new AmazonS3Exception(e.getMessage());
             }
-        var resumeType = UserDocumentType.valueOf(UserDocumentType.RESUME.name());
-        var result = userDocumentService.uploadDocument(userId, resume, resumeType);
-        if (result == null) {
-            throw new RuntimeException("Failed to upload resume");
-        }
-        var userDocument = userDocumentService.createUserDocumentViaFile(resume, resumeType, userProfile,
-                resumeTitle, true);
-        if (userDocument == null) {
-            throw new RuntimeException("Failed to create user document");
-        }
-        // Get the resume details
-        userDocumentService.extractResumeDetailsAndPopulateProfile(resume, userProfile);
         var savedProfile = userProfileRepository.findByAccountId(userId).orElse(null);
         if (savedProfile == null) {
             throw new AccountNotFoundException("User profile not found");

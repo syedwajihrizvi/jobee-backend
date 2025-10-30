@@ -51,6 +51,12 @@ public class Conversation {
     @Enumerated(value = EnumType.STRING)
     private MessagerUserType participantTwoType;
 
+    @Column(name = "participant_one_name")
+    private String participantOneName;
+
+    @Column(name = "participant_two_name")
+    private String participantTwoName;
+
     @Column(name = "last_message_id")
     private Long lastMessageId;
 
