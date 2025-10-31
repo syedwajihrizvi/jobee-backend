@@ -49,21 +49,21 @@ public class DropBoxService implements LinkService {
             connection.setInstanceFollowRedirects(false);
             connection.setRequestMethod("GET");
             connection.connect();
-            int responseCode = connection.getResponseCode();
             String contentType = null;
-            System.out.println("HTTP Response Code: " + responseCode);
             byte[] documentBytes = inputStream.readAllBytes();
             contentType = fileService.detectMimeType(url, documentBytes, title);
-            var documentTitle = title != null ? title : "google_drive_document_" + documentType.name().toLowerCase();
+            var documentTitle = title != null && !title.isEmpty() ? title
+                    : "dropbox_document_" + documentType.name().toLowerCase();
+            System.out.println("Formatted title of documet: " + documentTitle);
             MultipartFile multipartFile = new MockMultipartFile(documentTitle, documentTitle,
                     contentType, documentBytes);
-            if (multipartFile.getSize() > 200_000) {
+            if (multipartFile.getSize() > 10_000_000) {
                 throw new InvalidDocumentException("File size exceeds the maximum limit of 200KB");
 
             }
             return multipartFile;
         } catch (Exception e) {
-            System.out.println("Exception while creating MultipartFile from Google Drive URL: " + e.getMessage());
+            System.out.println("Exception while creating MultipartFile from Dropbox URL: " + e.getMessage());
             return null;
         }
     }

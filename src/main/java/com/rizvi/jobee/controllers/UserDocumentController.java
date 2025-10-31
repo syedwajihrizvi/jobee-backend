@@ -57,7 +57,7 @@ public class UserDocumentController {
                 Long userId = principal.getId();
                 var userProfile = userProfileRepository.findById(userId).orElseThrow(
                                 () -> new AccountNotFoundException("User profile not found"));
-                var userDocumentType = UserDocumentType.valueOf(documentType); // Validate document type
+                var userDocumentType = UserDocumentType.valueOf(documentType);
                 var createdDocument = userDocumentService.createUserDocumentViaFile(document, userDocumentType,
                                 userProfile, title, false);
                 if (createdDocument == null) {

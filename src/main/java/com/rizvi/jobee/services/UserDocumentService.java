@@ -22,6 +22,7 @@ public class UserDocumentService {
     private final S3Service s3Service;
     private final GoogleDriveService googleDriveService;
     private final DropBoxService dropboxService;
+    private final OneDriveService oneDriveService;
     private final UserDocumentRepository userDocumentRepository;
     private final UserProfileRepository userProfileRepository;
     private final AIService aiService;
@@ -97,7 +98,6 @@ public class UserDocumentService {
             UserProfile userProfile, String documentLink, UserDocumentType documentType, String title,
             DocumentUrlType documentUrlType) throws InvalidDocumentURLLinkException {
 
-        // Validate Google Drive link
         System.out.println("Validating Link: " + documentLink);
         MultipartFile multipartFile = null;
         if (documentUrlType == DocumentUrlType.GOOGLE_DRIVE) {
@@ -106,7 +106,9 @@ public class UserDocumentService {
         if (documentUrlType == DocumentUrlType.DROPBOX) {
             multipartFile = dropboxService.createMultiPartFile(documentLink, title, documentType);
         }
-
+        if (documentUrlType == DocumentUrlType.ONE_DRIVE) {
+            multipartFile = oneDriveService.createMultiPartFile(documentLink, title, documentType);
+        }
         if (multipartFile.getSize() > 200_000) {
             throw new InvalidDocumentException("File size exceeds the maximum limit of 200KB");
 

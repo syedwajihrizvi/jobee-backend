@@ -176,12 +176,24 @@
             <version>2.0.30</version>
         </dependency>
 
+
         <!-- Word (.docx) parsing -->
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
             <version>5.2.5</version>
         </dependency>
+<dependency>
+    <groupId>org.docx4j</groupId>
+    <artifactId>docx4j-core</artifactId>
+    <version>11.4.10</version>
+</dependency>
+
+<dependency>
+    <groupId>org.docx4j</groupId>
+    <artifactId>docx4j-export-fo</artifactId>
+    <version>11.4.10</version>
+</dependency>
 
     </dependencies>
 

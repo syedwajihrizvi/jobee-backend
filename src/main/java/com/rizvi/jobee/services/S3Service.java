@@ -18,16 +18,19 @@ import com.rizvi.jobee.enums.UserDocumentType;
 import lombok.AllArgsConstructor;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.core.sync.RequestBody;
 
 @AllArgsConstructor
 @Service
 public class S3Service {
         private S3Client s3Client;
-
         private AWSProperties awsProperties;
 
         public String uploadDocument(
-                        Long userId, MultipartFile document, UserDocumentType documentType, String title)
+                        Long userId,
+                        MultipartFile document,
+                        UserDocumentType documentType,
+                        String title)
                         throws IOException {
                 String originalName = title;
                 System.out.println("Original file name: " + originalName);
@@ -36,20 +39,28 @@ public class S3Service {
                                 .replaceAll("\\s+", "_") // replace spaces with underscores
                                 .replaceAll("[^a-zA-Z0-9._-]", ""); // allow only safe characters
                 String contentType = document.getContentType();
-                String fileExtension = contentType.substring(contentType.lastIndexOf('/') + 1);
+                String fileExtension = "";
+                if (!contentType.equals("application/pdf")) {
+                        fileExtension = "docx";
+                } else {
+                        fileExtension = "pdf";
+                }
                 final String key = "user-documents/" + documentType + "/" + userId + "/"
                                 + safeFileName + "." + fileExtension;
                 System.out.println("Document Type : " + document.getContentType());
-                System.out.println(document.getContentType().equals("application/pdf"));
+                System.out.println("Uploading document to S3 with key: " + key);
                 System.out.println("Content-Type of the document: " + contentType);
+                // Convert to pdf if needed
+
                 var response = s3Client.putObject(
                                 PutObjectRequest.builder()
                                                 .bucket(awsProperties.getBucket())
                                                 .key(key)
                                                 .contentType(contentType)
                                                 .build(),
-                                software.amazon.awssdk.core.sync.RequestBody.fromInputStream(document.getInputStream(),
+                                RequestBody.fromInputStream(document.getInputStream(),
                                                 document.getSize()));
+                System.out.println("Upload response from S3: " + response);
                 System.out.println(response.toString());
                 return documentType + "/" + userId + "/" + safeFileName + "." + fileExtension;
         }
