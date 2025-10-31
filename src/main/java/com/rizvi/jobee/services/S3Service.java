@@ -33,7 +33,6 @@ public class S3Service {
                         String title)
                         throws IOException {
                 String originalName = title;
-                System.out.println("Original file name: " + originalName);
                 String safeFileName = originalName
                                 .trim()
                                 .replaceAll("\\s+", "_") // replace spaces with underscores
@@ -47,12 +46,9 @@ public class S3Service {
                 }
                 final String key = "user-documents/" + documentType + "/" + userId + "/"
                                 + safeFileName + "." + fileExtension;
-                System.out.println("Document Type : " + document.getContentType());
-                System.out.println("Uploading document to S3 with key: " + key);
-                System.out.println("Content-Type of the document: " + contentType);
                 // Convert to pdf if needed
 
-                var response = s3Client.putObject(
+                s3Client.putObject(
                                 PutObjectRequest.builder()
                                                 .bucket(awsProperties.getBucket())
                                                 .key(key)
@@ -60,14 +56,11 @@ public class S3Service {
                                                 .build(),
                                 RequestBody.fromInputStream(document.getInputStream(),
                                                 document.getSize()));
-                System.out.println("Upload response from S3: " + response);
-                System.out.println(response.toString());
                 return documentType + "/" + userId + "/" + safeFileName + "." + fileExtension;
         }
 
         public void uploadProfileImage(Long userId, MultipartFile profileImage) throws IOException {
                 final String key = "user-profile-images/" + userId + "_" + profileImage.getOriginalFilename();
-                System.out.println("Uploading profile image to S3 with key: " + key);
                 s3Client.putObject(
                                 PutObjectRequest.builder()
                                                 .bucket(awsProperties.getBucket())
@@ -76,6 +69,24 @@ public class S3Service {
                                 software.amazon.awssdk.core.sync.RequestBody.fromInputStream(
                                                 profileImage.getInputStream(),
                                                 profileImage.getSize()));
+        }
+
+        public String uploadDocumentImage(
+                        Long userId,
+                        MultipartFile documentImage,
+                        String documentType,
+                        String title) throws IOException {
+                final String key = "user-documents/" + documentType + "/" + userId + "/" +
+                                documentImage.getOriginalFilename();
+                s3Client.putObject(
+                                PutObjectRequest.builder()
+                                                .bucket(awsProperties.getBucket())
+                                                .key(key).contentType(documentImage.getContentType())
+                                                .build(),
+                                software.amazon.awssdk.core.sync.RequestBody.fromInputStream(
+                                                documentImage.getInputStream(),
+                                                documentImage.getSize()));
+                return documentType + "/" + userId + "/" + documentImage.getOriginalFilename();
         }
 
         public void updateBusinessProfileImage(Long userId, MultipartFile profileImage) throws IOException {

@@ -77,6 +77,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/business-profiles/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user-documents").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user-documents/link").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/user-documents/image").permitAll()
                         .requestMatchers(HttpMethod.GET, "/profiles/**").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/profiles/socialMedia/**").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/profiles/views").permitAll()

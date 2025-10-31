@@ -30,10 +30,20 @@ public class UserDocumentService {
     private final ExperienceService userExperienceService;
     private final UserSkillService userSkillService;
 
-    public String uploadDocument(
+    private String uploadDocument(
             Long userId, MultipartFile document, UserDocumentType documentType, String title) {
         try {
             var result = s3Service.uploadDocument(userId, document, documentType, title);
+            return result;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private String uploadDocumentImage(
+            Long userId, MultipartFile documentImage, String documentType, String title) {
+        try {
+            var result = s3Service.uploadDocumentImage(userId, documentImage, documentType, title);
             return result;
         } catch (Exception e) {
             return null;
@@ -66,6 +76,24 @@ public class UserDocumentService {
         if (setPrimary) {
             userProfile.setPrimaryResume(userDocument);
         }
+        userProfileRepository.save(userProfile);
+        return userDocument;
+    }
+
+    public UserDocument createUserDocumentViaImage(
+            MultipartFile documentImage, UserDocumentType documentType, UserProfile userProfile,
+            String title) {
+        if (documentImage.getSize() > 5_000_000) {
+            throw new InvalidDocumentException("File size exceeds the maximum limit of 5MB");
+        }
+        var userId = userProfile.getId();
+        var result = uploadDocumentImage(userId, documentImage, title, title);
+        if (result == null) {
+            return null;
+        }
+        var userDocument = UserDocument.builder().documentType(documentType)
+                .documentUrl(result).title(title).user(userProfile).build();
+        userProfile.addDocument(userDocument);
         userProfileRepository.save(userProfile);
         return userDocument;
     }

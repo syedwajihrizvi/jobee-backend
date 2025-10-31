@@ -46,6 +46,29 @@ public class UserDocumentController {
                 return ResponseEntity.ok(documentDtos);
         }
 
+        @PostMapping("/image")
+        @Operation(summary = "Create a document via an image")
+        public ResponseEntity<UserDocumentDto> createUserDocumentViaImage(
+                        @RequestParam("documentImage") MultipartFile documentImage,
+                        @RequestParam("documentType") String documentType,
+                        @RequestParam(name = "title", required = false) String title,
+                        @AuthenticationPrincipal CustomPrincipal principal,
+                        UriComponentsBuilder uriComponentsBuilder) {
+                Long userId = principal.getId();
+                var userProfile = userProfileRepository.findById(userId).orElseThrow(
+                                () -> new AccountNotFoundException("User profile not found"));
+                var userDocumentType = UserDocumentType.valueOf(documentType);
+                var createdDocument = userDocumentService.createUserDocumentViaImage(documentImage, userDocumentType,
+                                userProfile, title);
+                if (createdDocument == null) {
+                        return ResponseEntity.badRequest().build();
+                }
+                var uri = uriComponentsBuilder.path("/user-documents/{id}")
+                                .buildAndExpand(createdDocument.getId())
+                                .toUri();
+                return ResponseEntity.created(uri).body(userDocumentMapper.toDto(createdDocument));
+        }
+
         @PostMapping()
         @Operation(summary = "Create a user document via file")
         public ResponseEntity<UserDocumentDto> createUserDocumentViaFile(
