@@ -14,6 +14,7 @@ import com.rizvi.jobee.entities.Conversation;
 import com.rizvi.jobee.entities.Message;
 import com.rizvi.jobee.enums.MessagerUserType;
 import com.rizvi.jobee.enums.Role;
+import com.rizvi.jobee.exceptions.MessageNotFoundException;
 import com.rizvi.jobee.repositories.BusinessAccountRepository;
 import com.rizvi.jobee.repositories.ConversationRepository;
 import com.rizvi.jobee.repositories.MessageRepository;
@@ -72,7 +73,6 @@ public class MessageService {
         var userType = userRole.equals(Role.BUSINESS.name()) || userRole.equals(Role.ADMIN.name())
                 ? MessagerUserType.BUSINESS
                 : MessagerUserType.USER;
-        System.out.println("Search Param Received in Service: " + search);
         Sort sort = Sort.by("updatedAt").descending();
         List<Conversation> conversations = null;
         if (search != null && !search.isEmpty()) {
@@ -210,5 +210,18 @@ public class MessageService {
         conversation.setLastMessageId(savedMessage.getId());
         conversationRepository.save(conversation);
         return savedMessage;
+    }
+
+    public Message markMessageAsRead(Long conversationId) {
+        var conversation = conversationRepository.findById(conversationId).orElse(null);
+        if (conversation == null) {
+            throw new MessageNotFoundException("Conversation not found with id: " + conversationId);
+        }
+        var messageId = conversation.getLastMessageId();
+        var message = messageRepository.findById(messageId).orElseThrow(
+                () -> new MessageNotFoundException(messageId));
+        message.setRead(true);
+        messageRepository.save(message);
+        return message;
     }
 }
