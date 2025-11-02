@@ -1,11 +1,15 @@
 package com.rizvi.jobee.entities;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.hibernate.annotations.CreationTimestamp;
 
 import com.rizvi.jobee.enums.ApplicationStatus;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -15,6 +19,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
@@ -67,8 +72,37 @@ public class Application {
     @JoinColumn(name = "cover_letter_document_id", nullable = true)
     private UserDocument coverLetterDocument;
 
+    @OneToMany(mappedBy = "application", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private Set<Interview> interviews = new HashSet<>();
+
     public void setJob(Job job) {
         this.job = job;
         job.getApplications().add(this);
+    }
+
+    public List<Long> getInterviewIds() {
+        System.out.println("Getting interview IDs for application ID: " + this.id);
+        return this.interviews.stream()
+                .map(Interview::getId)
+                .toList();
+    }
+
+    public void addInterview(Interview interview) {
+        if (interview != null) {
+            this.interviews.add(interview);
+            if (!this.equals(interview.getApplication())) {
+                interview.setApplication(this);
+            }
+        }
+    }
+
+    public void removeInterview(Interview interview) {
+        if (interview != null) {
+            this.interviews.remove(interview);
+            if (this.equals(interview.getApplication())) {
+                interview.setApplication(null);
+            }
+        }
     }
 }

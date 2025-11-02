@@ -117,12 +117,17 @@ public class InterviewService {
                 .endTime(request.getEndTime())
                 .interviewType(request.getInterviewType())
                 .timezone(request.getTimezone())
-                .location(request.getLocation())
+                .streetAddress(request.getStreetAddress())
+                .buildingName(request.getBuildingName())
+                .parkingInfo(request.getParkingInfo())
+                .contactInstructionsOnArrival(request.getContactInstructionsOnArrival())
                 .meetingLink(request.getMeetingLink())
                 .phoneNumber(request.getPhoneNumber())
+                .interviewMeetingPlatform(request.getMeetingPlatform())
                 .status(InterviewStatus.SCHEDULED)
                 .createdBy(businessAccount)
                 .build();
+        interview.setApplication(application);
         for (ConductorDto conductor : request.getConductors()) {
             var interviewer = businessAccountRepository.findByEmail(conductor.getEmail()).orElse(null);
             if (interviewer == null) {

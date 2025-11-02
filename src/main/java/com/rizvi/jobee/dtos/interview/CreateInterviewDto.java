@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+import com.rizvi.jobee.enums.InterviewMeetingPlatform;
 import com.rizvi.jobee.enums.InterviewType;
 import com.rizvi.jobee.enums.Timezone;
 
@@ -21,8 +22,12 @@ public class CreateInterviewDto {
     private LocalTime endTime;
     private InterviewType interviewType;
     private Timezone timezone;
-    private String location;
+    private String streetAddress;
+    private String buildingName;
+    private String parkingInfo;
+    private String contactInstructionsOnArrival;
     private String meetingLink;
+    private InterviewMeetingPlatform meetingPlatform;
     private String phoneNumber;
     private Long previousInterviewId;
     private List<ConductorDto> conductors;

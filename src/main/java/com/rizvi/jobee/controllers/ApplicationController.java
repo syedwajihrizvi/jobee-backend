@@ -78,6 +78,7 @@ public class ApplicationController {
                 dto.setApplicationId(application.getId());
                 dto.setStatus(application.getStatus());
                 dto.setAppliedAt(application.getCreatedAt().toString());
+                dto.setInterviewIds(application.getInterviewIds());
                 return dto;
             }).toList();
             return ResponseEntity.ok(applicationDtos);

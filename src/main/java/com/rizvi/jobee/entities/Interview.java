@@ -13,6 +13,7 @@ import org.hibernate.annotations.Type;
 
 import com.rizvi.jobee.dtos.interview.ConductorDto;
 import com.rizvi.jobee.enums.InterviewDecisionResult;
+import com.rizvi.jobee.enums.InterviewMeetingPlatform;
 import com.rizvi.jobee.enums.InterviewStatus;
 import com.rizvi.jobee.enums.InterviewType;
 import com.rizvi.jobee.enums.PreparationStatus;
@@ -77,8 +78,21 @@ public class Interview {
     @Column(name = "interview_type", nullable = false)
     private InterviewType interviewType;
 
-    @Column(name = "location", nullable = false)
-    private String location;
+    @Enumerated(value = EnumType.STRING)
+    @Column(name = "meeting_platform", nullable = false)
+    private InterviewMeetingPlatform interviewMeetingPlatform;
+
+    @Column(name = "street_address", nullable = true)
+    private String streetAddress;
+
+    @Column(name = "building_name", nullable = true)
+    private String buildingName;
+
+    @Column(name = "parking_info", nullable = true)
+    private String parkingInfo;
+
+    @Column(name = "contact_instructions", nullable = true)
+    private String contactInstructionsOnArrival;
 
     @Column(name = "meeting_link", nullable = false)
     private String meetingLink;
@@ -170,5 +184,21 @@ public class Interview {
             tips.add(tip.getTip());
         }
         return tips;
+    }
+
+    // Custom setter to maintain bidirectional relationship
+    public void setApplication(Application application) {
+        // Remove from previous application if exists
+        if (this.application != null && !this.application.equals(application)) {
+            this.application.getInterviews().remove(this);
+        }
+
+        // Set the new application
+        this.application = application;
+
+        // Add to new application's interviews collection
+        if (application != null && !application.getInterviews().contains(this)) {
+            application.getInterviews().add(this);
+        }
     }
 }

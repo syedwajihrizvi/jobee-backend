@@ -44,5 +44,6 @@ public interface ApplicationMapper {
     @Mapping(target = "jobId", source = "job.id")
     @Mapping(target = "jobTitle", source = "job.title")
     @Mapping(target = "companyName", source = "job.businessAccount.company.name")
+    @Mapping(target = "interviewIds", expression = "java(application.getInterviewIds())")
     ApplicationDetailsForBusinessDto toApplicationDetailsForBusinessDto(Application application);
 }

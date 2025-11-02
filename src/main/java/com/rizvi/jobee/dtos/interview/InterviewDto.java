@@ -30,8 +30,12 @@ public class InterviewDto {
     private String interviewType;
     private String decisionDate;
     private String decisionResult;
-    private String location;
+    private String streetAddress;
+    private String buildingName;
+    private String parkingInfo;
+    private String contactInstructionsOnArrival;
     private String meetingLink;
+    private String interviewMeetingPlatform;
     private String phoneNumber;
     private String timezone;
     private List<String> preparationTipsFromInterviewer;
