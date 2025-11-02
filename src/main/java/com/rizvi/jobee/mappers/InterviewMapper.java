@@ -38,6 +38,7 @@ public interface InterviewMapper {
     @Mapping(target = "email", source = "businessAccount.email")
     @Mapping(target = "name", expression = "java(businessAccount.getFullName())")
     @Mapping(target = "title", source = "businessAccount.profile.title")
+    @Mapping(target = "profileImageUrl", source = "businessAccount.profile.profileImageUrl")
     InterviewConductorDto toConductorDto(BusinessAccount businessAccount);
 
     InterviewPrepQuestion toInterviewPrepQuestion(InterviewPreparationQuestion question);

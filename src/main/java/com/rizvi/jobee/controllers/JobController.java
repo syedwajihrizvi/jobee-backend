@@ -56,6 +56,7 @@ public class JobController {
     public ResponseEntity<PaginatedJobResponseDto<JobSummaryDto>> getJobs(
             int pageNumber, int pageSize,
             @ModelAttribute JobQuery jobQuery) {
+        System.out.println("Received job query: " + jobQuery);
         var paginatedJobData = jobService.getAllJobs(jobQuery, pageNumber, pageSize);
         var jobs = paginatedJobData.getJobs();
         var hasMore = paginatedJobData.isHasMore();
@@ -111,6 +112,7 @@ public class JobController {
             @ModelAttribute JobQuery jobQuery,
             @PathVariable Long companyId) {
         jobQuery.setCompanyId(companyId);
+        System.out.println("Received job query for company " + companyId + ": " + jobQuery);
         var paginatedJobData = jobService.getJobsByCompany(jobQuery, companyId, pageNumber, pageSize);
         var jobs = paginatedJobData.getJobs();
         var hasMore = paginatedJobData.isHasMore();

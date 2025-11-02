@@ -17,6 +17,7 @@ import org.springframework.data.jpa.domain.Specification;
 
 public class JobSpecifications {
     public static Specification<Job> withFilters(JobQuery query) {
+        System.out.println("Building specifications with query: " + query);
         return (root, _, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             Join<Job, BusinessAccount> businessAccountJoin = root.join("businessAccount");
@@ -52,6 +53,14 @@ public class JobSpecifications {
                 }
                 predicates.add(cb.or(predicates.toArray(new Predicate[0])));
             }
+            if (query.getExperience() != null && !query.getExperience().isEmpty()) {
+                List<Predicate> experiencePredicates = new ArrayList<>();
+                for (String level : query.getExperience()) {
+                    System.out.println("Adding experience level filter: " + level);
+                    experiencePredicates.add(cb.equal(root.get("level"), level));
+                }
+                predicates.add(cb.or(experiencePredicates.toArray(new Predicate[0])));
+            }
             if (query.getEmploymentTypes() != null && !query.getEmploymentTypes().isEmpty()) {
                 List<Predicate> employmentTypePredicates = new ArrayList<>();
                 for (String type : query.getEmploymentTypes()) {
@@ -83,9 +92,6 @@ public class JobSpecifications {
             }
             if (query.getMaxSalary() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("maxSalary"), query.getMaxSalary()));
-            }
-            if (query.getExperience() != null && !query.getExperience().isEmpty()) {
-                predicates.add(cb.equal(root.get("level"), query.getExperience()));
             }
             return cb.and(predicates.toArray(new Predicate[0]));
         };

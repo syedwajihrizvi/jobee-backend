@@ -8,4 +8,5 @@ public class InterviewConductorDto {
     private String email;
     private String name;
     private String title;
+    private String profileImageUrl;
 }
