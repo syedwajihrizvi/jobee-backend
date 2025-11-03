@@ -8,6 +8,7 @@ public class BusinessAccountDto {
     private String email;
     private String companyName;
     private Long companyId;
+    private String companyLogo;
     private String firstName;
     private String lastName;
     private String title;

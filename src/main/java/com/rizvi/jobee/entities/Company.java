@@ -46,6 +46,9 @@ public class Company {
     @Column(name = "hq_country", nullable = true)
     private String hqCountry;
 
+    @Column(name = "logo_url", nullable = true)
+    private String logo;
+
     @Column(name = "rating", nullable = true)
     private BigDecimal rating;
 
