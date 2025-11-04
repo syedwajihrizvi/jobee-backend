@@ -16,7 +16,8 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
         @EntityGraph(attributePaths = { "businessAccount", "businessAccount.company", "tags", "applications" })
         List<Job> findAll(Specification<Job> spec);
 
-        @EntityGraph(attributePaths = { "businessAccount", "businessAccount.company", "tags" })
+        @EntityGraph(attributePaths = { "businessAccount", "businessAccount.company", "tags",
+                        "businessAccount.company.logo" })
         @Query("select j from Job j where j.id in :jobIds")
         List<Job> findJobWithIdList(List<Long> jobIds);
 
@@ -33,7 +34,7 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
         @Query("select distinct j from Job j join j.tags t where lower(trim(t.slug)) in :skills")
         List<Job> findJobsWithSkills(List<String> skills);
 
-        @Query("select j.businessAccount.company.id, j.businessAccount.company.name, count(j) as jobCount from Job j group by j.businessAccount.company.id, j.businessAccount.company.name order by jobCount desc limit :limit")
+        @Query("select j.businessAccount.company.id, j.businessAccount.company.name, j.businessAccount.company.logo,count(j) as jobCount from Job j group by j.businessAccount.company.id, j.businessAccount.company.name, j.businessAccount.company.logo order by jobCount desc limit :limit")
         List<Object[]> findTopHiringCompanies(Integer limit);
 
         @Query("select j from Job j where j.businessAccount.id = :accountId")

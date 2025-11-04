@@ -15,6 +15,7 @@ public interface JobMapper {
     @Mapping(target = "businessAccountId", source = "businessAccount.id")
     @Mapping(target = "companyId", source = "businessAccount.company.id")
     @Mapping(target = "applicants", expression = "java(job.getApplications().size())")
+    @Mapping(target = "companyLogoUrl", source = "businessAccount.company.logo")
     JobSummaryDto toSummaryDto(Job job);
 
     @Mapping(target = "applicants", expression = "java(job.getApplications().size())")

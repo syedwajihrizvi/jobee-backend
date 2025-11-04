@@ -70,7 +70,8 @@ public class CompanyController {
                 .map(entry -> companyMapper.map(new Object[] {
                         entry.keySet().iterator().next().getId(),
                         entry.keySet().iterator().next().getName(),
-                        entry.values().iterator().next()
+                        entry.keySet().iterator().next().getLogo(),
+                        entry.values().iterator().next(),
                 }))
                 .toList();
         return ResponseEntity.ok(topCompanies);

@@ -33,7 +33,8 @@ public class CompanyService {
                     var company = new Company();
                     company.setId((Long) result[0]);
                     company.setName((String) result[1]);
-                    Long jobCount = (Long) result[2];
+                    company.setLogo((String) result[2]);
+                    Long jobCount = (Long) result[3];
                     return Map.of(company, jobCount);
                 })
                 .toList();

@@ -15,9 +15,10 @@ public interface CompanyMapper {
     @Mapping(target = "id", source = "id")
     @Mapping(target = "name", source = "name")
     @Mapping(target = "jobCount", source = "jobCount")
-    TopHiringCompanyDto toTopCompaniesDto(Long id, String name, Long jobCount);
+    @Mapping(target = "logoUrl", source = "logo")
+    TopHiringCompanyDto toTopCompaniesDto(Long id, String name, String logo, Long jobCount);
 
     default TopHiringCompanyDto map(Object[] data) {
-        return toTopCompaniesDto((Long) data[0], (String) data[1], (Long) data[2]);
+        return toTopCompaniesDto((Long) data[0], (String) data[1], (String) data[2], (Long) data[3]);
     }
 }

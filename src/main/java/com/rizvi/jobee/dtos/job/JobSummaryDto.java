@@ -15,6 +15,7 @@ public class JobSummaryDto {
     private Long companyId;
     private Long businessAccountId;
     private String businessName;
+    private String companyLogoUrl;
     private String location;
     private String views;
     private String level;

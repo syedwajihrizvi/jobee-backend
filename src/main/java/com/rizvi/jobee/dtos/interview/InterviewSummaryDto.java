@@ -13,6 +13,7 @@ public class InterviewSummaryDto {
     private String endTime;
     private String description;
     private String candidateName;
+    private String candidateProfileImageUrl;
     private String jobTitle;
     private String companyName;
     private String interviewType;

@@ -65,6 +65,21 @@ public class Job {
     @Column(name = "location", nullable = true)
     private String location;
 
+    @Column(name = "city", nullable = true)
+    private String city;
+
+    @Column(name = "state", nullable = true)
+    private String state;
+
+    @Column(name = "country", nullable = true)
+    private String country;
+
+    @Column(name = "street_address", nullable = true)
+    private String streetAddress;
+
+    @Column(name = "postal_code", nullable = true)
+    private String postalCode;
+
     @Enumerated(value = EnumType.STRING)
     @Column(name = "employment_type", nullable = true)
     private EmploymentType employmentType;

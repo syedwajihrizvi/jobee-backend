@@ -14,7 +14,7 @@ import lombok.AllArgsConstructor;
 
 @Controller
 @AllArgsConstructor
-public class WebSockerMessageController {
+public class WebSocketController {
         private final SimpMessagingTemplate messagingTemplate;
         private final MessageService messageService;
         private final MessageMapper messageMapper;
@@ -28,9 +28,6 @@ public class WebSockerMessageController {
                                 + message.getReceiverId();
                 String senderDest = "/topic/messages/" + message.getSenderType().toString().toLowerCase() + "/"
                                 + message.getSenderId();
-                System.out.println(message.toString());
-                System.out.println("Sending message to rec.destination: " + receiverDest);
-                System.out.println("Sending message to send.destination: " + senderDest);
                 Message savedMessage = messageService.saveMessage(message);
                 // Since we are sending to both, we need two DTOs
                 MessageDto senderMessageDto = messageMapper.toMessageDto(savedMessage, message.getSenderId(),

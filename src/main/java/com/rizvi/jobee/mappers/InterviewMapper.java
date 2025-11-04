@@ -31,6 +31,7 @@ public interface InterviewMapper {
 
     @Mapping(target = "jobTitle", source = "job.title")
     @Mapping(target = "companyName", source = "job.businessAccount.company.name")
+    @Mapping(target = "candidateProfileImageUrl", source = "candidate.profileImageUrl")
     @Mapping(target = "candidateName", expression = "java(interview.getCandidate().getFullName())")
     InterviewSummaryDto toSummaryDto(Interview interview);
 

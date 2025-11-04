@@ -9,6 +9,7 @@ public class ApplicationDto {
     private Long jobId;
     private String jobTitle;
     private String companyName;
+    private String companyLogoUrl;
     private Long userId;
     private String userEmail;
     private LocalDateTime appliedAt;
