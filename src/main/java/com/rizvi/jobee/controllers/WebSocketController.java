@@ -1,7 +1,6 @@
 package com.rizvi.jobee.controllers;
 
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
@@ -11,6 +10,7 @@ import com.rizvi.jobee.entities.Message;
 import com.rizvi.jobee.entities.Notification;
 import com.rizvi.jobee.mappers.MessageMapper;
 import com.rizvi.jobee.services.MessageService;
+import com.rizvi.jobee.services.UserNotificationService;
 
 import lombok.AllArgsConstructor;
 
@@ -19,6 +19,7 @@ import lombok.AllArgsConstructor;
 public class WebSocketController {
         private final SimpMessagingTemplate messagingTemplate;
         private final MessageService messageService;
+        private final UserNotificationService userNotificationService;
         private final MessageMapper messageMapper;
 
         @MessageMapping("/sendMessage")
@@ -42,12 +43,15 @@ public class WebSocketController {
         }
 
         @MessageMapping("/sendNotification")
-        public Notification sendNotification(@Payload Notification notification) {
+        @SendTo("/topic/notifications")
+        public Notification sendNotification(Notification notification) {
                 System.out.println("Received notification: " + notification);
                 String recepientDest = "/topic/notifications/"
-                                + notification.getRecepientType().toString().toLowerCase() + "/"
-                                + notification.getRecepientId();
-                messagingTemplate.convertAndSend(recepientDest, notification);
-                return notification;
+                                + notification.getRecipientType().toString().toLowerCase() + "/"
+                                + notification.getRecipientId();
+                System.out.println("Sending notification to: " + recepientDest);
+                Notification savedNotification = userNotificationService.saveNotification(notification);
+                messagingTemplate.convertAndSend(recepientDest, savedNotification);
+                return savedNotification;
         }
 }

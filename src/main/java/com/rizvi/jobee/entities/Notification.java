@@ -35,12 +35,12 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "recepient_id", nullable = false)
-    private Long recepientId;
+    @Column(name = "recipient_id", nullable = false)
+    private Long recipientId;
 
-    @Column(name = "recepient_type", nullable = false)
+    @Column(name = "recipient_type", nullable = false)
     @Enumerated(value = EnumType.STRING)
-    private MessagerUserType recepientType;
+    private MessagerUserType recipientType;
 
     @Column(name = "notification_type", nullable = false)
     @Enumerated(value = EnumType.STRING)
@@ -49,7 +49,7 @@ public class Notification {
     @Column(name = "message", nullable = false, length = 500)
     private String message;
 
-    @Column(name = "created_ad", nullable = true, updatable = false)
+    @Column(name = "created_at", nullable = true, updatable = false)
     @CreationTimestamp
     private LocalDateTime timestamp;
 

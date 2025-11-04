@@ -65,6 +65,7 @@ public class SecurityConfig {
                         .requestMatchers("/topic/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/oauth2/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/messages/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/user-notifications").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/messages/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/messages/conversations").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/companies/**").permitAll()
