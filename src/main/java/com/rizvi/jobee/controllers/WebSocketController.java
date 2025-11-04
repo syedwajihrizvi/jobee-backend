@@ -1,12 +1,14 @@
 package com.rizvi.jobee.controllers;
 
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import com.rizvi.jobee.dtos.message.MessageDto;
 import com.rizvi.jobee.entities.Message;
+import com.rizvi.jobee.entities.Notification;
 import com.rizvi.jobee.mappers.MessageMapper;
 import com.rizvi.jobee.services.MessageService;
 
@@ -22,8 +24,6 @@ public class WebSocketController {
         @MessageMapping("/sendMessage")
         @SendTo("/topic/messages")
         public MessageDto sendMessage(Message message) {
-                // TODO: Save message to database for persistence
-                // Logic to send message
                 String receiverDest = "/topic/messages/" + message.getReceiverType().toString().toLowerCase() + "/"
                                 + message.getReceiverId();
                 String senderDest = "/topic/messages/" + message.getSenderType().toString().toLowerCase() + "/"
@@ -38,7 +38,16 @@ public class WebSocketController {
 
                 messagingTemplate.convertAndSend(receiverDest, receiverMessageDto);
                 messagingTemplate.convertAndSend(senderDest, senderMessageDto);
-                System.out.println(savedMessage.toString());
                 return senderMessageDto;
+        }
+
+        @MessageMapping("/sendNotification")
+        public Notification sendNotification(@Payload Notification notification) {
+                System.out.println("Received notification: " + notification);
+                String recepientDest = "/topic/notifications/"
+                                + notification.getRecepientType().toString().toLowerCase() + "/"
+                                + notification.getRecepientId();
+                messagingTemplate.convertAndSend(recepientDest, notification);
+                return notification;
         }
 }

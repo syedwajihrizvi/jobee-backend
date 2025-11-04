@@ -60,6 +60,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/accounts/register", "/accounts/login")
                         .permitAll()
                         .requestMatchers("/ws-chat/**").permitAll()
+                        .requestMatchers("/ws-notifications/**").permitAll()
                         .requestMatchers("/app/**").permitAll()
                         .requestMatchers("/topic/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/oauth2/**").permitAll()

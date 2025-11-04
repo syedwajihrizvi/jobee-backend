@@ -10,6 +10,7 @@ import com.rizvi.jobee.entities.Company;
 @Mapper(componentModel = "spring")
 public interface CompanyMapper {
     @Mapping(target = "location", expression = "java(company.getHqCity() + \", \" + company.getHqState() + \", \" + company.getHqCountry())")
+    @Mapping(target = "logoUrl", source = "logo")
     CompanyDto toCompanyDto(Company company);
 
     @Mapping(target = "id", source = "id")
