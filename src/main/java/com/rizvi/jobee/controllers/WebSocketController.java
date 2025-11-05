@@ -6,9 +6,12 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import com.rizvi.jobee.dtos.message.MessageDto;
+import com.rizvi.jobee.dtos.notification.CreateNotificationDto;
+import com.rizvi.jobee.dtos.notification.NotificationDto;
 import com.rizvi.jobee.entities.Message;
 import com.rizvi.jobee.entities.Notification;
 import com.rizvi.jobee.mappers.MessageMapper;
+import com.rizvi.jobee.mappers.NotificationMapper;
 import com.rizvi.jobee.services.MessageService;
 import com.rizvi.jobee.services.UserNotificationService;
 
@@ -21,6 +24,7 @@ public class WebSocketController {
         private final MessageService messageService;
         private final UserNotificationService userNotificationService;
         private final MessageMapper messageMapper;
+        private final NotificationMapper notificationMapper;
 
         @MessageMapping("/sendMessage")
         @SendTo("/topic/messages")
@@ -44,14 +48,14 @@ public class WebSocketController {
 
         @MessageMapping("/sendNotification")
         @SendTo("/topic/notifications")
-        public Notification sendNotification(Notification notification) {
+        public NotificationDto sendNotification(CreateNotificationDto notification) {
                 System.out.println("Received notification: " + notification);
                 String recepientDest = "/topic/notifications/"
                                 + notification.getRecipientType().toString().toLowerCase() + "/"
                                 + notification.getRecipientId();
-                System.out.println("Sending notification to: " + recepientDest);
                 Notification savedNotification = userNotificationService.saveNotification(notification);
-                messagingTemplate.convertAndSend(recepientDest, savedNotification);
-                return savedNotification;
+                var notificationDto = notificationMapper.toNotificationDto(savedNotification);
+                messagingTemplate.convertAndSend(recepientDest, notificationDto);
+                return notificationDto;
         }
 }
