@@ -43,7 +43,8 @@ public class JwtFilter extends OncePerRequestFilter {
         String email = jwtService.getEmailFromToken(token);
         Long id = jwtService.getIdFromToken(token);
         String role = jwtService.getRoleFromToken(token);
-        CustomPrincipal principal = new CustomPrincipal(id, email, role);
+        String accountType = jwtService.getAccountTypeFromToken(token);
+        CustomPrincipal principal = new CustomPrincipal(id, email, role, accountType);
         var authorites = List.of(new SimpleGrantedAuthority(role));
         var authentication = new UsernamePasswordAuthenticationToken(principal, null, authorites);
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

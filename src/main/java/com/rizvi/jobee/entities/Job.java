@@ -48,7 +48,8 @@ public class Job {
     private Long id;
 
     @Column(name = "views", nullable = false)
-    private Integer views;
+    @Builder.Default
+    private Integer views = 0;
 
     @Column(name = "title", nullable = false)
     private String title;

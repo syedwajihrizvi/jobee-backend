@@ -11,5 +11,6 @@ public class CustomPrincipal {
     private Long id;
     private String email;
     private String role;
+    private String accountType;
 
 }

@@ -75,7 +75,9 @@ public class BusinessAccountController {
         if (businessAccount == null || !passwordEncoder.matches(password, businessAccount.getPassword())) {
             throw new IncorrectEmailOrPasswordException("Invalid email or password");
         }
-        var jwtToken = jwtService.generateToken(businessAccount.getEmail(), Role.BUSINESS, businessAccount.getId());
+        var jwtToken = jwtService.generateBusinessJwtToken(businessAccount.getEmail(), Role.BUSINESS,
+                businessAccount.getId(),
+                businessAccount.getAccountType().name());
         return ResponseEntity.ok(new JwtDto(jwtToken));
     }
 
@@ -83,10 +85,13 @@ public class BusinessAccountController {
     public ResponseEntity<BusinessAccountDto> getCurrentBusinessAccount(
             @AuthenticationPrincipal CustomPrincipal principal) {
         var userId = principal.getId();
+        var accountType = principal.getAccountType();
         var businessAccount = businessAccountRepository.findById(userId).orElse(null);
         if (businessAccount == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(businessMapper.toDto(businessAccount));
+        BusinessAccountDto dto = businessMapper.toDto(businessAccount);
+        dto.setRole(accountType);
+        return ResponseEntity.ok(dto);
     }
 }

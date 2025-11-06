@@ -18,4 +18,5 @@ public class BusinessAccountDto {
     private String country;
     private Boolean verified;
     private String profileImageUrl;
+    private String role;
 }
