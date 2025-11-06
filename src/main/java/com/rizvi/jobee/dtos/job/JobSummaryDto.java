@@ -20,6 +20,11 @@ public class JobSummaryDto {
     private String views;
     private String level;
     private String department;
+    private String streetAddress;
+    private String city;
+    private String state;
+    private String country;
+    private String postalCode;
     private String employmentType;
     private String setting;
     private Integer minSalary;

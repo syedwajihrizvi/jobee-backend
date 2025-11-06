@@ -62,6 +62,9 @@ public class Job {
     @Column(name = "created_at", nullable = true, insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "content_updated_at", nullable = true, insertable = false, updatable = false)
+    private LocalDateTime contentUpdatedAt;
+
     @Column(name = "location", nullable = true)
     private String location;
 
@@ -183,5 +186,9 @@ public class Job {
         }
 
         return 0f;
+    }
+
+    public Long getCompanyId() {
+        return this.businessAccount.getCompany().getId();
     }
 }

@@ -598,14 +598,17 @@
 
 -- INSERT MESSAGES BETWEEN USERS AND BUSINESS PROFILES
 -- INSERT FOR USER WITH ID 2 AND BUSINESS PROFILE ID OF 1
-INSERT INTO messages (id, text, sender_id, receiver_id, timestamp, read, sender_type, receiver_type, conversation_id) VALUES
-(7, 'Hello, I would love to speak to you about an opening in our company?', 1, 2, NOW() - INTERVAL '5 days', FALSE, 'BUSINESS', 'USER', 2),
-(8, 'Thank you for reaching out! I''m very interested in learning more about this opportunity.', 2, 1, NOW() - INTERVAL '4 days 20 hours', FALSE, 'USER', 'BUSINESS', 2),
-(9, 'Great! The Software Engineer position involves developing and maintaining software applications. We are looking for candidates with experience in Python and React. Could you tell me about your background?', 1, 2, NOW() - INTERVAL '4 days 15 hours', FALSE, 'BUSINESS', 'USER', 2),
-(10, 'I have 3 years of experience with Python and 2 years with React. I''ve worked on several full-stack applications and have experience with database design and API development.', 2, 1, NOW() - INTERVAL '4 days 10 hours', FALSE, 'USER', 'BUSINESS', 2),
-(11, 'That sounds perfect for our needs! We also work with PostgreSQL and Spring Boot. Are you familiar with those technologies?', 1, 2, NOW() - INTERVAL '4 days 2 hours', FALSE, 'BUSINESS', 'USER', 2),
-(12, 'Yes, I have experience with PostgreSQL and I''ve been learning Spring Boot recently. I''m always eager to expand my skill set.', 2, 1, NOW() - INTERVAL '3 days 18 hours', FALSE, 'USER', 'BUSINESS', 2),
-(13, 'Excellent! Would you like to schedule an interview? We have openings next week on Tuesday and Thursday at 10 AM or 2 PM.', 1, 2, NOW() - INTERVAL '3 days 8 hours', FALSE, 'BUSINESS', 'USER', 2),
-(14, 'I can do Thursday at 10 AM. That would work perfectly for me.', 2, 1, NOW() - INTERVAL '3 days 4 hours', FALSE, 'USER', 'BUSINESS', 2),
-(15, 'Thursday at 10 AM is confirmed. We will send you a calendar invite with the interview details and meeting link shortly. Looking forward to speaking with you!', 1, 2, NOW() - INTERVAL '2 days 22 hours', FALSE, 'BUSINESS', 'USER', 2),
-(16, 'Thank you so much! I received the calendar invite. I''m looking forward to our conversation and learning more about the role and your company culture.', 2, 1, NOW() - INTERVAL '2 days 18 hours', FALSE, 'USER', 'BUSINESS', 2);
+-- INSERT INTO messages (id, text, sender_id, receiver_id, timestamp, read, sender_type, receiver_type, conversation_id) VALUES
+-- (7, 'Hello, I would love to speak to you about an opening in our company?', 1, 2, NOW() - INTERVAL '5 days', FALSE, 'BUSINESS', 'USER', 2),
+-- (8, 'Thank you for reaching out! I''m very interested in learning more about this opportunity.', 2, 1, NOW() - INTERVAL '4 days 20 hours', FALSE, 'USER', 'BUSINESS', 2),
+-- (9, 'Great! The Software Engineer position involves developing and maintaining software applications. We are looking for candidates with experience in Python and React. Could you tell me about your background?', 1, 2, NOW() - INTERVAL '4 days 15 hours', FALSE, 'BUSINESS', 'USER', 2),
+-- (10, 'I have 3 years of experience with Python and 2 years with React. I''ve worked on several full-stack applications and have experience with database design and API development.', 2, 1, NOW() - INTERVAL '4 days 10 hours', FALSE, 'USER', 'BUSINESS', 2),
+-- (11, 'That sounds perfect for our needs! We also work with PostgreSQL and Spring Boot. Are you familiar with those technologies?', 1, 2, NOW() - INTERVAL '4 days 2 hours', FALSE, 'BUSINESS', 'USER', 2),
+-- (12, 'Yes, I have experience with PostgreSQL and I''ve been learning Spring Boot recently. I''m always eager to expand my skill set.', 2, 1, NOW() - INTERVAL '3 days 18 hours', FALSE, 'USER', 'BUSINESS', 2),
+-- (13, 'Excellent! Would you like to schedule an interview? We have openings next week on Tuesday and Thursday at 10 AM or 2 PM.', 1, 2, NOW() - INTERVAL '3 days 8 hours', FALSE, 'BUSINESS', 'USER', 2),
+-- (14, 'I can do Thursday at 10 AM. That would work perfectly for me.', 2, 1, NOW() - INTERVAL '3 days 4 hours', FALSE, 'USER', 'BUSINESS', 2),
+-- (15, 'Thursday at 10 AM is confirmed. We will send you a calendar invite with the interview details and meeting link shortly. Looking forward to speaking with you!', 1, 2, NOW() - INTERVAL '2 days 22 hours', FALSE, 'BUSINESS', 'USER', 2),
+-- (16, 'Thank you so much! I received the calendar invite. I''m looking forward to our conversation and learning more about the role and your company culture.', 2, 1, NOW() - INTERVAL '2 days 18 hours', FALSE, 'USER', 'BUSINESS', 2);
+
+UPDATE jobs SET description = 'Design, implement, and maintain scalable cloud solutions for enterprise environments. Collaborate with cross-functional teams to develop cloud strategies, migrate workloads, ensure security and high availability, and optimize performance across AWS, Azure, or GCP platforms.' WHERE id = 25;
+UPDATE companies SET description = 'A leading provider of cloud computing solutions, specializing in scalable and secure infrastructure for businesses of all sizes. Our services include cloud migration, architecture design, and managed services across AWS, Azure, and Google Cloud platforms.' WHERE id = 25;

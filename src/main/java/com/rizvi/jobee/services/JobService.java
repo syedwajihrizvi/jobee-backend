@@ -13,12 +13,17 @@ import org.springframework.stereotype.Service;
 
 import com.rizvi.jobee.dtos.job.CreateJobDto;
 import com.rizvi.jobee.dtos.job.PaginatedJobDto;
+import com.rizvi.jobee.entities.AIJobInsight;
 import com.rizvi.jobee.entities.BusinessAccount;
+import com.rizvi.jobee.entities.Company;
 import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.entities.Tag;
 import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.exceptions.JobNotFoundException;
+import com.rizvi.jobee.helpers.AISchemas.AIJobInsightAnswer;
+import com.rizvi.jobee.helpers.AISchemas.GenerateAIInsightRequest;
 import com.rizvi.jobee.queries.JobQuery;
+import com.rizvi.jobee.repositories.AIJobInsightsRepository;
 import com.rizvi.jobee.repositories.JobRepository;
 import com.rizvi.jobee.repositories.TagRepository;
 import com.rizvi.jobee.specifications.JobSpecifications;
@@ -32,6 +37,8 @@ public class JobService {
     private final JobRepository jobRepository;
     private final TagRepository tagRepository;
     private final UserProfileService userProfileService;
+    private final AIJobInsightsRepository aiJobInsightsRepository;
+    private final AIService aiService;
     private static final int MAX_CANDIDATES_FOR_JOB = 5;
 
     public PaginatedJobDto getAllJobs(JobQuery jobQuery, int pageNumber, int pageSize) {
@@ -76,9 +83,10 @@ public class JobService {
     public Job createJob(CreateJobDto request, BusinessAccount businessAccount) {
         var tagEntities = new ArrayList<Tag>();
         for (String tagName : request.getTags()) {
-            var tag = tagRepository.findByName(tagName.trim().replaceAll("[^a-zA-Z0-9 ]", ""));
+            var slugName = tagName.trim().replaceAll("[^a-zA-Z0-9 ]", "");
+            var tag = tagRepository.findBySlug(slugName);
             if (tag == null) {
-                tag = Tag.builder().name(tagName).build();
+                tag = Tag.builder().name(tagName).slug(slugName).build();
                 tag = tagRepository.save(tag);
             }
             tagEntities.add(tag);
@@ -88,6 +96,12 @@ public class JobService {
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .location(request.getLocation())
+                .state(request.getState())
+                .streetAddress(request.getStreetAddress())
+                .city(request.getCity())
+                .country(request.getCountry())
+                .postalCode(request.getPostalCode())
+                .department(request.getDepartment())
                 .employmentType(request.getEmploymentType())
                 .setting(request.getSetting())
                 .appDeadline(request.getAppDeadline())
@@ -218,5 +232,39 @@ public class JobService {
             result.put(userProfile, score);
         }
         return result;
+    }
+
+    public AIJobInsight generateAIJobInsight(Job job, Company company) {
+        // Check if insight already exist for the jobs
+        var jobUpdatedAt = job.getContentUpdatedAt();
+        var existingInsight = aiJobInsightsRepository.findByJobId(job.getId());
+        if (existingInsight != null) {
+            System.out.println("SYED-DEBUG: Existing Insight Found: " + existingInsight.getId());
+        } else {
+            System.out.println("SYED-DEBUG: No Existing Insight Found");
+        }
+        System.out.println("SYED-DEBUG: Comparing Dates - Job Updated At: " + jobUpdatedAt +
+                ", Existing Insight Updated At: " +
+                (existingInsight != null ? existingInsight.getUpdatedAt() : "null"));
+
+        var createNewInsight = existingInsight == null || existingInsight.getUpdatedAt().isBefore(jobUpdatedAt);
+        if (createNewInsight) {
+            System.out.println("SYED-DEBUG: Generating new AI Job Insight for job ID " + job.getId());
+            GenerateAIInsightRequest request = new GenerateAIInsightRequest(job, company);
+            AIJobInsightAnswer aiAnswer = aiService.generateAIJobInsight(request);
+            if (existingInsight != null) {
+                existingInsight.setAiAnalysis(aiAnswer.getInsights());
+                var savedInsight = aiJobInsightsRepository.save(existingInsight);
+                return savedInsight;
+            } else {
+                AIJobInsight newInsight = AIJobInsight.builder()
+                        .job(job)
+                        .aiAnalysis(aiAnswer.getInsights())
+                        .build();
+                var savedInsight = aiJobInsightsRepository.save(newInsight);
+                return savedInsight;
+            }
+        }
+        return existingInsight;
     }
 }

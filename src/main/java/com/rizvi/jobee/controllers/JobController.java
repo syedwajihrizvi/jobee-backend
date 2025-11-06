@@ -28,12 +28,14 @@ import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.BusinessNotFoundException;
+import com.rizvi.jobee.helpers.AISchemas.AIJobInsightAnswer;
 import com.rizvi.jobee.mappers.JobMapper;
 import com.rizvi.jobee.principals.CustomPrincipal;
 import com.rizvi.jobee.queries.JobQuery;
 import com.rizvi.jobee.repositories.JobRepository;
 import com.rizvi.jobee.repositories.UserProfileRepository;
 import com.rizvi.jobee.services.AccountService;
+import com.rizvi.jobee.services.CompanyService;
 import com.rizvi.jobee.services.JobService;
 import com.rizvi.jobee.services.UserProfileService;
 
@@ -48,6 +50,7 @@ public class JobController {
     private final UserProfileRepository userProfileRepository;
     private final UserProfileService userProfileService;
     private final AccountService accountService;
+    private final CompanyService companyService;
     private final JobService jobService;
     private final JobMapper jobMapper;
 
@@ -70,6 +73,16 @@ public class JobController {
     public ResponseEntity<JobSummaryDto> getJobById(@PathVariable("id") Long id) {
         var job = jobService.getJobById(id);
         return ResponseEntity.ok(jobMapper.toSummaryDto(job));
+    }
+
+    @GetMapping("/{id}/ai-insights")
+    @Operation(summary = "Get AI-generated insights for a specific job")
+    public ResponseEntity<List<String>> getAIJobInsight(@PathVariable Long id) {
+        var job = jobService.getJobById(id);
+        var companyId = job.getCompanyId();
+        var company = companyService.findCompanyById(companyId);
+        var aiJobInsight = jobService.generateAIJobInsight(job, company);
+        return ResponseEntity.ok(aiJobInsight.getAiAnalysis());
     }
 
     @GetMapping("/applied")

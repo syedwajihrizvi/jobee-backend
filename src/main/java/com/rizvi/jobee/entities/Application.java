@@ -82,7 +82,6 @@ public class Application {
     }
 
     public List<Long> getInterviewIds() {
-        System.out.println("Getting interview IDs for application ID: " + this.id);
         return this.interviews.stream()
                 .map(Interview::getId)
                 .toList();

@@ -16,6 +16,12 @@ public class CreateJobDto {
     private Long businessAccountId;
     private String location;
     private EmploymentType employmentType;
+    private String streetAddress;
+    private String city;
+    private String state;
+    private String country;
+    private String postalCode;
+    private String department;
     private JobSetting setting;
     private Integer minSalary;
     private Integer maxSalary;

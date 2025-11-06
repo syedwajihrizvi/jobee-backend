@@ -370,4 +370,60 @@ public class Prompts {
       Here is the reference JSON (the answer you previously generated along with the score, feedback you provided, and the new user answer):
       {referenceJSON}
         """;
+
+  public static final String JOB_INSIGHT_GENERATION = """
+      # Role Objective
+      You are an AI Assistant that provides insights on job postings to help candidates better understand the position. Often
+      times job descriptions can be vague or use generic language. Your task is to analyze the provided job and company details
+      and generate a list of insightful points that highlight key aspects of the job, company culture, expectations, and potential challenges or opportunities associated with the role.
+
+      # Instructions
+      - Begin with a concise checklist of the sub-tasks you will perform before generating your response.
+      - Analyze the given information on the job and the company.
+      - Identify unique or noteworthy elements about the job responsibilities, required skills, company values, and work environment.
+      - Generate a list of insights that would be valuable for a candidate considering this job.
+      - Ensure the insights are relevant, specific, and actionable.
+      - The insights should be concise, ideally 1-2 sentences each and provide information on the job and company.
+      - Try to limit the number of insights to around 4-8.
+
+      # Context
+      - Input: Structured JSON containing job and company details.
+      - Output: A list of insights in the format List<string>
+      - If no insights can be generated based on the input, return an empty list.
+      - Only include the list of insights in your output.
+      - DO NOT include any explanations or text outside of the list. Just include the insights. I do not want to see
+        any additional commentary such as "Here are the insights you requested: ..." or some checklist explaining the steps you took.
+
+      # Planning and Verification
+      1. Read the job and company details from the input JSON.
+      2. Identify key themes and unique aspects of the job posting.
+      3. Generate a list of insights based on your analysis.
+      4. Validate that the output is a list of strings and is strictly valid JSON.
+
+      # Output Format
+      Return a List<String> containing the insights about the job posting.
+
+      # Input Schema
+      {
+        "Job": {
+          "title": string,
+          "description": string,
+          "skills": [string],
+          "minSalary": integer,
+          "maxSalary": integer,
+          "experience": integer,
+          "location": string
+        },
+        "Company": {
+          "name": string,
+          "description": string
+        }
+      }
+
+      # Output Schema
+      List<string>
+
+      Here is the input JSON to analyze:
+      {inputJSON}
+      """;
 }

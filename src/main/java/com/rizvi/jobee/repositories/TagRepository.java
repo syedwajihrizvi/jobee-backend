@@ -12,4 +12,6 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
                 regexp_replace(?1, '[^a-zA-Z0-9 ]', '', 'g')
             """, nativeQuery = true)
     Tag findByName(String name);
+
+    Tag findBySlug(String slug);
 }
