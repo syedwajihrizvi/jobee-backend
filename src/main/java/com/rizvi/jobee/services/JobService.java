@@ -16,6 +16,7 @@ import com.rizvi.jobee.dtos.job.PaginatedJobDto;
 import com.rizvi.jobee.entities.AIJobInsight;
 import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.Company;
+import com.rizvi.jobee.entities.HiringTeam;
 import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.entities.Tag;
 import com.rizvi.jobee.entities.UserProfile;
@@ -24,6 +25,7 @@ import com.rizvi.jobee.helpers.AISchemas.AIJobInsightAnswer;
 import com.rizvi.jobee.helpers.AISchemas.GenerateAIInsightRequest;
 import com.rizvi.jobee.queries.JobQuery;
 import com.rizvi.jobee.repositories.AIJobInsightsRepository;
+import com.rizvi.jobee.repositories.HiringTeamRepository;
 import com.rizvi.jobee.repositories.JobRepository;
 import com.rizvi.jobee.repositories.TagRepository;
 import com.rizvi.jobee.specifications.JobSpecifications;
@@ -37,6 +39,7 @@ public class JobService {
     private final JobRepository jobRepository;
     private final TagRepository tagRepository;
     private final UserProfileService userProfileService;
+    private final HiringTeamRepository hiringTeamRepository;
     private final AIJobInsightsRepository aiJobInsightsRepository;
     private final AIService aiService;
     private static final int MAX_CANDIDATES_FOR_JOB = 5;
@@ -123,12 +126,24 @@ public class JobService {
         jobRepository.save(job);
     }
 
-    public List<Job> getJobsByBusinessAccountId(Long accountId, String search) {
+    public List<Job> getJobsByBusinessAccountIdForRecruiter(Long accountId, String search) {
         if (search != null && !search.isEmpty()) {
             return jobRepository.findByBusinessAccountIdAndTitle(accountId, search);
         }
         var sort = Sort.by("createdAt").descending();
         return jobRepository.findByBusinessAccountId(accountId, sort);
+    }
+
+    public List<Job> getJobsByBusinessAccountIdForEmployee(Long accountId, String search) {
+        List<HiringTeam> teamsUserIsPartOf = new ArrayList<>();
+        var sort = Sort.by("createdAt").descending();
+        if (search != null && !search.isEmpty()) {
+            teamsUserIsPartOf = hiringTeamRepository.findByBusinessAccountIdAndJobTitle(accountId, search, sort);
+        }
+        teamsUserIsPartOf = hiringTeamRepository.findByBusinessAccountId(accountId, sort);
+        return teamsUserIsPartOf.stream()
+                .map(team -> team.getJob())
+                .toList();
     }
 
     public List<Job> getJobsByCompanyId(Long companyId) {

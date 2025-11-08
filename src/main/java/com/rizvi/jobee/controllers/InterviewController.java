@@ -82,6 +82,8 @@ public class InterviewController {
             interviews = interviewService.getInterviewsByCompanyId(businessId);
         } else if (accountType.equals(BusinessType.RECRUITER.name())) {
             interviews = interviewService.getInterviewsForRecruiter(businessId);
+        } else if (accountType.equals(BusinessType.EMPLOYEE.name())) {
+            interviews = interviewService.getInterviewsForEmployee(businessId);
         }
         var interviewSummaryDtos = interviews.stream()
                 .map(interviewMapper::toSummaryDto)

@@ -1,5 +1,6 @@
 package com.rizvi.jobee.controllers;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -133,7 +134,7 @@ public class JobController {
             jobQuery.setPostedByAccountId(userId);
 
         } else if (accountType.equals(BusinessType.EMPLOYEE.name())) {
-            System.out.println("Employee specific jobs fetch logic to be implemented");
+            jobQuery.setHiringTeamMemberAccountId(userId);
         }
         var paginatedJobData = jobService.getJobsByCompany(jobQuery, pageNumber, pageSize);
         var jobs = paginatedJobData.getJobs();
@@ -173,8 +174,17 @@ public class JobController {
             @RequestParam(required = false) String search,
             @AuthenticationPrincipal CustomPrincipal principal) {
         var accountId = principal.getId();
-        List<Job> jobs;
-        jobs = jobService.getJobsByBusinessAccountId(accountId, search);
+        var accountType = principal.getAccountType();
+        List<Job> jobs = new ArrayList<>();
+        if (accountType.equals(BusinessType.RECRUITER.name())) {
+            jobs = jobService.getJobsByBusinessAccountIdForRecruiter(accountId, search);
+        } else if (accountType.equals(BusinessType.EMPLOYEE.name())) {
+            jobs = jobService.getJobsByBusinessAccountIdForEmployee(accountId, search);
+        } else if (accountType.equals(BusinessType.ADMIN.name())) {
+            var account = accountService.getBusinessAccountById(accountId);
+            Long companyId = account.getCompany().getId();
+            jobs = jobService.getJobsByCompanyId(companyId);
+        }
 
         var jobDtos = jobs.stream().map(jobMapper::toSummaryForBusinessDto).toList();
         return ResponseEntity.ok(jobDtos);

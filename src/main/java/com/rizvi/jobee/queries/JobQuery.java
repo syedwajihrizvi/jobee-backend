@@ -14,6 +14,7 @@ public class JobQuery {
     private Integer minSalary;
     private Integer maxSalary;
     private Long postedByAccountId;
+    private Long hiringTeamMemberAccountId;
     private Long companyId;
     private List<String> employmentTypes;
     private List<String> experience;

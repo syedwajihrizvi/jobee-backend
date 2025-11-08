@@ -88,6 +88,13 @@ public class InterviewService {
         return interviewRepository.findByCreatedAccountId(businessAccountId, sort);
     }
 
+    public List<Interview> getInterviewsForEmployee(Long businessAccountId) {
+        var sort = Sort.by(
+                Sort.Order.asc("interviewDate"),
+                Sort.Order.desc("createdAt"));
+        return interviewRepository.findByInterviewersId(businessAccountId, sort);
+    }
+
     public List<Interview> getInterviewsByCompanyId(Long businessAccountId) {
         var businessAccount = businessAccountRepository.findById(businessAccountId).orElseThrow(
                 () -> new AccountNotFoundException("Business account not found with id: " + businessAccountId));

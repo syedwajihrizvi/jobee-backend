@@ -39,6 +39,7 @@ import com.rizvi.jobee.queries.ApplicationQuery;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.repositories.ApplicationRepository;
 import com.rizvi.jobee.repositories.BusinessAccountRepository;
+import com.rizvi.jobee.repositories.HiringTeamRepository;
 import com.rizvi.jobee.repositories.JobRepository;
 import com.rizvi.jobee.repositories.UserDocumentRepository;
 import com.rizvi.jobee.repositories.UserProfileRepository;
@@ -57,6 +58,7 @@ import lombok.AllArgsConstructor;
 public class ApplicationController {
     private final BusinessAccountRepository businessAccountRepository;
     private final ApplicationRepository applicationRepository;
+    private final HiringTeamRepository hiringTeamRepository;
     private final JobRepository jobRepository;
     private final JobService jobService;
     private final JobMapper jobMapper;
@@ -123,21 +125,22 @@ public class ApplicationController {
     public ResponseEntity<List<ApplicantSummaryForBusinessDto>> getApplicationsForJobsPostedByUser(
             @RequestParam(required = false) String pending,
             @AuthenticationPrincipal CustomPrincipal principal) {
-        var userId = principal.getId();
+        var accountId = principal.getId();
         var accountType = principal.getAccountType();
-        var account = businessAccountRepository.findById(userId)
-                .orElseThrow(() -> new AccountNotFoundException("Business account not found for user id: " + userId));
+        var account = businessAccountRepository.findById(accountId)
+                .orElseThrow(
+                        () -> new AccountNotFoundException("Business account not found for user id: " + accountId));
         Long companyId = account.getCompany().getId();
-        System.out.println("Company ID: " + companyId);
         List<Job> jobs = new ArrayList<>();
-        System.out.println("Account Type: " + accountType);
-        System.out.println(BusinessType.ADMIN.name());
         if (accountType.equals(BusinessType.ADMIN.name())) {
             System.out.println("Fetching for ADMIN");
             jobs = jobService.getJobsByCompanyId(companyId);
         } else if (accountType.equals(BusinessType.RECRUITER.name())) {
             System.out.println("Fetching for RECRUITER");
-            jobs = jobService.getJobsByBusinessAccountId(userId, null);
+            jobs = jobService.getJobsByBusinessAccountIdForRecruiter(accountId, null);
+        } else if (accountType.equals(BusinessType.EMPLOYEE.name())) {
+            System.out.println("Fetching for EMPLOYEE");
+            jobs = jobService.getJobsByBusinessAccountIdForEmployee(accountId, null);
         }
 
         var applications = Job.getApplicationsFromJobs(jobs);

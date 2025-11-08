@@ -117,6 +117,10 @@ public class Job {
     @Builder.Default
     private Set<Interview> interviews = new HashSet<>();
 
+    @OneToMany(mappedBy = "job", orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @Builder.Default
+    private Set<HiringTeam> hiringTeamMembers = new HashSet<>();
+
     @Builder.Default
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(name = "job_tags", joinColumns = @JoinColumn(name = "job_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))

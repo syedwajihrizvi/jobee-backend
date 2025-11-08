@@ -9,6 +9,7 @@ import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.entities.Tag;
 import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.Company;
+import com.rizvi.jobee.entities.HiringTeam;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +18,6 @@ import org.springframework.data.jpa.domain.Specification;
 
 public class JobSpecifications {
     public static Specification<Job> withFilters(JobQuery query) {
-        System.out.println("Building specifications with query: " + query);
         return (root, _, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             Join<Job, BusinessAccount> businessAccountJoin = root.join("businessAccount");
@@ -56,10 +56,17 @@ public class JobSpecifications {
                 }
                 predicates.add(cb.or(predicates.toArray(new Predicate[0])));
             }
+            if (query.getHiringTeamMemberAccountId() != null) {
+                Join<Job, HiringTeam> hiringTeamJoin = root.join("hiringTeamMembers");
+                predicates.add(cb.and(
+                    cb.isNotNull(hiringTeamJoin.get("businessAccount")),
+                    cb.equal(hiringTeamJoin.get("businessAccount").get("id"),
+                            query.getHiringTeamMemberAccountId())
+                ));
+            }
             if (query.getExperience() != null && !query.getExperience().isEmpty()) {
                 List<Predicate> experiencePredicates = new ArrayList<>();
                 for (String level : query.getExperience()) {
-                    System.out.println("Adding experience level filter: " + level);
                     experiencePredicates.add(cb.equal(root.get("level"), level));
                 }
                 predicates.add(cb.or(experiencePredicates.toArray(new Predicate[0])));

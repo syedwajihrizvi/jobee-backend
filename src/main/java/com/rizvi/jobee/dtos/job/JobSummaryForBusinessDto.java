@@ -13,6 +13,8 @@ public class JobSummaryForBusinessDto {
     private String level;
     private Integer applicants;
     private String department;
+    private String city;
+    private String country;
     private Integer pendingApplicationsSize;
     private Integer minSalary;
     private Integer maxSalary;

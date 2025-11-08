@@ -613,9 +613,16 @@
 -- UPDATE jobs SET description = 'Design, implement, and maintain scalable cloud solutions for enterprise environments. Collaborate with cross-functional teams to develop cloud strategies, migrate workloads, ensure security and high availability, and optimize performance across AWS, Azure, or GCP platforms.' WHERE id = 25;
 -- UPDATE companies SET description = 'A leading provider of cloud computing solutions, specializing in scalable and secure infrastructure for businesses of all sizes. Our services include cloud migration, architecture design, and managed services across AWS, Azure, and Google Cloud platforms.' WHERE id = 25;
 
-INSERT INTO business_accounts (id, email, password, created_at, account_type, first_name, last_name, company_id) VALUES
-(55, 'jonsnow@email.com', 'winteriscoming', NOW(), 'RECRUITER', 'Jon', 'Snow', 57);
+-- INSERT INTO business_accounts (id, email, password, created_at, account_type, first_name, last_name, company_id) VALUES
+-- (55, 'jonsnow@email.com', 'winteriscoming', NOW(), 'RECRUITER', 'Jon', 'Snow', 57);
 
-INSERT INTO business_profiles (id, business_account_id, summary, title, created_at) VALUES
-(55, 55, 'Recruiter at Night''s Watch, seeking brave souls for the Wall.', 'Recruiter', NOW());
+-- INSERT INTO business_profiles (id, business_account_id, summary, title, created_at) VALUES
+-- (55, 55, 'Recruiter at Night''s Watch, seeking brave souls for the Wall.', 'Recruiter', NOW());
+
+INSERT INTO hiring_team (job_id, business_account_id, email, first_name, last_name, invited, created_at, updated_at) 
+VALUES 
+    (57, 65, 'wajih@jobee.solutions.com', 'Wajih', 'Rizvi', TRUE, NOW(), NOW()),
+    (58, 65, 'wajih@jobee.solutions.com', 'Wajih', 'Rizvi', TRUE, NOW(), NOW()),
+    (59, 65, 'wajih@jobee.solutions.com', 'Wajih', 'Rizvi', TRUE, NOW(), NOW()),
+    (75, 65, 'wajih@jobee.solutions.com', 'Wajih', 'Rizvi', TRUE, NOW(), NOW());
 

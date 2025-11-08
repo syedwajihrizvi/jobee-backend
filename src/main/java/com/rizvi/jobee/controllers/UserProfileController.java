@@ -192,7 +192,9 @@ public class UserProfileController {
         @Operation(summary = "Get AI recommended jobs for the authenticated user")
         public ResponseEntity<List<RecommendedJobDto>> getRecommendedJobs(
                         @AuthenticationPrincipal CustomPrincipal principal) {
+                System.out.println("SYED-DEBUG: Fetching recommended jobs");
                 var userProfileId = principal.getProfileId();
+                System.out.println("SYED-DEBUG: User Profile ID: " + userProfileId);
                 var userProfile = userProfileRepository.findById(userProfileId)
                                 .orElseThrow(() -> new AccountNotFoundException("User profile not found"));
                 var jobs = jobRecommenderService.getRecommendedJobsForUser(userProfile);

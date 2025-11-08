@@ -40,4 +40,7 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
     @EntityGraph(attributePaths = { "job", "job.businessAccount" })
     @Query("select i from Interview i where i.job.businessAccount.id = :businessAccountId")
     List<Interview> findByCreatedAccountId(Long businessAccountId, Sort sort);
+
+    @EntityGraph(attributePaths = { "job" })
+    List<Interview> findByInterviewersId(Long interviewerId, Sort sort);
 }
