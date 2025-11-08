@@ -151,8 +151,12 @@ public class Job {
 
     public static List<Application> getApplicationsFromJobs(List<Job> jobs) {
         List<Application> applications = new ArrayList<>();
-        for (Job job : jobs) {
-            applications.addAll(job.getApplications());
+        if (jobs != null) {
+            for (Job job : jobs) {
+                if (job != null && job.getApplications() != null) {
+                    applications.addAll(job.getApplications());
+                }
+            }
         }
         return applications;
     }

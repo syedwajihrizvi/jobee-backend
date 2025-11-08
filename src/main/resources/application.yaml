@@ -24,5 +24,11 @@ cloud:
     bucket: ${AWS_S3_BUCKET:jobee-backend}
     accessKey: ${AWS_ACCESS_KEY_ID:your-access-key-id}
     secretKey: ${AWS_SECRET_ACCESS_KEY:your-secret-access-key}
+twilio:
+  accountSid: ${TWILIO_ACCOUNT_SID:your-twilio-account-sid}
+  authToken: ${TWILIO_AUTH_TOKEN:your-twilio-auth-token}
+  phoneNumber: ${TWILIO_PHONE_NUMBER:+16472705508}
+email:
+  from: ${JOBEE_EMAIL_FROM:no-reply@jobee.solutions}
 openai:
   apiKey: ${OPENAI_API_KEY:your-openai-api-key}

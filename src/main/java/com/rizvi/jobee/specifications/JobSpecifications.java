@@ -43,6 +43,9 @@ public class JobSpecifications {
             if (query.getCompanyId() != null) {
                 predicates.add(cb.equal(companyJoin.get("id"), query.getCompanyId()));
             }
+            if (query.getPostedByAccountId() != null) {
+                predicates.add(cb.equal(businessAccountJoin.get("id"), query.getPostedByAccountId()));
+            }
             if (query.getCompanies() != null && !query.getCompanies().isEmpty()) {
                 for (String comp : query.getCompanies()) {
                     String searchCompany = "%" + comp.toLowerCase().trim().replace(" ", "") + "%";

@@ -94,8 +94,10 @@ public class UserProfileController {
         @Operation(summary = "Get the authenticated user's profile")
         public ResponseEntity<UserProfileSummaryDto> getMyProfile(
                         @AuthenticationPrincipal CustomPrincipal principal) {
-                var userProfile = userProfileService.getAuthenticatedUserProfile(principal.getId());
-                var canQuickApplyBatch = userProfileService.canQuickApplyBatch(principal.getId());
+                var accountId = principal.getId();
+                var userProfileId = principal.getProfileId();
+                var userProfile = userProfileService.getAuthenticatedUserProfile(accountId);
+                var canQuickApplyBatch = userProfileService.canQuickApplyBatch(userProfileId);
                 if (userProfile == null) {
                         throw new AccountNotFoundException("User profile not found");
                 }
@@ -112,8 +114,8 @@ public class UserProfileController {
         @Operation(summary = "Get the authenticated user's dashboard data")
         public ResponseEntity<UserProfileDashboardSummaryDto> getUserDashboardData(
                         @AuthenticationPrincipal CustomPrincipal principal) {
-                var userId = principal.getId();
-                var userProfile = userProfileService.getAuthenticatedUserProfile(userId);
+                var accountId = principal.getId();
+                var userProfile = userProfileService.getAuthenticatedUserProfile(accountId);
                 if (userProfile == null) {
                         throw new AccountNotFoundException("User profile not found");
                 }
@@ -125,11 +127,11 @@ public class UserProfileController {
         @Operation(summary = "Get the authenticated user's profile completeness percentage")
         public ResponseEntity<ProfileCompletenessDto> getProfileCompleteness(
                         @AuthenticationPrincipal CustomPrincipal principal) {
-                var userId = principal.getId();
-                var comleteness = userProfileService.calculateProfileCompleteness(userId);
+                var userProfileId = principal.getProfileId();
+                var completeness = userProfileService.calculateProfileCompleteness(userProfileId);
                 var dto = new ProfileCompletenessDto();
-                dto.setId(userId);
-                dto.setCompleteness(comleteness);
+                dto.setId(userProfileId);
+                dto.setCompleteness(completeness);
                 return ResponseEntity.ok(dto);
         }
 
@@ -138,8 +140,8 @@ public class UserProfileController {
         public ResponseEntity<Void> favoriteCompany(
                         @RequestParam Long companyId,
                         @AuthenticationPrincipal CustomPrincipal principal) {
-                var userId = principal.getId();
-                userProfileService.toggleFavoriteCompany(companyId, userId);
+                var userProfileId = principal.getProfileId();
+                userProfileService.toggleFavoriteCompany(companyId, userProfileId);
                 return ResponseEntity.ok().build();
         }
 
@@ -147,8 +149,8 @@ public class UserProfileController {
         @Operation(summary = "Get all the jobs the user has applied to")
         public ResponseEntity<List<?>> getUserAppliedJobs(
                         @AuthenticationPrincipal CustomPrincipal principal) {
-                var userId = principal.getId();
-                var applications = applicationRepository.findByUserProfileId(userId);
+                var userProfileId = principal.getProfileId();
+                var applications = applicationRepository.findByUserProfileId(userProfileId);
                 var applicationDtos = applications.stream()
                                 .map(applicationMapper::toSummaryDto)
                                 .toList();
@@ -160,13 +162,13 @@ public class UserProfileController {
         public ResponseEntity<ApplicationSummaryDto> getUserApplicationForJob(
                         @AuthenticationPrincipal CustomPrincipal principal,
                         @PathVariable Long jobId) {
-                var userId = principal.getId();
-                var application = applicationRepository.findByJobIdAndUserProfileId(jobId, userId);
+                var userProfileId = principal.getProfileId();
+                var application = applicationRepository.findByJobIdAndUserProfileId(jobId, userProfileId);
                 if (application == null) {
                         return ResponseEntity.ok().build();
                 }
                 var applicationDto = applicationMapper.toSummaryDto(application);
-                var interview = interviewService.getInterviewByJobIdAndCandidateId(jobId, userId);
+                var interview = interviewService.getInterviewByJobIdAndCandidateId(jobId, userProfileId);
                 if (interview != null) {
                         applicationDto.setInterviewId(interview.getId());
                 }
@@ -177,8 +179,8 @@ public class UserProfileController {
         @Operation(summary = "Get all favorite jobs for the authenticated user")
         public ResponseEntity<List<JobSummaryDto>> getFavoriteJobs(
                         @AuthenticationPrincipal CustomPrincipal principal) {
-                var userId = principal.getId();
-                var userProfile = userProfileRepository.findById(userId)
+                var userProfileId = principal.getProfileId();
+                var userProfile = userProfileRepository.findById(userProfileId)
                                 .orElseThrow(() -> new AccountNotFoundException("User profile not found"));
                 var favoriteJobs = userProfile.getFavoriteJobs().stream()
                                 .map(jobMapper::toSummaryDto)
@@ -190,8 +192,8 @@ public class UserProfileController {
         @Operation(summary = "Get AI recommended jobs for the authenticated user")
         public ResponseEntity<List<RecommendedJobDto>> getRecommendedJobs(
                         @AuthenticationPrincipal CustomPrincipal principal) {
-                var userId = principal.getId();
-                var userProfile = userProfileRepository.findById(userId)
+                var userProfileId = principal.getProfileId();
+                var userProfile = userProfileRepository.findById(userProfileId)
                                 .orElseThrow(() -> new AccountNotFoundException("User profile not found"));
                 var jobs = jobRecommenderService.getRecommendedJobsForUser(userProfile);
                 List<RecommendedJobDto> result = new ArrayList<>();
@@ -226,8 +228,8 @@ public class UserProfileController {
         public ResponseEntity<?> addFavoriteJob(
                         @RequestParam Long jobId,
                         @AuthenticationPrincipal CustomPrincipal principal) {
-                var userId = principal.getId();
-                var userProfile = userProfileRepository.findByAccountId(userId)
+                var accountId = principal.getId();
+                var userProfile = userProfileRepository.findByAccountId(accountId)
                                 .orElseThrow(() -> new AccountNotFoundException("User profile not found"));
                 var job = jobRepository.findById(Long.valueOf(jobId))
                                 .orElseThrow(() -> new JobNotFoundException("Job with ID " + jobId + " not found"));
@@ -251,8 +253,8 @@ public class UserProfileController {
                 if (profileImage.isEmpty()) {
                         throw new IllegalArgumentException("Profile image file is empty");
                 }
-                var userId = principal.getId();
-                var savedProfile = userProfileService.updateUserProfileImage(profileImage, userId);
+                var userProfileId = principal.getProfileId();
+                var savedProfile = userProfileService.updateUserProfileImage(profileImage, userProfileId);
                 return ResponseEntity.ok().body(userMapper.toProfileSummaryDto(savedProfile));
         }
 
@@ -264,8 +266,8 @@ public class UserProfileController {
                 if (videoIntro.isEmpty()) {
                         throw new IllegalArgumentException("Video introduction file is empty");
                 }
-                var userId = principal.getId();
-                var savedProfile = userProfileService.updateUserVideo(videoIntro, userId);
+                var userProfileId = principal.getProfileId();
+                var savedProfile = userProfileService.updateUserVideo(videoIntro, userProfileId);
                 return ResponseEntity.ok().body(userMapper.toProfileSummaryDto(savedProfile));
         }
 
@@ -273,8 +275,8 @@ public class UserProfileController {
         @Operation(summary = "Remove video introduction")
         public ResponseEntity<Void> removeVideoIntro(
                         @AuthenticationPrincipal CustomPrincipal principal) throws AmazonS3Exception {
-                var userId = principal.getId();
-                userProfileService.removeVideoIntro(userId);
+                var userProfileId = principal.getProfileId();
+                userProfileService.removeVideoIntro(userProfileId);
                 return ResponseEntity.noContent().build();
         }
 
@@ -284,8 +286,8 @@ public class UserProfileController {
         public ResponseEntity<UserProfileSummaryDto> updateGeneralInfo(
                         @RequestBody UpdateUserProfileGeneralInfoDto request,
                         @AuthenticationPrincipal CustomPrincipal principal) {
-                var userId = principal.getId();
-                var savedProfile = userProfileService.updateGeneralInformation(request, userId);
+                var userProfileId = principal.getProfileId();
+                var savedProfile = userProfileService.updateGeneralInformation(request, userProfileId);
                 if (savedProfile == null) {
                         throw new AccountNotFoundException("User profile not found");
                 }
@@ -297,8 +299,8 @@ public class UserProfileController {
         public ResponseEntity<UserProfileSummaryDto> updateSummary(
                         @RequestBody UpdateUserProfileSummaryDto summaryDto,
                         @AuthenticationPrincipal CustomPrincipal principal) {
-                var userId = principal.getId();
-                var savedProfile = userProfileService.updateUserSummary(summaryDto, userId);
+                var userProfileId = principal.getProfileId();
+                var savedProfile = userProfileService.updateUserSummary(summaryDto, userProfileId);
                 if (savedProfile == null) {
                         throw new AccountNotFoundException("User profile not found");
                 }
@@ -313,9 +315,9 @@ public class UserProfileController {
                         @RequestPart(name = "videoIntro", required = false) MultipartFile videoIntro,
                         @RequestPart("data") String request,
                         @AuthenticationPrincipal CustomPrincipal principal) throws RuntimeException, AmazonS3Exception {
-                var userId = principal.getId();
+                var userProfileId = principal.getProfileId();
                 var userProfile = userProfileService.updateUserProfileViaCompleteProfile(
-                                profileImage, videoIntro, request, userId);
+                                profileImage, videoIntro, request, userProfileId);
                 return ResponseEntity.ok().body(userMapper.toProfileSummaryDto(userProfile));
         }
 
@@ -324,12 +326,12 @@ public class UserProfileController {
         public ResponseEntity<UserProfileSummaryDto> updatePrimaryResume(
                         @RequestParam("resumeId") Long resumeId,
                         @AuthenticationPrincipal CustomPrincipal principal) {
-                var userId = principal.getId();
-                var document = userDocumentService.userDocumentExists(resumeId, userId);
+                var userProfileId = principal.getProfileId();
+                var document = userDocumentService.userDocumentExists(resumeId, userProfileId);
                 if (document == null) {
                         return ResponseEntity.notFound().build();
                 }
-                var savedProfile = userProfileService.updatePrimaryResume(document, userId);
+                var savedProfile = userProfileService.updatePrimaryResume(document, userProfileId);
                 return ResponseEntity.ok().body(userMapper.toProfileSummaryDto(savedProfile));
         }
 

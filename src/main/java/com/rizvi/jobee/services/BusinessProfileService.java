@@ -24,12 +24,8 @@ public class BusinessProfileService {
         return businessProfileRepository.findBusinessProfileByEmail(email.replace(" ", ""));
     }
 
-    public BusinessProfile getUserProfileById(Long userId) {
-        return businessProfileRepository.findById(userId).orElse(null);
-    }
-
     public BusinessProfile updateBusinessProfileGeneralInfo(UpdateBusinessProfileGeneralInfoDto request, Long userId) {
-        var businessProfile = businessProfileRepository.findById(userId).orElse(null);
+        var businessProfile = businessProfileRepository.findByBusinessAccountId(userId).orElse(null);
         var businessAccount = businessProfile.getBusinessAccount();
         if (businessProfile == null || businessAccount == null) {
             throw new AccountNotFoundException("Business profile not found");
@@ -60,7 +56,7 @@ public class BusinessProfileService {
     }
 
     public BusinessProfile updateProfileImage(MultipartFile profileImage, Long userId) throws AmazonS3Exception {
-        var businessProfile = businessProfileRepository.findById(userId).orElse(null);
+        var businessProfile = businessProfileRepository.findByBusinessAccountId(userId).orElse(null);
         if (businessProfile == null) {
             throw new AccountNotFoundException("Business profile not found");
         }
@@ -74,7 +70,7 @@ public class BusinessProfileService {
     }
 
     public Long getCompanyIdForBusinessProfileId(Long businessProfileId) {
-        var businessProfile = businessProfileRepository.findById(businessProfileId).orElse(null);
+        var businessProfile = businessProfileRepository.findByBusinessAccountId(businessProfileId).orElse(null);
         if (businessProfile == null) {
             throw new AccountNotFoundException("Business profile not found");
         }

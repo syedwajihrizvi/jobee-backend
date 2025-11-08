@@ -9,6 +9,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CustomPrincipal {
     private Long id;
+    private Long profileId;
     private String email;
     private String role;
     private String accountType;

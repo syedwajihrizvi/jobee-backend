@@ -55,7 +55,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(c -> c
                         .requestMatchers(HttpMethod.GET, "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**")
                         .permitAll()
-                        .requestMatchers(HttpMethod.POST, "/business-accounts/register", "/business-accounts/login")
+                        .requestMatchers(HttpMethod.POST, "/business-accounts/register", "/business-accounts/login",
+                                "/business-accounts/register-via-code")
                         .permitAll()
                         .requestMatchers(HttpMethod.POST, "/accounts/register", "/accounts/login")
                         .permitAll()
@@ -75,6 +76,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/api/companies/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/user-documents/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/experiences/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/business-accounts/invite-member").permitAll()
                         .requestMatchers(HttpMethod.GET, "/business-accounts/me").permitAll()
                         .requestMatchers(HttpMethod.GET, "/business-profiles").permitAll()
                         .requestMatchers(HttpMethod.GET, "/business-profiles/socialMedia/**").permitAll()

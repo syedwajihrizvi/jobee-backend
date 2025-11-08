@@ -1,5 +1,7 @@
 package com.rizvi.jobee.controllers;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +16,7 @@ import com.rizvi.jobee.dtos.user.BusinessProfileDashboardSummaryDto;
 import com.rizvi.jobee.dtos.user.BusinessProfileSummaryForInterviewDto;
 import com.rizvi.jobee.dtos.user.UpdateBusinessProfileGeneralInfoDto;
 import com.rizvi.jobee.entities.Job;
+import com.rizvi.jobee.enums.BusinessType;
 import com.rizvi.jobee.exceptions.AmazonS3Exception;
 import com.rizvi.jobee.mappers.BusinessMapper;
 import com.rizvi.jobee.mappers.JobMapper;
@@ -49,8 +52,17 @@ public class BusinessProfileController {
     public ResponseEntity<BusinessProfileDashboardSummaryDto> getBusinessProfileForDashboard(
             @AuthenticationPrincipal CustomPrincipal principal) {
         var userId = principal.getId();
+        var accountType = principal.getAccountType();
         var companyId = businessProfileService.getCompanyIdForBusinessProfileId(userId);
-        var jobs = jobService.getJobsByCompanyId(companyId);
+        // Depening on the ROLE of the user, fetch different data
+        // If the user is an admin, fectch all jobs by company
+        // If the user is a recruiter, fetch only jobs posted by that recruiter
+        List<Job> jobs = null;
+        if (accountType.equals(BusinessType.ADMIN.name())) {
+            jobs = jobService.getJobsByCompanyId(companyId);
+        } else if (accountType.equals(BusinessType.RECRUITER.name())) {
+            jobs = jobService.getJobsByBusinessAccountId(userId, null);
+        }
         var totalJobs = jobs.size();
         var totalApplications = jobs.stream().mapToInt(job -> job.getApplications().size()).sum();
         var totalViews = jobs.stream().mapToInt(job -> job.getViews()).sum();

@@ -17,11 +17,12 @@ import lombok.AllArgsConstructor;
 public class JwtService {
     private JwtConfig jwtConfig;
 
-    public String generateBusinessJwtToken(String email, Role role, Long id, String account_type) {
+    public String generateBusinessJwtToken(String email, Role role, Long id, String account_type, Long profile_id) {
         return Jwts.builder()
                 .subject(email)
                 .claim("role", role)
                 .claim("id", id)
+                .claim("profile_id", profile_id)
                 .claim("account_type", account_type)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + jwtConfig.getAccessTokenExpiration()))
@@ -29,11 +30,12 @@ public class JwtService {
                 .compact();
     }
 
-    public String generateUserToken(String email, Role role, Long id) {
+    public String generateUserToken(String email, Role role, Long accountId, Long profileId) {
         return Jwts.builder()
                 .subject(email)
                 .claim("role", role)
-                .claim("id", id)
+                .claim("id", accountId)
+                .claim("profile_id", profileId)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + jwtConfig.getAccessTokenExpiration()))
                 .signWith(Keys.hmacShaKeyFor(jwtConfig.getSecret().getBytes(StandardCharsets.UTF_8)))
@@ -75,6 +77,17 @@ public class JwtService {
         }
     }
 
+    public Long getProfileIdFromToken(String token) {
+        try {
+            return Jwts.parser()
+                    .verifyWith(Keys.hmacShaKeyFor(jwtConfig.getSecret().getBytes(StandardCharsets.UTF_8)))
+                    .build()
+                    .parseSignedClaims(token).getPayload().get("profile_id", Long.class);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public String getRoleFromToken(String token) {
         try {
             return Jwts.parser()
@@ -96,4 +109,5 @@ public class JwtService {
             return null;
         }
     }
+
 }

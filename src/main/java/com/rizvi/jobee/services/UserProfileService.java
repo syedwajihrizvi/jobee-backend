@@ -79,7 +79,7 @@ public class UserProfileService {
     }
 
     public UserProfile updateGeneralInformation(UpdateUserProfileGeneralInfoDto request, Long accountId) {
-        var userProfile = userProfileRepository.findByAccountId(accountId).orElse(null);
+        var userProfile = userProfileRepository.findById(accountId).orElse(null);
         if (userProfile == null) {
             return null;
         }
@@ -112,7 +112,7 @@ public class UserProfileService {
     }
 
     public UserProfile updateUserSummary(UpdateUserProfileSummaryDto request, Long accountId) {
-        var userProfile = userProfileRepository.findByAccountId(accountId).orElse(null);
+        var userProfile = userProfileRepository.findById(accountId).orElse(null);
         if (userProfile == null) {
             return null;
         }
@@ -122,7 +122,7 @@ public class UserProfileService {
     }
 
     public UserProfile updateUserVideo(MultipartFile videoIntro, Long accountId) throws AmazonS3Exception {
-        var userProfile = userProfileRepository.findByAccountId(accountId).orElse(null);
+        var userProfile = userProfileRepository.findById(accountId).orElse(null);
         if (userProfile == null) {
             return null;
         }
@@ -137,7 +137,7 @@ public class UserProfileService {
     }
 
     public Void removeVideoIntro(Long accountId) throws AmazonS3Exception {
-        var userProfile = userProfileRepository.findByAccountId(accountId).orElse(null);
+        var userProfile = userProfileRepository.findById(accountId).orElse(null);
         if (userProfile == null) {
             return null;
         }
@@ -151,7 +151,7 @@ public class UserProfileService {
             MultipartFile profileImage, MultipartFile videoIntro,
             String request, Long userId)
             throws RuntimeException, AmazonS3Exception {
-        var userProfile = userProfileRepository.findByAccountId(userId).orElse(null);
+        var userProfile = userProfileRepository.findById(userId).orElse(null);
         if (userProfile == null) {
             throw new AccountNotFoundException("User profile not found");
         }
@@ -225,8 +225,8 @@ public class UserProfileService {
         return Math.min(completeness, 100);
     }
 
-    public void toggleFavoriteCompany(Long companyId, Long userId) {
-        var userProfile = userProfileRepository.findByAccountId(userId)
+    public void toggleFavoriteCompany(Long companyId, Long userProfileId) {
+        var userProfile = userProfileRepository.findById(userProfileId)
                 .orElseThrow(() -> new AccountNotFoundException("User profile not found"));
         var favoriteCompanies = userProfile.getFavoriteCompanies();
         var company = companyRepository.findById(companyId).orElseThrow(() -> new CompanyNotFoundException());
@@ -280,7 +280,7 @@ public class UserProfileService {
     }
 
     public UserProfile updatePrimaryResume(UserDocument resume, Long userId) {
-        var userProfile = userProfileRepository.findByAccountId(userId).orElse(null);
+        var userProfile = userProfileRepository.findById(userId).orElse(null);
         if (userProfile == null) {
             throw new AccountNotFoundException("User profile not found");
         }

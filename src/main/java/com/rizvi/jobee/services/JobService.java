@@ -57,8 +57,7 @@ public class JobService {
         return job;
     }
 
-    public PaginatedJobDto getJobsByCompany(JobQuery jobQuery, Long companyId, int pageNumber, int pageSize) {
-        jobQuery.setCompanyId(companyId);
+    public PaginatedJobDto getJobsByCompany(JobQuery jobQuery, int pageNumber, int pageSize) {
         PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
         Page<Job> page = jobRepository.findAll(JobSpecifications.withFilters(jobQuery), pageRequest);
         var jobs = page.getContent();
@@ -158,12 +157,10 @@ public class JobService {
                     .sum();
             score += (int) ((matchingSkills * 40) / jobTags.size());
         }
-        System.out.println("Skill Match Score for Job ID " + jobId + ": " + score + "/40");
         var totalExperience = userProfile.getExperiences().stream()
                 .mapToLong(exp -> {
                     String fromYear = exp.getFrom().replace(" ", "");
                     String toYear = exp.getTo() != null ? exp.getTo().replace(" ", "") : "present";
-                    System.out.println(fromYear + " - " + toYear);
                     if (fromYear != null && toYear != null && !toYear.equals("present")) {
                         System.out.println("present".equals(toYear));
                         return Long.parseLong(toYear) - Long.parseLong(fromYear);
@@ -177,7 +174,6 @@ public class JobService {
 
         var experienceScore = job.getUserMatchWithExperience(totalExperience);
         score += (experienceScore * 30) / 100;
-        System.out.println("Experience Match Score for Job ID " + jobId + ": " + (experienceScore * 30) / 100 + "/30");
         var jobLocation = job.getLocation();
         List<String> userLocations = new ArrayList<>();
         userLocations.addAll(userProfile.getExperiences().stream()
@@ -199,8 +195,6 @@ public class JobService {
         if (hasRelevantEducation) {
             score += 10;
         }
-        System.out.println("Location Match Score for Job ID " + jobId + ": " + (score * 20) / 100 + "/20");
-        System.out.println("Job Match Score for Job ID " + jobId + ": " + score + "/" + maxScore);
         return Long.valueOf(Math.min(score, maxScore));
     }
 
@@ -243,9 +237,6 @@ public class JobService {
         } else {
             System.out.println("SYED-DEBUG: No Existing Insight Found");
         }
-        System.out.println("SYED-DEBUG: Comparing Dates - Job Updated At: " + jobUpdatedAt +
-                ", Existing Insight Updated At: " +
-                (existingInsight != null ? existingInsight.getUpdatedAt() : "null"));
 
         var createNewInsight = existingInsight == null || existingInsight.getUpdatedAt().isBefore(jobUpdatedAt);
         if (createNewInsight) {

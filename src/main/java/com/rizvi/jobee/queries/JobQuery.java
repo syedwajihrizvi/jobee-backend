@@ -13,6 +13,7 @@ public class JobQuery {
     private Integer distance;
     private Integer minSalary;
     private Integer maxSalary;
+    private Long postedByAccountId;
     private Long companyId;
     private List<String> employmentTypes;
     private List<String> experience;

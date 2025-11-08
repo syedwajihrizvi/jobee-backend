@@ -1,5 +1,7 @@
 package com.rizvi.jobee.repositories;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -10,4 +12,7 @@ public interface BusinessProfileRepository extends JpaRepository<BusinessProfile
     @EntityGraph(attributePaths = { "businessAccount" })
     @Query("select bp from BusinessProfile bp where bp.businessAccount.email = :email")
     BusinessProfile findBusinessProfileByEmail(String email);
+
+    @Query("select bp from BusinessProfile bp where bp.businessAccount.id = :businessAccountId")
+    Optional<BusinessProfile> findByBusinessAccountId(Long businessAccountId);
 }

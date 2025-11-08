@@ -6,9 +6,11 @@ import com.rizvi.jobee.entities.Job;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class PaginatedJobDto {
     private boolean hasMore;
     private List<Job> jobs;

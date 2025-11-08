@@ -1,5 +1,6 @@
 package com.rizvi.jobee.controllers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,8 @@ import com.rizvi.jobee.dtos.interview.InterviewDto;
 import com.rizvi.jobee.dtos.interview.InterviewPrepQuestionDto;
 import com.rizvi.jobee.dtos.interview.InterviewPreparationDto;
 import com.rizvi.jobee.dtos.interview.InterviewSummaryDto;
+import com.rizvi.jobee.entities.Interview;
+import com.rizvi.jobee.enums.BusinessType;
 import com.rizvi.jobee.dtos.application.ApplicationDto;
 import com.rizvi.jobee.mappers.InterviewMapper;
 import com.rizvi.jobee.principals.CustomPrincipal;
@@ -73,7 +76,13 @@ public class InterviewController {
     public ResponseEntity<List<InterviewSummaryDto>> getInterviewsByBusinessId(
             @AuthenticationPrincipal CustomPrincipal principal) {
         var businessId = principal.getId();
-        var interviews = interviewService.getInterviewsForBusinessAccount(businessId);
+        var accountType = principal.getAccountType();
+        List<Interview> interviews = new ArrayList<>();
+        if (accountType.equals(BusinessType.ADMIN.name())) {
+            interviews = interviewService.getInterviewsByCompanyId(businessId);
+        } else if (accountType.equals(BusinessType.RECRUITER.name())) {
+            interviews = interviewService.getInterviewsForRecruiter(businessId);
+        }
         var interviewSummaryDtos = interviews.stream()
                 .map(interviewMapper::toSummaryDto)
                 .toList();

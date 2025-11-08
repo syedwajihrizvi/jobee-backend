@@ -26,9 +26,9 @@ import com.rizvi.jobee.dtos.user.FindCandidateDto;
 import com.rizvi.jobee.entities.Application;
 import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.entities.UserProfile;
+import com.rizvi.jobee.enums.BusinessType;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.BusinessNotFoundException;
-import com.rizvi.jobee.helpers.AISchemas.AIJobInsightAnswer;
 import com.rizvi.jobee.mappers.JobMapper;
 import com.rizvi.jobee.principals.CustomPrincipal;
 import com.rizvi.jobee.queries.JobQuery;
@@ -78,6 +78,7 @@ public class JobController {
     @GetMapping("/{id}/ai-insights")
     @Operation(summary = "Get AI-generated insights for a specific job")
     public ResponseEntity<List<String>> getAIJobInsight(@PathVariable Long id) {
+        System.out.println("Generating AI insights for job ID: " + id);
         var job = jobService.getJobById(id);
         var companyId = job.getCompanyId();
         var company = companyService.findCompanyById(companyId);
@@ -123,10 +124,18 @@ public class JobController {
     public ResponseEntity<PaginatedJobResponseDto<JobSummaryForBusinessDto>> getJobsByCompany(
             int pageNumber, int pageSize,
             @ModelAttribute JobQuery jobQuery,
-            @PathVariable Long companyId) {
+            @PathVariable Long companyId,
+            @AuthenticationPrincipal CustomPrincipal principal) {
+        var userId = principal.getId();
+        var accountType = principal.getAccountType();
         jobQuery.setCompanyId(companyId);
-        System.out.println("Received job query for company " + companyId + ": " + jobQuery);
-        var paginatedJobData = jobService.getJobsByCompany(jobQuery, companyId, pageNumber, pageSize);
+        if (accountType.equals(BusinessType.RECRUITER.name())) {
+            jobQuery.setPostedByAccountId(userId);
+
+        } else if (accountType.equals(BusinessType.EMPLOYEE.name())) {
+            System.out.println("Employee specific jobs fetch logic to be implemented");
+        }
+        var paginatedJobData = jobService.getJobsByCompany(jobQuery, pageNumber, pageSize);
         var jobs = paginatedJobData.getJobs();
         var hasMore = paginatedJobData.isHasMore();
         var totalElements = paginatedJobData.getTotalElements();

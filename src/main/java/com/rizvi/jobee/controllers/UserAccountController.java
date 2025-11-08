@@ -62,7 +62,8 @@ public class UserAccountController {
         if (userAccount == null) {
             throw new IncorrectEmailOrPasswordException("Invalid email or password");
         }
-        var jwtToken = jwtService.generateUserToken(userAccount.getEmail(), Role.USER, userAccount.getId());
+        var jwtToken = jwtService.generateUserToken(userAccount.getEmail(), Role.USER, userAccount.getId(),
+                userAccount.getProfile().getId());
         return ResponseEntity.ok(new JwtDto(jwtToken));
     }
 
