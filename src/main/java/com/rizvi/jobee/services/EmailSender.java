@@ -21,11 +21,17 @@ public class EmailSender {
     @Value("${email.from}")
     private String senderEmail;
 
+    public void sendHiringTeamInvitationEmail() {
+        System.out.println("Sending hiring team invitation email...");
+    }
+
+    public void sendHiringTeamInvitationAndJoinJobbeeEmail() {
+        System.out.println("Sending hiring team invitation and join Jobee email...");
+    }
+
     public void sendInvitationEmail(
             String to, String companyName, BusinessAccount sender, String invitationType,
             String companyCode, String inviteUrl, String qrCode) {
-        System.out.println("Sending email to: " + to + " from " + senderEmail);
-        System.out.println("Invite URL: " + inviteUrl);
         try {
             Destination destination = createEmailDestination(to);
             String inviteeFullName = sender.getFullName();

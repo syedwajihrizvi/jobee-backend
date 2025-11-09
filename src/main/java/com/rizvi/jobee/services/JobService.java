@@ -25,6 +25,7 @@ import com.rizvi.jobee.helpers.AISchemas.AIJobInsightAnswer;
 import com.rizvi.jobee.helpers.AISchemas.GenerateAIInsightRequest;
 import com.rizvi.jobee.queries.JobQuery;
 import com.rizvi.jobee.repositories.AIJobInsightsRepository;
+import com.rizvi.jobee.repositories.BusinessAccountRepository;
 import com.rizvi.jobee.repositories.HiringTeamRepository;
 import com.rizvi.jobee.repositories.JobRepository;
 import com.rizvi.jobee.repositories.TagRepository;
@@ -39,7 +40,9 @@ public class JobService {
     private final JobRepository jobRepository;
     private final TagRepository tagRepository;
     private final UserProfileService userProfileService;
+    private final InvitationService invitationService;
     private final HiringTeamRepository hiringTeamRepository;
+    private final BusinessAccountRepository businessAccountRepository;
     private final AIJobInsightsRepository aiJobInsightsRepository;
     private final AIService aiService;
     private static final int MAX_CANDIDATES_FOR_JOB = 5;
@@ -115,6 +118,28 @@ public class JobService {
         for (Tag tag : tagEntities) {
             job.addTag(tag);
         }
+        // Add the hiring team members
+        for (var memberDto : request.getHiringTeam()) {
+            var email = memberDto.getEmail();
+            var firstName = memberDto.getFirstName();
+            var lastName = memberDto.getLastName();
+            // Create the hiring team member
+            var hiringTeamMember = HiringTeam.builder().email(email).firstName(firstName).lastName(lastName).job(job)
+                    .build();
+            var hiringTeamMemberAccount = businessAccountRepository.findByEmail(email).orElse(null);
+            if (hiringTeamMemberAccount != null) {
+                hiringTeamMember.setBusinessAccount(hiringTeamMemberAccount);
+                hiringTeamMember.setInvited(false);
+                invitationService.sendHiringTeamInvitationEmail();
+                // TODO: Send notification Email (TODO)
+            } else {
+                hiringTeamMember.setInvited(true);
+                invitationService.sendHiringTeamInvitationAndJoinJobeeEmail();
+                // Send invite Email (TODO)
+            }
+            job.addHiringTeamMember(hiringTeamMember);
+        }
+
         var savedJob = jobRepository.save(job);
         return savedJob;
 

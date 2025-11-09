@@ -5,8 +5,10 @@ import org.mapstruct.Mapping;
 
 import com.rizvi.jobee.dtos.user.BusinessAccountDto;
 import com.rizvi.jobee.dtos.user.BusinessProfileSummaryForInterviewDto;
+import com.rizvi.jobee.dtos.user.HiringTeamMemberResponseDto;
 import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.BusinessProfile;
+import com.rizvi.jobee.entities.HiringTeam;
 
 @Mapper(componentModel = "spring")
 public interface BusinessMapper {
@@ -28,4 +30,11 @@ public interface BusinessMapper {
     @Mapping(target = "firstName", source = "businessAccount.firstName")
     @Mapping(target = "lastName", source = "businessAccount.lastName")
     BusinessProfileSummaryForInterviewDto toBusinessProfileSummaryForInterviewDto(BusinessProfile businessProfile);
+
+    @Mapping(target = "email", source = "businessAccount.email")
+    @Mapping(target = "firstName", source = "businessAccount.firstName")
+    @Mapping(target = "lastName", source = "businessAccount.lastName")
+    @Mapping(target = "profileImageUrl", source = "businessAccount.profile.profileImageUrl")
+    @Mapping(target = "verified", expression = "java(member.isVerified())")
+    HiringTeamMemberResponseDto toHiringTeamMemberResponseDto(HiringTeam member);
 }

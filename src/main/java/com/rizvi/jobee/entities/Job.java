@@ -200,4 +200,9 @@ public class Job {
     public Long getCompanyId() {
         return this.businessAccount.getCompany().getId();
     }
+
+    public void addHiringTeamMember(HiringTeam member) {
+        this.hiringTeamMembers.add(member);
+        member.setJob(this);
+    }
 }

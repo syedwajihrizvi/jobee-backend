@@ -62,4 +62,7 @@ public class HiringTeam {
     @JoinColumn(name = "business_account_id", nullable = true)
     private BusinessAccount businessAccount;
 
+    public Boolean isVerified() {
+        return this.businessAccount != null && this.businessAccount.getProfile().getVerified();
+    }
 }

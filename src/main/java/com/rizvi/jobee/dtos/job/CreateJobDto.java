@@ -26,6 +26,7 @@ public class CreateJobDto {
     private Integer minSalary;
     private Integer maxSalary;
     private List<String> tags;
+    private List<HiringTeamMemberDto> hiringTeam;
     private JobLevel experience;
     private LocalDateTime appDeadline;
 }

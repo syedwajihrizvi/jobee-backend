@@ -9,7 +9,7 @@ import com.rizvi.jobee.dtos.job.JobSummaryDto;
 import com.rizvi.jobee.dtos.job.JobSummaryForBusinessDto;
 import com.rizvi.jobee.entities.Job;
 
-@Mapper(componentModel = "spring", uses = { ApplicationMapper.class })
+@Mapper(componentModel = "spring", uses = { ApplicationMapper.class, BusinessMapper.class })
 public interface JobMapper {
     @Mapping(target = "businessName", source = "businessAccount.company.name")
     @Mapping(target = "businessAccountId", source = "businessAccount.id")

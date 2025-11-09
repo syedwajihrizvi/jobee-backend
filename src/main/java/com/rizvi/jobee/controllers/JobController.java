@@ -30,6 +30,7 @@ import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.enums.BusinessType;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.BusinessNotFoundException;
+import com.rizvi.jobee.mappers.BusinessMapper;
 import com.rizvi.jobee.mappers.JobMapper;
 import com.rizvi.jobee.principals.CustomPrincipal;
 import com.rizvi.jobee.queries.JobQuery;
@@ -37,6 +38,7 @@ import com.rizvi.jobee.repositories.JobRepository;
 import com.rizvi.jobee.repositories.UserProfileRepository;
 import com.rizvi.jobee.services.AccountService;
 import com.rizvi.jobee.services.CompanyService;
+import com.rizvi.jobee.services.InvitationService;
 import com.rizvi.jobee.services.JobService;
 import com.rizvi.jobee.services.UserProfileService;
 
@@ -50,6 +52,7 @@ public class JobController {
     private final JobRepository jobRepository;
     private final UserProfileRepository userProfileRepository;
     private final UserProfileService userProfileService;
+    private final BusinessMapper businessMapper;
     private final AccountService accountService;
     private final CompanyService companyService;
     private final JobService jobService;
@@ -151,7 +154,12 @@ public class JobController {
     public ResponseEntity<JobDetailedSummaryForBusinessDto> getDetailedJobForBusiness(
             @PathVariable Long jobId) {
         var job = jobService.getCompanyJobById(jobId);
-        return ResponseEntity.ok(jobMapper.toDetailedSummaryForBusinessDto(job));
+        var jobDto = jobMapper.toDetailedSummaryForBusinessDto(job);
+        for (var member : job.getHiringTeamMembers()) {
+            var memberDto = businessMapper.toHiringTeamMemberResponseDto(member);
+            jobDto.getHiringTeam().add(memberDto);
+        }
+        return ResponseEntity.ok(jobDto);
     }
 
     @GetMapping("/favorites")
@@ -201,6 +209,7 @@ public class JobController {
         if (businessAccount == null) {
             throw new BusinessNotFoundException();
         }
+        System.out.println("SYED-DEBUG: HIRING TEAM " + request.getHiringTeam());
         var savedJob = jobService.createJob(request, businessAccount);
         var uri = uriComponentsBuilder.path("/jobs/{id}").buildAndExpand(savedJob.getId()).toUri();
         return ResponseEntity.created(uri).body(jobMapper.toSummaryDto(savedJob));

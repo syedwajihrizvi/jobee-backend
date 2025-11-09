@@ -88,4 +88,12 @@ public class InvitationService {
         invitation.setStatus(status);
         invitationRepository.save(invitation);
     }
+
+    public void sendHiringTeamInvitationEmail() {
+        emailSender.sendHiringTeamInvitationEmail();
+    }
+
+    public void sendHiringTeamInvitationAndJoinJobeeEmail() {
+        emailSender.sendHiringTeamInvitationAndJoinJobbeeEmail();
+    }
 }
