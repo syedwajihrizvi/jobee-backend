@@ -23,10 +23,14 @@ import com.openai.models.chat.completions.StructuredChatCompletionCreateParams;
 import com.rizvi.jobee.dtos.user.ResumeExtract;
 import com.rizvi.jobee.exceptions.InvalidDocumentException;
 import com.rizvi.jobee.helpers.Prompts;
+import com.rizvi.jobee.helpers.AISchemas.AIJob;
+import com.rizvi.jobee.helpers.AISchemas.AIJobDescriptionAnswer;
+import com.rizvi.jobee.helpers.AISchemas.AIJobDescriptionResponse;
 import com.rizvi.jobee.helpers.AISchemas.AIJobInsightAnswer;
 import com.rizvi.jobee.helpers.AISchemas.AnswerInterviewQuestionRequest;
 import com.rizvi.jobee.helpers.AISchemas.AnswerInterviewQuestionResponse;
 import com.rizvi.jobee.helpers.AISchemas.GenerateAIInsightRequest;
+import com.rizvi.jobee.helpers.AISchemas.GenerateAIJobDescriptionRequest;
 import com.rizvi.jobee.helpers.AISchemas.PrepareForInterviewRequest;
 import com.rizvi.jobee.helpers.AISchemas.PrepareForInterviewResponse;
 import com.rizvi.jobee.helpers.AISchemas.ReferenceToPreviousAnswer;
@@ -192,6 +196,31 @@ public class AIService {
             return result.orElse(null);
         } catch (Exception e) {
             System.out.println("Error during generating job insights: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public AIJobDescriptionAnswer generateAIJobDescription(GenerateAIJobDescriptionRequest request) {
+        System.out.println("Generating AI Job Description for job");
+        System.out.println(request.toJsonString());
+        String inputJson = request.toJsonString();
+        String prompt = Prompts.JOB_DESCRIPTION_GENERATION.replace("{inputJSON}", inputJson);
+
+        try {
+            StructuredChatCompletionCreateParams<AIJobDescriptionAnswer> params = ChatCompletionCreateParams.builder()
+                    .model(ChatModel.GPT_5_NANO)
+                    .addSystemMessage("You are a helpful assistant that generates job descriptions.")
+                    .addUserMessage(prompt)
+                    .responseFormat(AIJobDescriptionAnswer.class)
+                    .build();
+            System.out.println("Calling OpenAI for job description...");
+            Optional<AIJobDescriptionAnswer> result = openAIClient.chat().completions().create(params).choices()
+                    .stream()
+                    .flatMap(choice -> choice.message().content().stream()).findFirst();
+            System.out.println("Received job description from OpenAI.");
+            return result.orElse(null);
+        } catch (Exception e) {
+            System.out.println("Error during generating job description: " + e.getMessage());
             return null;
         }
     }

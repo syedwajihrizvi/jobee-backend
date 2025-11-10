@@ -30,6 +30,7 @@ import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.enums.BusinessType;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.BusinessNotFoundException;
+import com.rizvi.jobee.helpers.AISchemas.AIJobDescriptionResponse;
 import com.rizvi.jobee.mappers.BusinessMapper;
 import com.rizvi.jobee.mappers.JobMapper;
 import com.rizvi.jobee.principals.CustomPrincipal;
@@ -38,7 +39,6 @@ import com.rizvi.jobee.repositories.JobRepository;
 import com.rizvi.jobee.repositories.UserProfileRepository;
 import com.rizvi.jobee.services.AccountService;
 import com.rizvi.jobee.services.CompanyService;
-import com.rizvi.jobee.services.InvitationService;
 import com.rizvi.jobee.services.JobService;
 import com.rizvi.jobee.services.UserProfileService;
 
@@ -266,5 +266,19 @@ public class JobController {
                 })
                 .toList();
         return ResponseEntity.ok(candidateDtos);
+    }
+
+    @PostMapping("/generate-ai-description")
+    @Operation(summary = "Generate AI-based job description")
+    public ResponseEntity<AIJobDescriptionResponse> generateAIJobDescription(
+            @RequestBody CreateJobDto request,
+            @AuthenticationPrincipal CustomPrincipal principal) {
+        var accountId = principal.getId();
+        var businessAccount = accountService.getBusinessAccountById(accountId);
+        if (businessAccount == null) {
+            throw new BusinessNotFoundException();
+        }
+        String aiJobDescription = jobService.generateAIJobDescription(request, businessAccount.getCompany());
+        return ResponseEntity.ok(new AIJobDescriptionResponse(aiJobDescription));
     }
 }

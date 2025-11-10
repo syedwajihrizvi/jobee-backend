@@ -108,6 +108,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/profiles/update-primary-resume").permitAll()
                         .requestMatchers(HttpMethod.GET, "/jobs/companies/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/jobs").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/jobs/generate-ai-description").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/jobs/*/views").permitAll()
                         .requestMatchers(HttpMethod.GET, "/jobs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/jobs/favorites").permitAll()

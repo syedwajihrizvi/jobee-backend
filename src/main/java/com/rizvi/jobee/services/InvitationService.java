@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.Invitation;
+import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.enums.BusinessType;
 import com.rizvi.jobee.enums.InvitationStatus;
 import com.rizvi.jobee.helpers.QRUtils;
@@ -31,7 +32,7 @@ public class InvitationService {
         for (int i = 0; i < 6; i++) {
             code.append(charPool.charAt(random.nextInt(charPool.length())));
         }
-        return companyName.substring(0, 0) + "-" + code.toString().toLowerCase();
+        return companyName.substring(0, 1) + "-" + code.toString().toLowerCase();
     }
 
     private String generateInviteLink(String companyCode) {
@@ -89,11 +90,24 @@ public class InvitationService {
         invitationRepository.save(invitation);
     }
 
-    public void sendHiringTeamInvitationEmail() {
-        emailSender.sendHiringTeamInvitationEmail();
+    public void sendHiringTeamInvitationEmail(BusinessAccount to, BusinessAccount from, Job job) {
+        emailSender.sendHiringTeamInvitationEmail(to, from, job);
+        System.out.println("Sent hiring team invitation email to " + to.getEmail());
     }
 
-    public void sendHiringTeamInvitationAndJoinJobeeEmail() {
-        emailSender.sendHiringTeamInvitationAndJoinJobbeeEmail();
+    public void sendHiringTeamInvitationAndJoinJobeeEmail(String to, BusinessAccount from,
+            Job job) {
+        var companyName = from.getCompany().getName();
+        var companyCode = generateCompanyCode(companyName);
+        var inviteLink = generateInviteLink(companyCode);
+        var jobTitle = job.getTitle();
+        String qrCode = null;
+        try {
+            qrCode = generateQRCodeUrl(inviteLink);
+        } catch (Exception e) {
+            System.out.println("Error generating QR code: " + e.getMessage());
+        }
+        emailSender.sendHiringTeamInvitationAndJoinJobeeEmail(
+                to, companyName, from, companyCode, jobTitle, inviteLink, qrCode);
     }
 }

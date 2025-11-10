@@ -31,10 +31,41 @@ public interface BusinessMapper {
     @Mapping(target = "lastName", source = "businessAccount.lastName")
     BusinessProfileSummaryForInterviewDto toBusinessProfileSummaryForInterviewDto(BusinessProfile businessProfile);
 
-    @Mapping(target = "email", source = "businessAccount.email")
-    @Mapping(target = "firstName", source = "businessAccount.firstName")
-    @Mapping(target = "lastName", source = "businessAccount.lastName")
-    @Mapping(target = "profileImageUrl", source = "businessAccount.profile.profileImageUrl")
+    @Mapping(target = "email", expression = "java(resolveEmail(member))")
+    @Mapping(target = "firstName", expression = "java(resolveFirstName(member))")
+    @Mapping(target = "lastName", expression = "java(resolveLastName(member))")
+    @Mapping(target = "profileImageUrl", expression = "java(resolveProfileImageUrl(member))")
     @Mapping(target = "verified", expression = "java(member.isVerified())")
     HiringTeamMemberResponseDto toHiringTeamMemberResponseDto(HiringTeam member);
+
+    default String resolveEmail(HiringTeam member) {
+        if (member.getBusinessAccount() != null) {
+            return member.getBusinessAccount().getEmail();
+        }
+        return member.getEmail();
+    }
+
+    default String resolveFirstName(HiringTeam member) {
+        if (member.getBusinessAccount() != null && member.getBusinessAccount().getFirstName() != null) {
+            return member.getBusinessAccount().getFirstName();
+        }
+        return member.getFirstName();
+    }
+
+    default String resolveLastName(HiringTeam member) {
+        if (member.getBusinessAccount() != null && member.getBusinessAccount().getLastName() != null) {
+            return member.getBusinessAccount().getLastName();
+        }
+        return member.getLastName();
+    }
+
+    default String resolveProfileImageUrl(HiringTeam member) {
+        if (member.getBusinessAccount() != null
+                && member.getBusinessAccount().getProfile() != null
+                && member.getBusinessAccount().getProfile().getProfileImageUrl() != null) {
+            return member.getBusinessAccount().getProfile().getProfileImageUrl();
+        }
+        return null;
+    }
+
 }

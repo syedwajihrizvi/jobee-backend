@@ -21,8 +21,10 @@ import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.entities.Tag;
 import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.exceptions.JobNotFoundException;
+import com.rizvi.jobee.helpers.AISchemas.AIJobDescriptionAnswer;
 import com.rizvi.jobee.helpers.AISchemas.AIJobInsightAnswer;
 import com.rizvi.jobee.helpers.AISchemas.GenerateAIInsightRequest;
+import com.rizvi.jobee.helpers.AISchemas.GenerateAIJobDescriptionRequest;
 import com.rizvi.jobee.queries.JobQuery;
 import com.rizvi.jobee.repositories.AIJobInsightsRepository;
 import com.rizvi.jobee.repositories.BusinessAccountRepository;
@@ -130,11 +132,11 @@ public class JobService {
             if (hiringTeamMemberAccount != null) {
                 hiringTeamMember.setBusinessAccount(hiringTeamMemberAccount);
                 hiringTeamMember.setInvited(false);
-                invitationService.sendHiringTeamInvitationEmail();
+                invitationService.sendHiringTeamInvitationEmail(hiringTeamMemberAccount, businessAccount, job);
                 // TODO: Send notification Email (TODO)
             } else {
                 hiringTeamMember.setInvited(true);
-                invitationService.sendHiringTeamInvitationAndJoinJobeeEmail();
+                invitationService.sendHiringTeamInvitationAndJoinJobeeEmail(email, businessAccount, job);
                 // Send invite Email (TODO)
             }
             job.addHiringTeamMember(hiringTeamMember);
@@ -271,7 +273,9 @@ public class JobService {
     public AIJobInsight generateAIJobInsight(Job job, Company company) {
         // Check if insight already exist for the jobs
         var jobUpdatedAt = job.getContentUpdatedAt();
-        var existingInsight = aiJobInsightsRepository.findByJobId(job.getId());
+        Sort sortByUpdatedAtDesc = Sort.by(Sort.Direction.DESC, "updatedAt");
+        var existingInsights = aiJobInsightsRepository.findByJobId(job.getId(), sortByUpdatedAtDesc);
+        AIJobInsight existingInsight = existingInsights.isEmpty() ? null : existingInsights.get(0);
         if (existingInsight != null) {
             System.out.println("SYED-DEBUG: Existing Insight Found: " + existingInsight.getId());
         } else {
@@ -297,5 +301,12 @@ public class JobService {
             }
         }
         return existingInsight;
+    }
+
+    public String generateAIJobDescription(CreateJobDto request, Company company) {
+
+        var aiRequest = new GenerateAIJobDescriptionRequest(request, company);
+        AIJobDescriptionAnswer aiDescription = aiService.generateAIJobDescription(aiRequest);
+        return aiDescription.getAnswer();
     }
 }
