@@ -201,4 +201,8 @@ public class Interview {
             application.getInterviews().add(this);
         }
     }
+
+    public String getCandidateEmail() {
+        return this.candidate.getAccount().getEmail();
+    }
 }

@@ -49,6 +49,7 @@ public class InterviewService {
     private final ApplicationRepository applicationRepository;
     private final AIService aiService;
     private final S3Service s3Service;
+    private final EmailSender emailSender;
     private final InterviewPrepQueue interviewPrepQueue;
 
     public List<Interview> getAllInterviews() {
@@ -117,7 +118,6 @@ public class InterviewService {
     public Interview createInterview(
             CreateInterviewDto request, BusinessAccount businessAccount,
             UserProfile candidate, Job job, Application application) {
-        System.out.println("Creating interview with request: " + request);
         var interview = Interview.builder()
                 .job(job)
                 .candidate(candidate)
@@ -154,7 +154,6 @@ public class InterviewService {
         var savedInterview = interviewRepository.save(interview);
         Long previousInterviewId = request.getPreviousInterviewId();
         if (previousInterviewId != null) {
-            // Update the status of the previous interview
             var previousInterview = interviewRepository.findById(
                     previousInterviewId)
                     .orElseThrow(() -> new InterviewNotFoundException(
@@ -165,6 +164,7 @@ public class InterviewService {
         }
         application.setStatus(ApplicationStatus.INTERVIEW_SCHEDULED);
         applicationRepository.save(application);
+        sendInterviewScheduledEmail(savedInterview);
         return savedInterview;
     }
 
@@ -337,5 +337,9 @@ public class InterviewService {
         interviewQuestion.updateViaAiFeedback(response);
         var savedInterviewQuestion = interviewPreparationQuestionRepository.save(interviewQuestion);
         return savedInterviewQuestion;
+    }
+
+    private void sendInterviewScheduledEmail(Interview interview) {
+
     }
 }
