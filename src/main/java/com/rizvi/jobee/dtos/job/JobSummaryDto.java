@@ -30,7 +30,7 @@ public class JobSummaryDto {
     private Integer minSalary;
     private Integer maxSalary;
     private Integer experience;
-    private Integer applicants;
+    private Integer applicationCount;
     private LocalDateTime createdAt;
     private LocalDateTime appDeadline;
     private List<TagDto> tags;

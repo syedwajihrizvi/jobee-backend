@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.rizvi.jobee.dtos.interview.CreateInterviewDto;
+import com.rizvi.jobee.dtos.interview.CreateInterviewRejectionDto;
 import com.rizvi.jobee.dtos.interview.InterviewDto;
 import com.rizvi.jobee.dtos.interview.InterviewPrepQuestionDto;
 import com.rizvi.jobee.dtos.interview.InterviewPreparationDto;
@@ -59,6 +61,20 @@ public class InterviewController {
         var interview = interviewService.getInterviewById(id);
         var interviewDto = interviewMapper.toDto(interview);
         return ResponseEntity.ok(interviewDto);
+    }
+
+    @GetMapping("/candidate/me")
+    @Operation(summary = "Get interviews for the authenticated candidate")
+    public ResponseEntity<List<InterviewSummaryDto>> getInterviewsForAuthenticatedCandidate(
+            @AuthenticationPrincipal CustomPrincipal principal) {
+        var candidateId = principal.getId();
+        var interviews = interviewService.getInterviewsByCandidate(candidateId);
+        var interviewSummaryDtos = interviews.stream()
+                .map(interviewMapper::toSummaryDto)
+                .toList();
+        System.out.println("SYED-DEBUG: Retrieved " + interviewSummaryDtos.size() + " interviews for candidate ID: "
+                + candidateId);
+        return ResponseEntity.ok(interviewSummaryDtos);
     }
 
     @GetMapping("/candidate/{candidateId}")
@@ -139,6 +155,15 @@ public class InterviewController {
         return ResponseEntity.ok().build();
     }
 
+    @PatchMapping("/{id}/mark-as-completed")
+    @Operation(summary = "Mark the interview as completed")
+    public ResponseEntity<Void> markInterviewAsCompleted(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomPrincipal principal) {
+        interviewService.markInterviewAsCompleted(id);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/{id}/prepare")
     @Operation(summary = "Get interview preparation details")
     public ResponseEntity<InterviewPreparationDto> getInterviewPreparationDetails(
@@ -203,5 +228,17 @@ public class InterviewController {
         var interviewQuestion = interviewService.getFeedbackForAnswerFromAI(id, principal.getId(), interviewQuestionId,
                 audioFile);
         return ResponseEntity.ok(interviewMapper.toInterviewPrepQuestionDto(interviewQuestion));
+    }
+
+    @PostMapping("{id}/reject-candidate")
+    @Operation(summary = "Business can reject an interview")
+    public ResponseEntity<InterviewDto> rejectInterview(
+            @PathVariable Long id,
+            @RequestBody @Valid CreateInterviewRejectionDto request,
+            @AuthenticationPrincipal CustomPrincipal principal) {
+        var reason = request.getReason();
+        var feedback = request.getFeedback();
+        var savedInterview = interviewService.rejectCandidateInterview(id, reason, feedback);
+        return ResponseEntity.ok(interviewMapper.toDto(savedInterview));
     }
 }

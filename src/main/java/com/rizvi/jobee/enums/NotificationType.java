@@ -2,6 +2,7 @@ package com.rizvi.jobee.enums;
 
 public enum NotificationType {
     REJECTION,
+    INTERVIEW_COMPLETED,
     INTERVIEW_SCHEDULED,
     INTERVIEW_RESULT,
     GENERAL,

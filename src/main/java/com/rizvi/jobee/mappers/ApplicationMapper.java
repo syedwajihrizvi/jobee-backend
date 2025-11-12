@@ -10,12 +10,10 @@ import com.rizvi.jobee.dtos.application.ApplicationSummaryDto;
 import com.rizvi.jobee.dtos.user.UserApplicationDto;
 import com.rizvi.jobee.entities.Application;
 
-@Mapper(componentModel = "spring", uses = { UserProfileMapper.class })
+@Mapper(componentModel = "spring", uses = { UserProfileMapper.class, JobMapper.class })
 public interface ApplicationMapper {
-    @Mapping(target = "jobId", source = "job.id")
+    @Mapping(target = "job", source = "job")
     @Mapping(target = "jobTitle", source = "job.title")
-    @Mapping(target = "companyName", source = "job.businessAccount.company.name")
-    @Mapping(target = "companyLogoUrl", source = "job.businessAccount.company.logo")
     @Mapping(target = "userId", source = "userProfile.id")
     @Mapping(target = "userEmail", source = "userProfile.account.email")
     @Mapping(target = "appliedAt", source = "createdAt")
@@ -31,6 +29,8 @@ public interface ApplicationMapper {
 
     @Mapping(target = "email", source = "userProfile.account.email")
     @Mapping(target = "fullName", expression = "java(application.getUserProfile().getFirstName() + \" \" + application.getUserProfile().getLastName())")
+    @Mapping(target = "firstName", source = "userProfile.firstName")
+    @Mapping(target = "lastName", source = "userProfile.lastName")
     @Mapping(target = "appliedAt", source = "createdAt")
     @Mapping(target = "phoneNumber", source = "userProfile.phoneNumber")
     @Mapping(target = "profileImageUrl", source = "userProfile.profileImageUrl")

@@ -12,10 +12,7 @@ public class NotificationDto {
     private String recipientType;
     private String notificationType;
     private LocalDateTime timestamp;
-    private String companyName;
-    private String companyLogoUrl;
-    private Long applicationId;
-    private String jobId;
+    private NotificationContext context;
     private boolean read;
 
 }

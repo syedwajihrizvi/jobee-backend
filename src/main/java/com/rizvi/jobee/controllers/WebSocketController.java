@@ -29,12 +29,11 @@ public class WebSocketController {
         @MessageMapping("/sendMessage")
         @SendTo("/topic/messages")
         public MessageDto sendMessage(Message message) {
-                String receiverDest = "/topic/messages/" + message.getReceiverType().toString().toLowerCase() + "/"
-                                + message.getReceiverId();
-                String senderDest = "/topic/messages/" + message.getSenderType().toString().toLowerCase() + "/"
-                                + message.getSenderId();
+                String receiverDest = MessageService.createMessageDestination(message.getReceiverType(),
+                                message.getReceiverId());
+                String senderDest = MessageService.createMessageDestination(message.getSenderType(),
+                                message.getSenderId());
                 Message savedMessage = messageService.saveMessage(message);
-                // Since we are sending to both, we need two DTOs
                 MessageDto senderMessageDto = messageMapper.toMessageDto(savedMessage, message.getSenderId(),
                                 message.getSenderType());
                 MessageDto receiverMessageDto = messageMapper.toMessageDto(savedMessage, message.getReceiverId(),
@@ -49,10 +48,8 @@ public class WebSocketController {
         @MessageMapping("/sendNotification")
         @SendTo("/topic/notifications")
         public NotificationDto sendNotification(CreateNotificationDto notification) {
-                System.out.println("Received notification: " + notification);
-                String recepientDest = "/topic/notifications/"
-                                + notification.getRecipientType().toString().toLowerCase() + "/"
-                                + notification.getRecipientId();
+                String recepientDest = UserNotificationService.createNotificationDestination(
+                                notification.getRecipientType(), notification.getRecipientId());
                 Notification savedNotification = userNotificationService.saveNotification(notification);
                 var notificationDto = notificationMapper.toNotificationDto(savedNotification);
                 messagingTemplate.convertAndSend(recepientDest, notificationDto);

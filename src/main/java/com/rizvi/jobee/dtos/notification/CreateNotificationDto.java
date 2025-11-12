@@ -15,4 +15,5 @@ public class CreateNotificationDto {
     private Long companyId;
     private Long jobId;
     private Long applicationId;
+    private Long interviewId;
 }

@@ -14,10 +14,12 @@ import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.Interview;
 import com.rizvi.jobee.entities.InterviewPreparation;
 import com.rizvi.jobee.entities.InterviewPreparationQuestion;
+import com.rizvi.jobee.entities.InterviewRejection;
 import com.rizvi.jobee.entities.InterviewTip;
 import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.enums.ApplicationStatus;
+import com.rizvi.jobee.enums.InterviewDecisionResult;
 import com.rizvi.jobee.enums.InterviewStatus;
 import com.rizvi.jobee.enums.PreparationStatus;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
@@ -49,8 +51,8 @@ public class InterviewService {
     private final ApplicationRepository applicationRepository;
     private final AIService aiService;
     private final S3Service s3Service;
-    private final EmailSender emailSender;
     private final InterviewPrepQueue interviewPrepQueue;
+    private final UserNotificationService userNotificationService;
 
     public List<Interview> getAllInterviews() {
         return interviewRepository.findAll();
@@ -164,7 +166,7 @@ public class InterviewService {
         }
         application.setStatus(ApplicationStatus.INTERVIEW_SCHEDULED);
         applicationRepository.save(application);
-        sendInterviewScheduledEmail(savedInterview);
+        userNotificationService.createInterviewScheduledNotificationAndSend(savedInterview);
         return savedInterview;
     }
 
@@ -339,7 +341,37 @@ public class InterviewService {
         return savedInterviewQuestion;
     }
 
-    private void sendInterviewScheduledEmail(Interview interview) {
+    @Transactional
+    public void markInterviewAsCompleted(Long interviewId) {
+        var interview = interviewRepository.findById(interviewId)
+                .orElseThrow(() -> new InterviewNotFoundException("Interview not found with id: " + interviewId));
+        interview.setStatus(InterviewStatus.COMPLETED);
+        var application = interview.getApplication();
+        application.setStatus(ApplicationStatus.INTERVIEW_COMPLETED);
+        applicationRepository.save(application);
+        userNotificationService.sendInAppNotificationForInterviewCompletion(interview);
+        interviewRepository.save(interview);
+    }
 
+    @Transactional
+    public Interview rejectCandidateInterview(Long interviewId, String reason, String feedback) {
+        var interview = interviewRepository.findByInterviewWithApplication(interviewId)
+                .orElseThrow(() -> new InterviewNotFoundException("Interview not found with id: " + interviewId));
+        var application = interview.getApplication();
+        interview.setStatus(InterviewStatus.COMPLETED);
+        interview.setDecisionResult(InterviewDecisionResult.REJECTED);
+        InterviewRejection rejection = InterviewRejection
+                .builder()
+                .interview(interview)
+                .application(application)
+                .reason(reason)
+                .feedback(feedback)
+                .build();
+        interview.setRejection(rejection);
+        var savedInterview = interviewRepository.save(interview);
+        application.setStatus(ApplicationStatus.REJECTED);
+        applicationRepository.save(application);
+        userNotificationService.createInterviewRejectionNotificationAndSend(savedInterview);
+        return savedInterview;
     }
 }

@@ -115,6 +115,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/interviews").permitAll()
                         .requestMatchers(HttpMethod.GET, "/interviews/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/interviews/**").permitAll()
+                        .requestMatchers(HttpMethod.PATCH, "/interviews/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/applications").permitAll()
                         .requestMatchers(HttpMethod.GET, "/applications/**").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/applications/**").permitAll()

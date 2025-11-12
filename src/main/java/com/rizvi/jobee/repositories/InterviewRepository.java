@@ -12,11 +12,12 @@ import com.rizvi.jobee.entities.Interview;
 
 public interface InterviewRepository extends JpaRepository<Interview, Long> {
 
-    @EntityGraph(attributePaths = { "interviewers.profile" })
+    @EntityGraph(attributePaths = { "interviewers.profile", "rejection" })
     @Query("select i from Interview i where i.id = :id")
     Optional<Interview> findById(Long id);
 
     // Additional query methods can be defined here if needed
+    @Query("select i from Interview i where i.candidate.id = :candidateId")
     List<Interview> findByCandidateId(Long candidateId, Sort sort);
 
     @Query("select i from Interview i where i.job.id = :jobId and i.candidate.id = :candidateId")
@@ -43,4 +44,9 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
 
     @EntityGraph(attributePaths = { "job" })
     List<Interview> findByInterviewersId(Long interviewerId, Sort sort);
+
+    @EntityGraph(attributePaths = { "application", "candidate" })
+    @Query("select i from Interview i where i.id = :interviewId")
+    Optional<Interview> findByInterviewWithApplication(Long interviewId);
+
 }

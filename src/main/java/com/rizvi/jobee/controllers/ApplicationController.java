@@ -39,7 +39,6 @@ import com.rizvi.jobee.queries.ApplicationQuery;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.repositories.ApplicationRepository;
 import com.rizvi.jobee.repositories.BusinessAccountRepository;
-import com.rizvi.jobee.repositories.HiringTeamRepository;
 import com.rizvi.jobee.repositories.JobRepository;
 import com.rizvi.jobee.repositories.UserDocumentRepository;
 import com.rizvi.jobee.repositories.UserProfileRepository;
@@ -58,7 +57,6 @@ import lombok.AllArgsConstructor;
 public class ApplicationController {
     private final BusinessAccountRepository businessAccountRepository;
     private final ApplicationRepository applicationRepository;
-    private final HiringTeamRepository hiringTeamRepository;
     private final JobRepository jobRepository;
     private final JobService jobService;
     private final JobMapper jobMapper;
@@ -66,6 +64,21 @@ public class ApplicationController {
     private final UserProfileRepository userProfileRepository;
     private final UserDocumentRepository userDocumentRepository;
     private final ApplicationMapper applicationMapper;
+
+    @GetMapping("/user/me")
+    @Operation(summary = "Get applications for the logged in user")
+    public ResponseEntity<List<ApplicationDto>> getApplicationsForLoggedInUser(
+            @AuthenticationPrincipal CustomPrincipal customPrincipal) {
+        var userId = customPrincipal.getProfileId();
+        var userProfile = userProfileRepository.findById(userId).orElse(null);
+        if (userProfile == null) {
+            throw new AccountNotFoundException("User profile not found for user id: " + userId);
+        }
+        var sort = Sort.by("createdAt").descending();
+        var applications = applicationRepository.findByUserProfile(userProfile, sort);
+        var applicationDtos = applications.stream().map(applicationMapper::toDto).toList();
+        return ResponseEntity.ok(applicationDtos);
+    }
 
     @GetMapping()
     public ResponseEntity<List<?>> getAllApplications(
@@ -120,6 +133,7 @@ public class ApplicationController {
         return ResponseEntity.ok(applicationDtos);
     }
 
+    // TODO: Update to /business/me
     @GetMapping("/me")
     @Operation(summary = "Get applications for jobs posted by the authenticated business user")
     public ResponseEntity<List<ApplicantSummaryForBusinessDto>> getApplicationsForJobsPostedByUser(

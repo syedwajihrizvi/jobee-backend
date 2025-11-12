@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 
 import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.Interview;
+import com.rizvi.jobee.entities.InterviewPreparation;
+import com.rizvi.jobee.entities.InterviewRejection;
 import com.rizvi.jobee.entities.Job;
 
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,10 @@ public class EmailSender {
   @Value("${email.from}")
   private String senderEmail;
 
+  public void sendRejectionEmail(InterviewRejection rejection) {
+    System.out.println("Sending rejection email...");
+  }
+
   public void sendScheduledInterviewEmail(Interview interview) {
     String to = interview.getCandidateEmail();
     String fullName = interview.getCandidate().getFullName();
@@ -32,11 +38,6 @@ public class EmailSender {
 
     try {
       Destination destination = createEmailDestination(to);
-      System.out.println("SYED-DEBUG: Destination for Scheduled Interview: " + to);
-      System.out.println("SYED-DEBUG: Full Name: " + fullName);
-      System.out.println("SYED-DEBUG: Job Title: " + jobTitle);
-      System.out.println("SYED-DEBUG: Interview Date: " + interviewDate);
-      System.out.println("SYED-DEBUG: Company Name: " + companyName);
       String subject = "You have a scheduled interview for " + jobTitle + " at " + companyName;
       String htmlString = generateScheduledInterviewHtml(fullName, jobTitle, interviewDate, companyName);
       String textString = "Hello " + fullName + ",\n\nYou have a scheduled interview for the position of " + jobTitle +
@@ -51,6 +52,33 @@ public class EmailSender {
       sesClient.sendEmail(emailRequest);
     } catch (Exception e) {
       System.out.println("Failed to send scheduled interview email: " + e.getMessage());
+    }
+  }
+
+  public void sendInterviewPrepEmail(InterviewPreparation interviewPrep) {
+    String to = interviewPrep.getInterview().getCandidateEmail();
+    String fullName = interviewPrep.getInterview().getCandidate().getFullName();
+    String jobTitle = interviewPrep.getInterview().getJob().getTitle();
+    String companyName = interviewPrep.getInterview().getCreatedBy().getCompany().getName();
+    String interviewDate = interviewPrep.getInterview().getInterviewDate().toString();
+
+    try {
+      Destination destination = createEmailDestination(to);
+      String subject = "Your Interview Preparation Materials are Ready for " + jobTitle;
+      String htmlString = generateInterviewPrepHtml(fullName, jobTitle, interviewDate, companyName);
+      String textString = "Hello " + fullName + ",\n\nYour interview preparation materials for the position of "
+          + jobTitle + " at " + companyName + " are now ready. Please log in to your Jobee account to access them.\n\n"
+          + "Best of luck!\n\n- The Jobee Team";
+      Message message = createEmail(subject, htmlString, textString);
+      SendEmailRequest emailRequest = SendEmailRequest.builder()
+          .source("Jobee <" + senderEmail + ">")
+          .destination(destination)
+          .message(message)
+          .replyToAddresses("support@jobee.solutions")
+          .build();
+      sesClient.sendEmail(emailRequest);
+    } catch (Exception e) {
+      System.out.println("Failed to send interview preparation email: " + e.getMessage());
     }
   }
 
@@ -316,6 +344,41 @@ public class EmailSender {
                     </p>
                     <p style="color: #4a5568;">
                       Your interview is scheduled for <strong>%s</strong>.
+                    </p>
+                    <div>
+                    <a href="%s" style="
+                        display: inline-block;
+                        margin: 20px 0;
+                        padding: 14px 28px;
+                        background-color: #21c55e;
+                        color: white;
+                        font-weight: bold;
+                        border-radius: 6px;
+                        text-decoration: none;">
+                      View on Jobee
+                    </a>
+                    </div>
+                    <p style="margin-top: 40px; font-size: 12px; color: #a0aec0;">
+                      If you didn't expect this invitation, you can safely ignore this email.
+                    </p>
+                  </div>
+                </body>
+              </html>
+        """
+        .formatted(companyName, fullName, companyName, jobTitle, interviewDate);
+    return htmlString;
+  }
+
+  private String generateInterviewPrepHtml(String fullName, String jobTitle, String interviewDate,
+      String companyName) {
+    String htmlString = """
+                        <html>
+                <body style="font-family: Arial, sans-serif; background-color: #f6f9fc; padding: 40px; text-align: center;">
+                  <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 40px;">
+                    <h2 style="color: #2d3748;">Your interview preparation materials are ready for an Interview at %s!</h2>
+                    <p style="color: #4a5568;">Hello %s</p>
+                    <p style="color: #4a5568;">
+                      <strong>Jobee</strong> has prepared your materials for your interview at <strong>%s</strong> for %s. Please review details on Jobee.
                     </p>
                   <div style="
                         display: inline-block;

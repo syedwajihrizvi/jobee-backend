@@ -121,6 +121,9 @@ public class Interview {
     @OneToOne(mappedBy = "interview", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private InterviewPreparation preparation;
 
+    @OneToOne(mappedBy = "interview", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private InterviewRejection rejection;
+
     @ManyToOne
     @JoinColumn(name = "created_by_user_id", nullable = true)
     private BusinessAccount createdBy;
@@ -204,5 +207,23 @@ public class Interview {
 
     public String getCandidateEmail() {
         return this.candidate.getAccount().getEmail();
+    }
+
+    public Long getApplicationId() {
+        return this.application != null ? this.application.getId() : null;
+    }
+
+    public Long getJobId() {
+        return this.job != null ? this.job.getId() : null;
+    }
+
+    public Long getCandidateId() {
+        return this.candidate != null ? this.candidate.getId() : null;
+    }
+
+    public Long getCompanyId() {
+        return this.job != null && this.job.getBusinessAccount() != null
+                ? this.job.getBusinessAccount().getCompany().getId()
+                : null;
     }
 }

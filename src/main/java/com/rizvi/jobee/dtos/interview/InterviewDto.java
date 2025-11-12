@@ -20,6 +20,7 @@ public class InterviewDto {
     private LocalDate createdAt;
     private Long jobId;
     private String companyName;
+    private String companyLogoUrl;
     private Long createdById;
     private String jobTitle;
     private Long candidateId;
@@ -38,6 +39,8 @@ public class InterviewDto {
     private String interviewMeetingPlatform;
     private String phoneNumber;
     private String timezone;
+    private String rejectionFeedback;
+    private String rejectionReason;
     private List<String> preparationTipsFromInterviewer;
     private List<InterviewConductorDto> interviewers;
     private List<ConductorDto> otherInterviewers;

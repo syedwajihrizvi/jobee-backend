@@ -31,6 +31,10 @@ public class MessageService {
     private final BusinessAccountRepository businessAccountRepository;
     private final UserProfileRepository userProfileRepository;
 
+    public static String createMessageDestination(MessagerUserType receiverType, Long receiverId) {
+        return "/topic/messages/" + receiverType.toString().toLowerCase() + "/" + receiverId;
+    }
+
     public List<Message> getMessagesForUser(Long userId, String userRole) {
         List<Message> messages;
         if (userRole.equals(Role.BUSINESS.name()) || userRole.equals(Role.ADMIN.name())) {

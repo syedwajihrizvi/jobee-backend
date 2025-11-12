@@ -3,6 +3,7 @@ package com.rizvi.jobee.enums;
 public enum ApplicationStatus {
     PENDING,
     INTERVIEW_SCHEDULED,
+    INTERVIEW_COMPLETED,
     OFFER_MADE,
     OFFER_ACCEPTED,
     OFFER_REJECTED,

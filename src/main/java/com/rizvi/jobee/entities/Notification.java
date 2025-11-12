@@ -3,9 +3,12 @@ package com.rizvi.jobee.entities;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Type;
 
+import com.rizvi.jobee.dtos.notification.NotificationContext;
 import com.rizvi.jobee.enums.MessagerUserType;
 import com.rizvi.jobee.enums.NotificationType;
+import com.vladmihalcea.hibernate.type.json.JsonType;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -56,17 +59,9 @@ public class Notification {
     @CreationTimestamp
     private LocalDateTime timestamp;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "company_id", nullable = true)
-    private Company company;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "application_id", nullable = true)
-    private Application application;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "job_id", nullable = true)
-    private Job job;
+    @Type(JsonType.class)
+    @Column(name = "context", columnDefinition = "jsonb", nullable = true)
+    private NotificationContext context;
 
     @Column(name = "read", nullable = false)
     @Builder.Default
