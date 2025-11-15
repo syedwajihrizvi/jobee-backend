@@ -1,5 +1,7 @@
 package com.rizvi.jobee.repositories;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -36,7 +38,7 @@ public interface ApplicationRepository extends JpaRepository<Application, Long>,
         List<Application> findByUserProfileId(Long userProfileId);
 
         @EntityGraph(attributePaths = { "job", "userProfile", "userProfile.account" })
-        List<Application> findAll(Specification<Application> spec);
+        Page<Application> findAll(Specification<Application> spec, Pageable pageable);
 
         @EntityGraph(attributePaths = { "userProfile", "userProfile.account", "userProfile.skills",
                         "userProfile.skills.skill", "userProfile.education", "userProfile.experiences",

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.rizvi.jobee.dtos.job.CreateJobDto;
 import com.rizvi.jobee.dtos.job.PaginatedJobDto;
+import com.rizvi.jobee.dtos.job.PaginatedResponse;
 import com.rizvi.jobee.entities.AIJobInsight;
 import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.Company;
@@ -49,12 +50,12 @@ public class JobService {
     private final AIService aiService;
     private static final int MAX_CANDIDATES_FOR_JOB = 5;
 
-    public PaginatedJobDto getAllJobs(JobQuery jobQuery, int pageNumber, int pageSize) {
+    public PaginatedResponse<Job> getAllJobs(JobQuery jobQuery, int pageNumber, int pageSize) {
         PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
         Page<Job> page = jobRepository.findAll(JobSpecifications.withFilters(jobQuery), pageRequest);
         var jobs = page.getContent();
         var hasMore = pageNumber < page.getTotalPages() - 1;
-        return new PaginatedJobDto(hasMore, jobs);
+        return new PaginatedResponse<>(hasMore, jobs);
     }
 
     public Job getJobById(Long jobId) {
@@ -65,13 +66,13 @@ public class JobService {
         return job;
     }
 
-    public PaginatedJobDto getJobsByCompany(JobQuery jobQuery, int pageNumber, int pageSize) {
+    public PaginatedResponse<Job> getJobsByCompany(JobQuery jobQuery, int pageNumber, int pageSize) {
         PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
         Page<Job> page = jobRepository.findAll(JobSpecifications.withFilters(jobQuery), pageRequest);
         var jobs = page.getContent();
         var hasMore = pageNumber < page.getTotalPages() - 1;
         var totalElements = page.getTotalElements();
-        return new PaginatedJobDto(hasMore, jobs, totalElements);
+        return new PaginatedResponse<Job>(hasMore, jobs, totalElements);
     }
 
     public Job getCompanyJobById(Long jobId) {
@@ -254,10 +255,12 @@ public class JobService {
         PriorityQueue<int[]> topCandidates = new PriorityQueue<>((a, b) -> a[0] - b[0]);
         for (var i = 0; i < userProfiles.size(); i++) {
             var userProfile = userProfiles.get(i);
-            var matchScore = checkJobMatch(jobId, userProfile);
-            topCandidates.add(new int[] { matchScore.intValue(), i });
-            if (topCandidates.size() > MAX_CANDIDATES_FOR_JOB) {
-                topCandidates.remove();
+            if (!job.hasUserApplied(userProfile.getId())) {
+                var matchScore = checkJobMatch(jobId, userProfile);
+                topCandidates.add(new int[] { matchScore.intValue(), i });
+                if (topCandidates.size() > MAX_CANDIDATES_FOR_JOB) {
+                    topCandidates.remove();
+                }
             }
         }
         Map<UserProfile, Integer> result = new HashMap<>();

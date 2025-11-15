@@ -25,6 +25,7 @@ import com.rizvi.jobee.dtos.application.BatchQuickApplyDto;
 import com.rizvi.jobee.dtos.application.BatchQuickApplySuccessDto;
 import com.rizvi.jobee.dtos.application.CreateApplicationDto;
 import com.rizvi.jobee.dtos.job.JobApplicationStatusDto;
+import com.rizvi.jobee.dtos.job.PaginatedResponse;
 import com.rizvi.jobee.entities.Application;
 import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.enums.ApplicationStatus;
@@ -42,9 +43,9 @@ import com.rizvi.jobee.repositories.BusinessAccountRepository;
 import com.rizvi.jobee.repositories.JobRepository;
 import com.rizvi.jobee.repositories.UserDocumentRepository;
 import com.rizvi.jobee.repositories.UserProfileRepository;
+import com.rizvi.jobee.services.ApplicationService;
 import com.rizvi.jobee.services.JobService;
 import com.rizvi.jobee.services.UserProfileService;
-import com.rizvi.jobee.specifications.ApplicantSpecification;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.transaction.Transactional;
@@ -64,6 +65,7 @@ public class ApplicationController {
     private final UserProfileRepository userProfileRepository;
     private final UserDocumentRepository userDocumentRepository;
     private final ApplicationMapper applicationMapper;
+    private final ApplicationService applicationService;
 
     @GetMapping("/user/me")
     @Operation(summary = "Get applications for the logged in user")
@@ -123,14 +125,23 @@ public class ApplicationController {
         return ResponseEntity.ok(applicationMapper.toApplicationDetailsForBusinessDto(application));
     }
 
-    @GetMapping("/job/{id}")
-    public ResponseEntity<List<ApplicantSummaryForBusinessDto>> getApplicationsForJobs(
+    @GetMapping("/jobs/{id}")
+    public ResponseEntity<PaginatedResponse<ApplicantSummaryForBusinessDto>> getApplicationsForJobs(
             @ModelAttribute ApplicationQuery query,
+            @RequestParam(defaultValue = "0") Integer pageNumber,
+            @RequestParam(defaultValue = "10") Integer pageSize,
             @PathVariable Long id) {
         query.setJobId(id);
-        var applications = applicationRepository.findAll(ApplicantSpecification.withFilters(query));
+        var pagiantedApplicationsData = applicationService.getAllApplications(query, pageNumber, pageSize);
+        var applications = pagiantedApplicationsData.getContent();
+        var hasMore = pagiantedApplicationsData.isHasMore();
+        var totalApplications = pagiantedApplicationsData.getTotalElements();
         var applicationDtos = applications.stream().map(applicationMapper::toApplicantSummaryForBusinessDto).toList();
-        return ResponseEntity.ok(applicationDtos);
+        System.out.println(applicationDtos.stream().map(dto -> dto.getId()).toList());
+        PaginatedResponse<ApplicantSummaryForBusinessDto> response = new PaginatedResponse<>(
+                hasMore, applicationDtos, totalApplications);
+
+        return ResponseEntity.ok(response);
     }
 
     // TODO: Update to /business/me
@@ -292,7 +303,7 @@ public class ApplicationController {
             @PathVariable Long id) {
         var application = applicationRepository.findById(id)
                 .orElseThrow(() -> new ApplicationNotFoundException("Application not found"));
-        application.setShortListed(true);
+        application.setShortlisted(true);
         applicationRepository.save(application);
         return ResponseEntity.ok().build();
     }
@@ -303,7 +314,7 @@ public class ApplicationController {
             @PathVariable Long id) {
         var application = applicationRepository.findById(id)
                 .orElseThrow(() -> new ApplicationNotFoundException("Application not found"));
-        application.setShortListed(false);
+        application.setShortlisted(false);
         applicationRepository.save(application);
         return ResponseEntity.ok().build();
     }

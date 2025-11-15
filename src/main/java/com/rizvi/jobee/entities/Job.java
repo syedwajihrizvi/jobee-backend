@@ -137,7 +137,7 @@ public class Job {
     }
 
     public List<Application> getShortListedApplications() {
-        return applications.stream().filter(application -> application.getShortListed() == true).toList();
+        return applications.stream().filter(application -> application.getShortlisted() == true).toList();
     }
 
     public void addTag(Tag tag) {

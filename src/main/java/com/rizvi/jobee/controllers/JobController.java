@@ -22,7 +22,7 @@ import com.rizvi.jobee.dtos.job.CreateJobDto;
 import com.rizvi.jobee.dtos.job.JobDetailedSummaryForBusinessDto;
 import com.rizvi.jobee.dtos.job.JobSummaryDto;
 import com.rizvi.jobee.dtos.job.JobSummaryForBusinessDto;
-import com.rizvi.jobee.dtos.job.PaginatedJobResponseDto;
+import com.rizvi.jobee.dtos.job.PaginatedResponse;
 import com.rizvi.jobee.dtos.user.FindCandidateDto;
 import com.rizvi.jobee.entities.Application;
 import com.rizvi.jobee.entities.Job;
@@ -31,7 +31,6 @@ import com.rizvi.jobee.enums.BusinessType;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.BusinessNotFoundException;
 import com.rizvi.jobee.helpers.AISchemas.AIJobDescriptionResponse;
-import com.rizvi.jobee.mappers.BusinessMapper;
 import com.rizvi.jobee.mappers.JobMapper;
 import com.rizvi.jobee.principals.CustomPrincipal;
 import com.rizvi.jobee.queries.JobQuery;
@@ -52,7 +51,6 @@ public class JobController {
     private final JobRepository jobRepository;
     private final UserProfileRepository userProfileRepository;
     private final UserProfileService userProfileService;
-    private final BusinessMapper businessMapper;
     private final AccountService accountService;
     private final CompanyService companyService;
     private final JobService jobService;
@@ -60,15 +58,15 @@ public class JobController {
 
     @GetMapping
     @Operation(summary = "Get all jobs with optional filters and search")
-    public ResponseEntity<PaginatedJobResponseDto<JobSummaryDto>> getJobs(
-            int pageNumber, int pageSize,
+    public ResponseEntity<PaginatedResponse<JobSummaryDto>> getJobs(
+            @RequestParam(defaultValue = "0") Integer pageNumber,
+            @RequestParam(defaultValue = "10") Integer pageSize,
             @ModelAttribute JobQuery jobQuery) {
-        System.out.println("Received job query: " + jobQuery);
         var paginatedJobData = jobService.getAllJobs(jobQuery, pageNumber, pageSize);
-        var jobs = paginatedJobData.getJobs();
+        var jobs = paginatedJobData.getContent();
         var hasMore = paginatedJobData.isHasMore();
         var jobDtos = jobs.stream().map(jobMapper::toSummaryDto).toList();
-        PaginatedJobResponseDto<JobSummaryDto> response = new PaginatedJobResponseDto<JobSummaryDto>(hasMore, jobDtos);
+        PaginatedResponse<JobSummaryDto> response = new PaginatedResponse<JobSummaryDto>(hasMore, jobDtos);
         return ResponseEntity.ok(response);
     }
 
@@ -125,8 +123,9 @@ public class JobController {
 
     @GetMapping("/companies/{companyId}/jobs")
     @Operation(summary = "Get all jobs for a specific company with optional filters and search")
-    public ResponseEntity<PaginatedJobResponseDto<JobSummaryForBusinessDto>> getJobsByCompany(
-            int pageNumber, int pageSize,
+    public ResponseEntity<PaginatedResponse<JobSummaryForBusinessDto>> getJobsByCompany(
+            @RequestParam(defaultValue = "0") Integer pageNumber,
+            @RequestParam(defaultValue = "10") Integer pageSize,
             @ModelAttribute JobQuery jobQuery,
             @PathVariable Long companyId,
             @AuthenticationPrincipal CustomPrincipal principal) {
@@ -140,11 +139,11 @@ public class JobController {
             jobQuery.setHiringTeamMemberAccountId(userId);
         }
         var paginatedJobData = jobService.getJobsByCompany(jobQuery, pageNumber, pageSize);
-        var jobs = paginatedJobData.getJobs();
+        var jobs = paginatedJobData.getContent();
         var hasMore = paginatedJobData.isHasMore();
         var totalElements = paginatedJobData.getTotalElements();
         var jobDtos = jobs.stream().map(jobMapper::toSummaryForBusinessDto).toList();
-        PaginatedJobResponseDto<JobSummaryForBusinessDto> response = new PaginatedJobResponseDto<JobSummaryForBusinessDto>(
+        PaginatedResponse<JobSummaryForBusinessDto> response = new PaginatedResponse<JobSummaryForBusinessDto>(
                 hasMore, jobDtos, totalElements);
         return ResponseEntity.ok(response);
     }
@@ -155,10 +154,7 @@ public class JobController {
             @PathVariable Long jobId) {
         var job = jobService.getCompanyJobById(jobId);
         var jobDto = jobMapper.toDetailedSummaryForBusinessDto(job);
-        for (var member : job.getHiringTeamMembers()) {
-            var memberDto = businessMapper.toHiringTeamMemberResponseDto(member);
-            jobDto.getHiringTeam().add(memberDto);
-        }
+        System.out.println(jobDto.getHiringTeam().size() + " hiring team members added to job DTO");
         return ResponseEntity.ok(jobDto);
     }
 
@@ -222,6 +218,8 @@ public class JobController {
             @PathVariable Long id) {
         var job = jobService.getJobById(id);
         var shortListedApplicants = job.getShortListedApplications().stream().map(Application::getId).toList();
+        System.out.println("Found " + shortListedApplicants.size() + " shortlisted applicants for job ID: " + id);
+        System.out.println(shortListedApplicants);
         return ResponseEntity.ok(shortListedApplicants);
     }
 
@@ -264,6 +262,7 @@ public class JobController {
                     dto.setMatchScore(score);
                     return dto;
                 })
+                .sorted((a, b) -> Integer.compare(b.getMatchScore(), a.getMatchScore()))
                 .toList();
         return ResponseEntity.ok(candidateDtos);
     }

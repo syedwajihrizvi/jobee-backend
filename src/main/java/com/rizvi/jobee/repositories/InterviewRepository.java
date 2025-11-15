@@ -3,7 +3,10 @@ package com.rizvi.jobee.repositories;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,6 +14,8 @@ import org.springframework.data.jpa.repository.Query;
 import com.rizvi.jobee.entities.Interview;
 
 public interface InterviewRepository extends JpaRepository<Interview, Long> {
+
+    Page<Interview> findAll(Specification<Interview> specification, Pageable pageable);
 
     @EntityGraph(attributePaths = { "interviewers.profile", "rejection" })
     @Query("select i from Interview i where i.id = :id")

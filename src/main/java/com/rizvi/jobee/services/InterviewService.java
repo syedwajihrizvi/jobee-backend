@@ -2,13 +2,17 @@ package com.rizvi.jobee.services;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.rizvi.jobee.dtos.interview.ConductorDto;
 import com.rizvi.jobee.dtos.interview.CreateInterviewDto;
+import com.rizvi.jobee.dtos.job.PaginatedResponse;
 import com.rizvi.jobee.entities.Application;
 import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.Interview;
@@ -33,11 +37,13 @@ import com.rizvi.jobee.helpers.AISchemas.AnswerInterviewQuestionResponse;
 import com.rizvi.jobee.helpers.AISchemas.InterviewPrepQuestion;
 import com.rizvi.jobee.helpers.AISchemas.PrepareForInterviewRequest;
 import com.rizvi.jobee.helpers.AISchemas.ReferenceToPreviousAnswer;
+import com.rizvi.jobee.queries.InterviewQuery;
 import com.rizvi.jobee.repositories.ApplicationRepository;
 import com.rizvi.jobee.repositories.BusinessAccountRepository;
 import com.rizvi.jobee.repositories.InterviewPreparationQuestionRepository;
 import com.rizvi.jobee.repositories.InterviewPreparationRepository;
 import com.rizvi.jobee.repositories.InterviewRepository;
+import com.rizvi.jobee.specifications.InterviewSpecifications;
 
 import lombok.AllArgsConstructor;
 
@@ -54,8 +60,17 @@ public class InterviewService {
     private final InterviewPrepQueue interviewPrepQueue;
     private final UserNotificationService userNotificationService;
 
-    public List<Interview> getAllInterviews() {
-        return interviewRepository.findAll();
+    public PaginatedResponse<Interview> getAllInterviews(InterviewQuery query, int pageNumber, int pageSize) {
+        PageRequest pageRequest = PageRequest.of(
+                pageNumber, pageSize,
+                Sort.by("interviewDate").descending().and(Sort.by("startTime").ascending())
+                        .and(Sort.by("id").ascending()));
+        Specification<Interview> specification = InterviewSpecifications.withFilters(query);
+        Page<Interview> page = interviewRepository.findAll(specification, pageRequest);
+        var interviews = page.getContent();
+        var hasMore = pageNumber < page.getTotalPages() - 1;
+        var totalInterviews = page.getTotalElements();
+        return new PaginatedResponse<Interview>(hasMore, interviews, totalInterviews);
     }
 
     public Interview getInterviewById(Long id) {

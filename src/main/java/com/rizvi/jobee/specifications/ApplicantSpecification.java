@@ -17,6 +17,7 @@ import jakarta.persistence.criteria.Predicate;
 
 public class ApplicantSpecification {
     public static Specification<Application> withFilters(ApplicationQuery query) {
+        System.out.println("RECEIVED APPLICATION STATUS: " + query.getApplicationStatus());
         return (root, _, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             Join<Application, Job> jobJoin = root.join("job");
@@ -43,6 +44,9 @@ public class ApplicantSpecification {
                 }
                 predicates.add(cb.or(locationPredicates.toArray(new Predicate[0])));
             }
+            if (query.getUserProfileId() != null) {
+                predicates.add(cb.equal(userProfileJoin.get("id"), query.getUserProfileId()));
+            }
             if (query.getSkills() != null && !query.getSkills().isEmpty()) {
                 List<Predicate> skillPredicates = new ArrayList<>();
                 for (String skill : query.getSkills()) {
@@ -59,7 +63,6 @@ public class ApplicantSpecification {
                         query.getEducationLevel().toLowerCase().trim()));
             }
             if (query.getApplicationDateRange() != null) {
-                System.out.println("Filtering applications from last " + query.getApplicationDateRange() + " days");
                 predicates.add(cb.greaterThanOrEqualTo(
                         root.get("createdAt"),
                         cb.literal(java.time.LocalDateTime.now().minusDays(query.getApplicationDateRange()))));
@@ -69,6 +72,12 @@ public class ApplicantSpecification {
             }
             if (query.getHasVideoIntro() != null) {
                 predicates.add(cb.isNotNull(userProfileJoin.get("videoIntroUrl")).in(query.getHasVideoIntro()));
+            }
+            if (query.getShortlisted() != null) {
+                predicates.add(cb.equal(root.get("shortlisted"), query.getShortlisted()));
+            }
+            if (query.getApplicationStatus() != null) {
+                predicates.add(cb.equal(root.get("status"), query.getApplicationStatus()));
             }
             return cb.and(predicates.toArray(new Predicate[0]));
         };

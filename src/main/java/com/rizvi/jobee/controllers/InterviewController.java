@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,11 +23,13 @@ import com.rizvi.jobee.dtos.interview.InterviewDto;
 import com.rizvi.jobee.dtos.interview.InterviewPrepQuestionDto;
 import com.rizvi.jobee.dtos.interview.InterviewPreparationDto;
 import com.rizvi.jobee.dtos.interview.InterviewSummaryDto;
+import com.rizvi.jobee.dtos.job.PaginatedResponse;
 import com.rizvi.jobee.entities.Interview;
 import com.rizvi.jobee.enums.BusinessType;
 import com.rizvi.jobee.dtos.application.ApplicationDto;
 import com.rizvi.jobee.mappers.InterviewMapper;
 import com.rizvi.jobee.principals.CustomPrincipal;
+import com.rizvi.jobee.queries.InterviewQuery;
 import com.rizvi.jobee.services.AccountService;
 import com.rizvi.jobee.services.ApplicationService;
 import com.rizvi.jobee.services.InterviewService;
@@ -49,10 +52,42 @@ public class InterviewController {
     private final InterviewMapper interviewMapper;
 
     @GetMapping()
-    public ResponseEntity<List<InterviewDto>> getAllInterviews() {
-        var interviews = interviewService.getAllInterviews();
-        var interviewDtos = interviews.stream().map(interviewMapper::toDto).toList();
-        return ResponseEntity.ok(interviewDtos);
+    @Operation(summary = "Get interviews")
+    public ResponseEntity<PaginatedResponse<InterviewSummaryDto>> getInterviewsByJobId(
+            @ModelAttribute InterviewQuery query,
+            @RequestParam(defaultValue = "0") Integer pageNumber,
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @RequestParam(required = false) Number limit,
+            @AuthenticationPrincipal CustomPrincipal principal) {
+        var accountId = principal.getId();
+        var accountType = principal.getAccountType();
+        if (accountType.equals(BusinessType.RECRUITER.name())) {
+            query.setPostedById(accountId);
+        } else if (accountType.equals(BusinessType.EMPLOYEE.name())) {
+            query.setConductorId(accountId);
+        }
+        // Either way, we set the company Id in the query
+        // TODO: Maybe add the company Id to the principal to avoid this extra call
+        var businessAccountId = principal.getId();
+        var businessAccount = accountService.getBusinessAccountById(businessAccountId);
+        var companyId = businessAccount.getCompany().getId();
+        query.setCompanyId(companyId);
+        System.out.println("SYED-DEBUG: Fetching interviews with query: " + query);
+        // May need to add additional checks based on principal info and business
+        // account type
+        // If ADMIN account, then can view all interviews for the company
+        // If RECRUITER account, then can view all interviews posted by that recruiter
+        // If EMPLOYEE account, then can view all interviews that employee is a
+        // condcutor for
+        var paginatedInterviews = interviewService.getAllInterviews(query, pageNumber, pageSize);
+        var interviews = paginatedInterviews.getContent();
+        var hasMore = paginatedInterviews.isHasMore();
+        var totalInterviews = paginatedInterviews.getTotalElements();
+        var interviewDtos = interviews.stream().map(interviewMapper::toSummaryDto).toList();
+        System.out.println("SYED-DEBUG: Retrieved " + interviewDtos.size() + " interviews for query: " + query);
+        PaginatedResponse<InterviewSummaryDto> response = new PaginatedResponse<>(hasMore, interviewDtos,
+                totalInterviews);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
@@ -101,18 +136,6 @@ public class InterviewController {
         } else if (accountType.equals(BusinessType.EMPLOYEE.name())) {
             interviews = interviewService.getInterviewsForEmployee(businessId);
         }
-        var interviewSummaryDtos = interviews.stream()
-                .map(interviewMapper::toSummaryDto)
-                .toList();
-        return ResponseEntity.ok(interviewSummaryDtos);
-    }
-
-    @GetMapping("/job/{jobId}")
-    @Operation(summary = "Get interviews for a specific job")
-    public ResponseEntity<List<InterviewSummaryDto>> getInterviewsByJobId(
-            @PathVariable Long jobId,
-            @RequestParam(required = false) Number limit) {
-        var interviews = interviewService.getInterviewsByJobId(jobId, limit);
         var interviewSummaryDtos = interviews.stream()
                 .map(interviewMapper::toSummaryDto)
                 .toList();

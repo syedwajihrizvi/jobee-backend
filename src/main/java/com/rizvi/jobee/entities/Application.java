@@ -51,7 +51,7 @@ public class Application {
 
     @Builder.Default
     @Column(name = "short_listed", nullable = true, insertable = false, updatable = true)
-    private Boolean shortListed = false;
+    private Boolean shortlisted = false;
 
     @Column(name = "created_at", nullable = true, updatable = false)
     @CreationTimestamp
