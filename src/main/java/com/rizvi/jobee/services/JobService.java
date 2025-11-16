@@ -12,7 +12,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.rizvi.jobee.dtos.job.CreateJobDto;
-import com.rizvi.jobee.dtos.job.PaginatedJobDto;
 import com.rizvi.jobee.dtos.job.PaginatedResponse;
 import com.rizvi.jobee.entities.AIJobInsight;
 import com.rizvi.jobee.entities.BusinessAccount;

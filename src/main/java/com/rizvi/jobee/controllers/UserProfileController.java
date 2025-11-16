@@ -9,6 +9,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +23,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.rizvi.jobee.dtos.application.ApplicationSummaryDto;
 import com.rizvi.jobee.dtos.job.JobSummaryDto;
+import com.rizvi.jobee.dtos.job.PaginatedResponse;
 import com.rizvi.jobee.dtos.job.RecommendedJobDto;
 import com.rizvi.jobee.dtos.user.CreateUserProfileDto;
 import com.rizvi.jobee.dtos.user.ProfileCompletenessDto;
@@ -39,13 +41,16 @@ import com.rizvi.jobee.mappers.JobMapper;
 import com.rizvi.jobee.mappers.UserMapper;
 import com.rizvi.jobee.mappers.UserProfileMapper;
 import com.rizvi.jobee.principals.CustomPrincipal;
+import com.rizvi.jobee.queries.ApplicationQuery;
 import com.rizvi.jobee.repositories.ApplicationRepository;
 import com.rizvi.jobee.repositories.JobRepository;
 import com.rizvi.jobee.repositories.UserProfileRepository;
 import com.rizvi.jobee.services.AccountService;
+import com.rizvi.jobee.services.ApplicationService;
 import com.rizvi.jobee.services.InterviewService;
 import com.rizvi.jobee.services.JobRecommenderService;
 import com.rizvi.jobee.services.UserDocumentService;
+import com.rizvi.jobee.services.UserFavoriteJobService;
 import com.rizvi.jobee.services.UserProfileService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -57,7 +62,9 @@ import lombok.AllArgsConstructor;
 public class UserProfileController {
         private final UserProfileRepository userProfileRepository;
         private final ApplicationRepository applicationRepository;
+        private final ApplicationService applicationService;
         private final JobRepository jobRepository;
+        private final UserFavoriteJobService userFavoriteJobService;
         private final UserDocumentService userDocumentService;
         private final UserProfileService userProfileService;
         private final InterviewService interviewService;
@@ -147,14 +154,22 @@ public class UserProfileController {
 
         @GetMapping("appliedJobs")
         @Operation(summary = "Get all the jobs the user has applied to")
-        public ResponseEntity<List<?>> getUserAppliedJobs(
+        public ResponseEntity<PaginatedResponse<JobSummaryDto>> getUserAppliedJobs(
+                        @RequestParam(defaultValue = "0") Integer pageNumber,
+                        @RequestParam(defaultValue = "10") Integer pageSize,
+                        @ModelAttribute ApplicationQuery applicationQuery,
                         @AuthenticationPrincipal CustomPrincipal principal) {
                 var userProfileId = principal.getProfileId();
-                var applications = applicationRepository.findByUserProfileId(userProfileId);
-                var applicationDtos = applications.stream()
-                                .map(applicationMapper::toSummaryDto)
+                applicationQuery.setUserProfileId(userProfileId);
+                var paginatedApplications = applicationService.getAllApplications(applicationQuery, pageNumber,
+                                pageSize);
+                var jobSummariesDto = paginatedApplications.getContent().stream()
+                                .map(application -> jobMapper.toSummaryDto(application.getJob()))
                                 .toList();
-                return ResponseEntity.ok(applicationDtos);
+                System.out.println("SYED-DEBUG: Total applied jobs found: " + paginatedApplications.getTotalElements());
+                var hasMore = paginatedApplications.isHasMore();
+                var total = paginatedApplications.getTotalElements();
+                return ResponseEntity.ok(new PaginatedResponse<JobSummaryDto>(hasMore, jobSummariesDto, total));
         }
 
         @GetMapping("appliedJobs/{jobId}")
@@ -177,24 +192,20 @@ public class UserProfileController {
 
         @GetMapping("/favorite-jobs")
         @Operation(summary = "Get all favorite jobs for the authenticated user")
-        public ResponseEntity<List<JobSummaryDto>> getFavoriteJobs(
+        public ResponseEntity<PaginatedResponse<JobSummaryDto>> getFavoriteJobs(
+                        @RequestParam(defaultValue = "0") Integer pageNumber,
+                        @RequestParam(defaultValue = "10") Integer pageSize,
                         @AuthenticationPrincipal CustomPrincipal principal) {
                 var userProfileId = principal.getProfileId();
-                var userProfile = userProfileRepository.findById(userProfileId)
-                                .orElseThrow(() -> new AccountNotFoundException("User profile not found"));
-                var favoriteJobs = userProfile.getFavoriteJobs().stream()
-                                .map(jobMapper::toSummaryDto)
-                                .toList();
-                return ResponseEntity.ok(favoriteJobs);
+                var pagiantedJobData = userFavoriteJobService.getFavoriteJobs(userProfileId, pageNumber, pageSize);
+                return ResponseEntity.ok(pagiantedJobData);
         }
 
         @GetMapping("/recommended-jobs")
         @Operation(summary = "Get AI recommended jobs for the authenticated user")
         public ResponseEntity<List<RecommendedJobDto>> getRecommendedJobs(
                         @AuthenticationPrincipal CustomPrincipal principal) {
-                System.out.println("SYED-DEBUG: Fetching recommended jobs");
                 var userProfileId = principal.getProfileId();
-                System.out.println("SYED-DEBUG: User Profile ID: " + userProfileId);
                 var userProfile = userProfileRepository.findById(userProfileId)
                                 .orElseThrow(() -> new AccountNotFoundException("User profile not found"));
                 var jobs = jobRecommenderService.getRecommendedJobsForUser(userProfile);
@@ -205,7 +216,10 @@ public class UserProfileController {
                         recommendedJobDto.setMatch(entry.getValue());
                         result.add(recommendedJobDto);
                 }
-                return ResponseEntity.ok(result);
+                var sortedResult = result.stream()
+                                .sorted((a, b) -> b.getMatch().compareTo(a.getMatch()))
+                                .toList();
+                return ResponseEntity.ok(sortedResult);
         }
 
         @PostMapping()

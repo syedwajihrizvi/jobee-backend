@@ -21,6 +21,7 @@ public interface ApplicationMapper {
     ApplicationDto toDto(Application application);
 
     @Mapping(target = "appliedAt", source = "createdAt")
+    @Mapping(target = "jobId", source = "job.id")
     ApplicationSummaryDto toSummaryDto(Application application);
 
     @Mapping(target = "jobId", source = "job.id")

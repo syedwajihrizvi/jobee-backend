@@ -70,6 +70,35 @@ public class JobController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/businesses")
+    @Operation(summary = "Get all jobs for a business with optional filters and search")
+    public ResponseEntity<PaginatedResponse<JobSummaryForBusinessDto>> getJobsForBusiness(
+            @RequestParam(defaultValue = "0") Integer pageNumber,
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @ModelAttribute JobQuery jobQuery,
+            @AuthenticationPrincipal CustomPrincipal principal) {
+        var userId = principal.getId();
+        var accountType = principal.getAccountType();
+        // TODO: Add company id to the principal to avoid extra DB call
+        var businessAccount = accountService.getBusinessAccountById(userId);
+        Long companyId = businessAccount.getCompany().getId();
+        jobQuery.setCompanyId(companyId);
+        if (accountType.equals(BusinessType.RECRUITER.name())) {
+            jobQuery.setPostedByAccountId(userId);
+
+        } else if (accountType.equals(BusinessType.EMPLOYEE.name())) {
+            jobQuery.setHiringTeamMemberAccountId(userId);
+        }
+        var paginatedJobData = jobService.getJobsByCompany(jobQuery, pageNumber, pageSize);
+        var jobs = paginatedJobData.getContent();
+        var hasMore = paginatedJobData.isHasMore();
+        var totalElements = paginatedJobData.getTotalElements();
+        var jobDtos = jobs.stream().map(jobMapper::toSummaryForBusinessDto).toList();
+        PaginatedResponse<JobSummaryForBusinessDto> response = new PaginatedResponse<JobSummaryForBusinessDto>(
+                hasMore, jobDtos, totalElements);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Get job by ID")
     public ResponseEntity<JobSummaryDto> getJobById(@PathVariable("id") Long id) {

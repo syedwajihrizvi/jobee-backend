@@ -21,6 +21,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.rizvi.jobee.dtos.application.ApplicantSummaryForBusinessDto;
 import com.rizvi.jobee.dtos.application.ApplicationDetailsForBusinessDto;
 import com.rizvi.jobee.dtos.application.ApplicationDto;
+import com.rizvi.jobee.dtos.application.ApplicationSummaryDto;
 import com.rizvi.jobee.dtos.application.BatchQuickApplyDto;
 import com.rizvi.jobee.dtos.application.BatchQuickApplySuccessDto;
 import com.rizvi.jobee.dtos.application.CreateApplicationDto;
@@ -69,7 +70,7 @@ public class ApplicationController {
 
     @GetMapping("/user/me")
     @Operation(summary = "Get applications for the logged in user")
-    public ResponseEntity<List<ApplicationDto>> getApplicationsForLoggedInUser(
+    public ResponseEntity<List<ApplicationSummaryDto>> getApplicationsForLoggedInUser(
             @AuthenticationPrincipal CustomPrincipal customPrincipal) {
         var userId = customPrincipal.getProfileId();
         var userProfile = userProfileRepository.findById(userId).orElse(null);
@@ -78,8 +79,28 @@ public class ApplicationController {
         }
         var sort = Sort.by("createdAt").descending();
         var applications = applicationRepository.findByUserProfile(userProfile, sort);
-        var applicationDtos = applications.stream().map(applicationMapper::toDto).toList();
+        var applicationDtos = applications.stream().map(applicationMapper::toSummaryDto).toList();
         return ResponseEntity.ok(applicationDtos);
+    }
+
+    @GetMapping("/users/last-application")
+    @Operation(summary = "Get the most recent application for the logged in user")
+    public ResponseEntity<ApplicationDto> getMostRecentApplicationForLoggedInUser(
+            @AuthenticationPrincipal CustomPrincipal customPrincipal) {
+        System.out.println("SYED-DEBUG: Entered getMostRecentApplicationForLoggedInUser");
+        var userId = customPrincipal.getProfileId();
+        var userProfile = userProfileRepository.findById(userId).orElse(null);
+        if (userProfile == null) {
+            throw new AccountNotFoundException("User profile not found for user id: " + userId);
+        }
+        var sort = Sort.by("createdAt").descending();
+        var applications = applicationRepository.findByUserProfile(userProfile, sort);
+        if (applications.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        var mostRecentApplication = applications.get(0);
+        var applicationDto = applicationMapper.toDto(mostRecentApplication);
+        return ResponseEntity.ok(applicationDto);
     }
 
     @GetMapping()

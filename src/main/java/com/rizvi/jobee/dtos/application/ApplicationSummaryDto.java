@@ -10,4 +10,5 @@ public class ApplicationSummaryDto {
     private LocalDate appliedAt;
     private String status;
     private Long interviewId;
+    private Long jobId;
 }

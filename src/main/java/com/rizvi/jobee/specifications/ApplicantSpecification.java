@@ -17,12 +17,13 @@ import jakarta.persistence.criteria.Predicate;
 
 public class ApplicantSpecification {
     public static Specification<Application> withFilters(ApplicationQuery query) {
-        System.out.println("RECEIVED APPLICATION STATUS: " + query.getApplicationStatus());
         return (root, _, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             Join<Application, Job> jobJoin = root.join("job");
             Join<Application, UserProfile> userProfileJoin = root.join("userProfile");
-            predicates.add(cb.equal(jobJoin.get("id"), query.getJobId()));
+            if (query.getJobId() != null) {
+                predicates.add(cb.equal(jobJoin.get("id"), query.getJobId()));
+            }
             if (query.getSearch() != null && !query.getSearch().isEmpty()) {
                 String search = query.getSearch().toLowerCase().trim();
                 predicates.add(cb.or(

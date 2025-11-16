@@ -22,6 +22,7 @@ public class JobRecommenderService {
         // In a real-world scenario, this would involve complex algorithms and possibly
         // AI/ML models
         // Right now, just find jobs that match user's skills, interests
+        // TODO: Only return jobs that the user has not applied to yet
         Map<Job, Long> recommendedJobs = new HashMap<>();
         var skills = user.getSkills().stream().map(s -> s.getSkill().getSlug().toLowerCase().trim()).toList();
         var jobs = jobRepository.findJobsWithSkills(skills);

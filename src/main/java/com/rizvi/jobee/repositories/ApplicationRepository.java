@@ -48,4 +48,7 @@ public interface ApplicationRepository extends JpaRepository<Application, Long>,
         @Query("select a from Application a where a.userProfile.id = :userId and a.job.id = :jobId")
         List<Application> findByUserProfileIdAndJobId(Long userId, Long jobId);
 
+        @Query("select a from Application a where a.userProfile.id = :userId order by a.createdAt desc limit 1")
+        Optional<Application> findMostRecentApplicationForUser(Long userId);
+
 }

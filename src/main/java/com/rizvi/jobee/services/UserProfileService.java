@@ -287,4 +287,5 @@ public class UserProfileService {
         userProfile.setPrimaryResume(resume);
         return userProfileRepository.save(userProfile);
     }
+
 }

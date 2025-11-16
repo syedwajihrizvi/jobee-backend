@@ -45,14 +45,20 @@ public class ApplicationService {
     }
 
     public PaginatedResponse<Application> getAllApplications(ApplicationQuery query, int pageNumber, int pageSize) {
-        PageRequest pageRequest = PageRequest.of(pageNumber, pageSize, 
-            Sort.by("createdAt").descending().and(Sort.by("id").ascending()));
+        PageRequest pageRequest = PageRequest.of(pageNumber, pageSize,
+                Sort.by("createdAt").descending().and(Sort.by("id").ascending()));
+        System.out.println("SYED-DEBUG: Fetching applications with query: " + query);
         Specification<Application> specification = ApplicantSpecification.withFilters(query);
         Page<Application> page = applicationRepository.findAll(specification, pageRequest);
         var applications = page.getContent();
+        System.out.println("SYED-DEBUG: Retrieved " + applications.size() + " applications");
         var hasMore = pageNumber < page.getTotalPages() - 1;
         var totalApplications = page.getTotalElements();
-        System.out.println("Total applications found: " + totalApplications);
         return new PaginatedResponse<Application>(hasMore, applications, totalApplications);
+    }
+
+    public Application getMostRecentApplicationForUser(Long userId) {
+        var application = applicationRepository.findMostRecentApplicationForUser(userId).orElse(null);
+        return application;
     }
 }

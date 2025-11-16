@@ -1,0 +1,2 @@
+ALTER TABLE user_favorite_jobs
+ADD COLUMN favorited_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
