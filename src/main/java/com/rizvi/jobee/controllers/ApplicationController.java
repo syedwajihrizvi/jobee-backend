@@ -87,7 +87,6 @@ public class ApplicationController {
     @Operation(summary = "Get the most recent application for the logged in user")
     public ResponseEntity<ApplicationDto> getMostRecentApplicationForLoggedInUser(
             @AuthenticationPrincipal CustomPrincipal customPrincipal) {
-        System.out.println("SYED-DEBUG: Entered getMostRecentApplicationForLoggedInUser");
         var userId = customPrincipal.getProfileId();
         var userProfile = userProfileRepository.findById(userId).orElse(null);
         if (userProfile == null) {
@@ -158,7 +157,6 @@ public class ApplicationController {
         var hasMore = pagiantedApplicationsData.isHasMore();
         var totalApplications = pagiantedApplicationsData.getTotalElements();
         var applicationDtos = applications.stream().map(applicationMapper::toApplicantSummaryForBusinessDto).toList();
-        System.out.println(applicationDtos.stream().map(dto -> dto.getId()).toList());
         PaginatedResponse<ApplicantSummaryForBusinessDto> response = new PaginatedResponse<>(
                 hasMore, applicationDtos, totalApplications);
 

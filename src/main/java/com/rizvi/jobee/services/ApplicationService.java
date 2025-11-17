@@ -61,4 +61,5 @@ public class ApplicationService {
         var application = applicationRepository.findMostRecentApplicationForUser(userId).orElse(null);
         return application;
     }
+
 }
