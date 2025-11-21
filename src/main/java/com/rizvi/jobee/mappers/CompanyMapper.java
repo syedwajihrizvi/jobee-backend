@@ -9,7 +9,7 @@ import com.rizvi.jobee.entities.Company;
 
 @Mapper(componentModel = "spring")
 public interface CompanyMapper {
-    @Mapping(target = "location", expression = "java(company.getHqCity() + \", \" + company.getHqState() + \", \" + company.getHqCountry())")
+    @Mapping(target = "location", expression = "java(company.getLocationAsString())")
     @Mapping(target = "logoUrl", source = "logo")
     CompanyDto toCompanyDto(Company company);
 
@@ -22,4 +22,5 @@ public interface CompanyMapper {
     default TopHiringCompanyDto map(Object[] data) {
         return toTopCompaniesDto((Long) data[0], (String) data[1], (String) data[2], (Long) data[3]);
     }
+
 }

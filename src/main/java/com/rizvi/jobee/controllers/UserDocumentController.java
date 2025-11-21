@@ -2,7 +2,6 @@ package com.rizvi.jobee.controllers;
 
 import java.util.List;
 
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,7 +28,7 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/user-documents")
+@RequestMapping("/api/user-documents")
 public class UserDocumentController {
 
         private final UserDocumentService userDocumentService;
@@ -99,8 +98,6 @@ public class UserDocumentController {
                         @RequestBody CreateDocViaLinkDto request,
                         @AuthenticationPrincipal CustomPrincipal principal,
                         UriComponentsBuilder uriComponentsBuilder) {
-                System.out.println("Received request to create document via link: " +
-                                request);
                 Long userId = principal.getId();
                 var userProfile = userProfileRepository.findById(userId).orElseThrow(
                                 () -> new AccountNotFoundException("User profile not found"));
@@ -115,7 +112,6 @@ public class UserDocumentController {
                 if (createdDocument == null) {
                         return ResponseEntity.badRequest().build();
                 }
-                System.out.println("Successfully created document via link: " + createdDocument.getId());
                 var uri = uriComponentsBuilder.path("/user-documents/{id}")
                                 .buildAndExpand(createdDocument.getId())
                                 .toUri();

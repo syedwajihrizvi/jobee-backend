@@ -26,7 +26,7 @@ import lombok.AllArgsConstructor;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/accounts")
+@RequestMapping("/api/accounts")
 public class UserAccountController {
     private final UserAccountRepository userAccountRepository;
     private final PasswordEncoder passwordEncoder;

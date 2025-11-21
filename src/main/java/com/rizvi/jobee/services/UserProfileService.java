@@ -17,6 +17,9 @@ import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.AmazonS3Exception;
 import com.rizvi.jobee.exceptions.CompanyNotFoundException;
+import com.rizvi.jobee.exceptions.IncompleteProfileException;
+import com.rizvi.jobee.helpers.AISchemas.AIProfessionalSummaryAnswer;
+import com.rizvi.jobee.helpers.AISchemas.GenerateAIProfessionalSummaryRequest;
 import com.rizvi.jobee.repositories.CompanyRepository;
 import com.rizvi.jobee.repositories.QuickApplyTSRepository;
 import com.rizvi.jobee.repositories.UserAccountRepository;
@@ -36,6 +39,7 @@ public class UserProfileService {
     private final UserAccountRepository userAccountRepository;
     private final QuickApplyTSRepository quickApplyTSRepository;
     private final CompanyRepository companyRepository;
+    private final AIService aiService;
     private final S3Service s3Service;
 
     public List<UserProfile> getAllUserProfiles() {
@@ -155,22 +159,41 @@ public class UserProfileService {
         if (userProfile == null) {
             throw new AccountNotFoundException("User profile not found");
         }
+
         CompleteProfileDto completeProfileDto;
         try {
             completeProfileDto = new ObjectMapper().readValue(request, CompleteProfileDto.class);
-            userProfile.setTitle(completeProfileDto.getTitle());
-            userProfile.setSummary(completeProfileDto.getSummary());
-            userProfile.setPhoneNumber(completeProfileDto.getPhoneNumber());
+            String title = completeProfileDto.getTitle();
+            String summary = completeProfileDto.getSummary();
+            String phoneNumber = completeProfileDto.getPhoneNumber();
+            String company = completeProfileDto.getCompany();
+            String country = completeProfileDto.getCountry();
+            String city = completeProfileDto.getCity();
+            if (title != null && !title.isEmpty())
+                userProfile.setTitle(title);
+            if (summary != null && !summary.isEmpty())
+                userProfile.setSummary(summary);
+            if (phoneNumber != null && !phoneNumber.isEmpty())
+                userProfile.setPhoneNumber(phoneNumber);
+            if (company != null && !company.isEmpty())
+                userProfile.setCompany(company);
+            if (country != null && !country.isEmpty())
+                userProfile.setCountry(country);
+            if (city != null && !city.isEmpty())
+                userProfile.setCity(city);
+
         } catch (JsonProcessingException e) {
             // TODO: Handle the exception properly
             throw new RuntimeException("Failed to parse request body");
         }
-        try {
-            s3Service.uploadProfileImage(userProfile.getId(), profileImage);
-            userProfile.setProfileImageUrl(userId.toString() + "_" + profileImage.getOriginalFilename());
-            userProfileRepository.save(userProfile);
-        } catch (Exception e) {
-            throw new AmazonS3Exception(e.getMessage());
+        if (profileImage != null) {
+            try {
+                s3Service.uploadProfileImage(userProfile.getId(), profileImage);
+                userProfile.setProfileImageUrl(userId.toString() + "_" + profileImage.getOriginalFilename());
+                userProfileRepository.save(userProfile);
+            } catch (Exception e) {
+                throw new AmazonS3Exception(e.getMessage());
+            }
         }
         if (videoIntro != null)
             try {
@@ -286,6 +309,20 @@ public class UserProfileService {
         }
         userProfile.setPrimaryResume(resume);
         return userProfileRepository.save(userProfile);
+    }
+
+    public AIProfessionalSummaryAnswer generateAIProfessionalSummary(Long userId, String existingSummaryDto) {
+        var userProfile = userProfileRepository.findById(userId).orElse(null);
+        if (userProfile == null) {
+            throw new AccountNotFoundException("User profile not found");
+        }
+        if (!userProfile.canGenerateAIProfessionalSummary()) {
+            throw new IncompleteProfileException(
+                    "User profile is incomplete for generating AI professional summary");
+        }
+        GenerateAIProfessionalSummaryRequest request = new GenerateAIProfessionalSummaryRequest(userProfile,
+                existingSummaryDto);
+        return aiService.generateAIProfessionalSummary(request);
     }
 
 }

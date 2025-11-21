@@ -135,7 +135,26 @@ public class UserProfile {
     }
 
     public String getLocation() {
-        return city + ", " + (state != null ? state : province) + ", " + country;
+        if (city == null && state == null && country == null) {
+            return null;
+        }
+
+        StringBuilder location = new StringBuilder();
+        if (city != null && !city.trim().isEmpty()) {
+            location.append(city);
+        }
+        if (state != null && !state.trim().isEmpty()) {
+            if (location.length() > 0)
+                location.append(", ");
+            location.append(state);
+        }
+        if (country != null && !country.trim().isEmpty()) {
+            if (location.length() > 0)
+                location.append(", ");
+            location.append(country);
+        }
+
+        return location.toString();
     }
 
     public String getFullName() {
@@ -204,5 +223,11 @@ public class UserProfile {
 
     public List<String> getSkillsAsStringList() {
         return this.skills.stream().map(s -> s.getSkill().getName()).toList();
+    }
+
+    public Boolean canGenerateAIProfessionalSummary() {
+        return this.education != null || !this.education.isEmpty()
+                || this.experiences != null || !this.experiences.isEmpty() || this.skills != null
+                || !this.skills.isEmpty() || this.projects != null && !this.projects.isEmpty();
     }
 }

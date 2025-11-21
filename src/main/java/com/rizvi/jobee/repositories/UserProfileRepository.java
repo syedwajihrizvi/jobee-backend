@@ -15,7 +15,8 @@ public interface UserProfileRepository extends JpaRepository<UserProfile, Long> 
     @Query("select p from UserProfile p where p.account.id = :accountId")
     Optional<UserProfile> findByAccountId(@Param("accountId") Long accountId);
 
-    @EntityGraph(attributePaths = { "account", "documents", "favoriteJobs", "skills", "skills.skill", "education" })
+    @EntityGraph(attributePaths = { "account", "documents", "favoriteJobs", "skills", "skills.skill", "education",
+            "experiences", "projects" })
     Optional<UserProfile> findById(Long id);
 
     @Query("select p from UserProfile p where p.id = :id")

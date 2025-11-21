@@ -1,6 +1,5 @@
 package com.rizvi.jobee.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,8 +19,6 @@ import com.rizvi.jobee.dtos.user.JwtDto;
 import com.rizvi.jobee.dtos.user.LoginDto;
 import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.BusinessProfile;
-import com.rizvi.jobee.entities.Company;
-import com.rizvi.jobee.enums.BusinessType;
 import com.rizvi.jobee.enums.InvitationStatus;
 import com.rizvi.jobee.enums.Role;
 import com.rizvi.jobee.exceptions.AlreadyRegisteredException;
@@ -30,7 +27,7 @@ import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.mappers.BusinessMapper;
 import com.rizvi.jobee.principals.CustomPrincipal;
 import com.rizvi.jobee.repositories.BusinessAccountRepository;
-import com.rizvi.jobee.repositories.CompanyRepository;
+import com.rizvi.jobee.services.BusinessAccountService;
 import com.rizvi.jobee.services.InvitationService;
 import com.rizvi.jobee.services.JwtService;
 
@@ -39,10 +36,10 @@ import lombok.AllArgsConstructor;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/business-accounts")
+@RequestMapping("/api/business-accounts")
 public class BusinessAccountController {
     private final BusinessAccountRepository businessAccountRepository;
-    private final CompanyRepository companyRepository;
+    private final BusinessAccountService accountService;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final BusinessMapper businessMapper;
@@ -53,26 +50,9 @@ public class BusinessAccountController {
     public ResponseEntity<BusinessAccountDto> createBusinessAccount(
             @RequestBody CreateBusinessAccountDto request,
             UriComponentsBuilder uriComponentsBuilder) throws RuntimeException {
-        var companyName = request.getCompanyName();
-        // TODO: Add slug check for company name
-        var company = companyRepository.findByName(companyName);
-        if (company != null) {
-            System.out.println("Company with name " + companyName + " already exists");
-            throw new AlreadyRegisteredException("Company with name " + companyName
-                    + " exists. Please contact admin or support if you need an invite.");
-        }
-        var password = passwordEncoder.encode(request.getPassword());
-        var businessAccount = BusinessAccount.builder()
-                .email(request.getEmail())
-                .password(password)
-                .accountType(BusinessType.ADMIN)
-                .build();
-        // Create the company
-        var newCompany = Company.builder().name(companyName).build();
-        newCompany.addBusinessAccount(businessAccount);
-        var savedCompany = companyRepository.save(newCompany);
+        var businessAccount = accountService.createBusinessAccount(request);
         var uri = uriComponentsBuilder.path("/business-accounts/{id}")
-                .buildAndExpand(savedCompany.getId()).toUri();
+                .buildAndExpand(businessAccount.getId()).toUri();
         return ResponseEntity.created(uri).body(businessMapper.toDto(businessAccount));
     }
 
@@ -81,16 +61,12 @@ public class BusinessAccountController {
     public ResponseEntity<BusinessAccountDto> createBusinessAccountViaCode(
             @RequestBody CreateBusinessAccountViaCodeDto request,
             UriComponentsBuilder uriComponentsBuilder) {
-        System.out.println("Received request to register business account via code");
-        System.out.println(request);
         var companyCode = request.getCompanyCode();
         var invitation = invitationService.getInvitationByCompanyCode(companyCode);
         if (invitation == null) {
             return ResponseEntity.badRequest().build();
         }
-        System.out.println("Invitation found for company code: " + companyCode);
         var email = request.getEmail();
-        var phoneNumber = request.getPhoneNumber();
         var existingAccount = businessAccountRepository.findByEmail(email).orElse(null);
         if (existingAccount != null) {
             throw new AlreadyRegisteredException("An account with email " + email + " already exists.");
@@ -126,14 +102,15 @@ public class BusinessAccountController {
         var email = request.getEmail();
         var password = request.getPassword();
         var businessAccount = businessAccountRepository.findByEmail(email).orElse(null);
-        // if (businessAccount == null || !passwordEncoder.matches(password,
-        // businessAccount.getPassword())) {
-        // throw new IncorrectEmailOrPasswordException("Invalid email or password");
-        // }
+        if (businessAccount == null || !passwordEncoder.matches(password,
+                businessAccount.getPassword())) {
+            throw new IncorrectEmailOrPasswordException("Invalid email or password");
+        }
         var jwtToken = jwtService.generateBusinessJwtToken(businessAccount.getEmail(), Role.BUSINESS,
                 businessAccount.getId(),
                 businessAccount.getAccountType().name(),
-                businessAccount.getProfile().getId());
+                businessAccount.getProfile().getId(),
+                businessAccount.getCompany().getId());
         return ResponseEntity.ok(new JwtDto(jwtToken));
     }
 
@@ -147,6 +124,7 @@ public class BusinessAccountController {
             return ResponseEntity.notFound().build();
         }
         BusinessAccountDto dto = businessMapper.toDto(businessAccount);
+        System.out.println("Fetched business account for user ID: " + dto);
         dto.setRole(accountType);
         return ResponseEntity.ok(dto);
     }

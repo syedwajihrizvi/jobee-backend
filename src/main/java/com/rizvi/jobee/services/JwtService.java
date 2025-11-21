@@ -17,13 +17,15 @@ import lombok.AllArgsConstructor;
 public class JwtService {
     private JwtConfig jwtConfig;
 
-    public String generateBusinessJwtToken(String email, Role role, Long id, String account_type, Long profile_id) {
+    public String generateBusinessJwtToken(String email, Role role, Long id, String account_type, Long profile_id,
+            Long company_id) {
         return Jwts.builder()
                 .subject(email)
                 .claim("role", role)
                 .claim("id", id)
                 .claim("profile_id", profile_id)
                 .claim("account_type", account_type)
+                .claim("company_id", company_id)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + jwtConfig.getAccessTokenExpiration()))
                 .signWith(Keys.hmacShaKeyFor(jwtConfig.getSecret().getBytes(StandardCharsets.UTF_8)))
@@ -105,6 +107,17 @@ public class JwtService {
                     .verifyWith(Keys.hmacShaKeyFor(jwtConfig.getSecret().getBytes(StandardCharsets.UTF_8)))
                     .build()
                     .parseSignedClaims(token).getPayload().get("account_type", String.class);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public Long getCompanyIdFromToken(String token) {
+        try {
+            return Jwts.parser()
+                    .verifyWith(Keys.hmacShaKeyFor(jwtConfig.getSecret().getBytes(StandardCharsets.UTF_8)))
+                    .build()
+                    .parseSignedClaims(token).getPayload().get("company_id", Long.class);
         } catch (Exception e) {
             return null;
         }

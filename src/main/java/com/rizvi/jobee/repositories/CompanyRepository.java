@@ -13,4 +13,6 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 
     @Query("select c from Company c where lower(c.name) like lower(concat('%', :name, '%'))")
     List<Company> findByNameContainingIgnoreCase(String name);
+
+    Company findBySlug(String slug);
 }

@@ -22,11 +22,7 @@ public interface UserMapper {
 
         @Mapping(target = "profileComplete", expression = """
                         java(userProfile.getDocuments() != null &&
-                        !userProfile.getDocuments().isEmpty() &&
-                        userProfile.getTitle() != null &&
-                        !userProfile.getTitle().isEmpty() &&
-                        userProfile.getSummary() != null &&
-                        !userProfile.getSummary().isEmpty())""")
+                        !userProfile.getDocuments().isEmpty())""")
         @Mapping(target = "email", source = "account.email")
         @Mapping(target = "location", expression = "java(userProfile.getLocation())")
         UserProfileSummaryDto toProfileSummaryDto(UserProfile userProfile);

@@ -36,6 +36,7 @@ import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.AmazonS3Exception;
 import com.rizvi.jobee.exceptions.JobNotFoundException;
+import com.rizvi.jobee.helpers.AISchemas.AIProfessionalSummaryAnswer;
 import com.rizvi.jobee.mappers.ApplicationMapper;
 import com.rizvi.jobee.mappers.JobMapper;
 import com.rizvi.jobee.mappers.UserMapper;
@@ -58,7 +59,7 @@ import lombok.AllArgsConstructor;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/profiles")
+@RequestMapping("/api/profiles")
 public class UserProfileController {
         private final UserProfileRepository userProfileRepository;
         private final ApplicationRepository applicationRepository;
@@ -323,11 +324,25 @@ public class UserProfileController {
                 return ResponseEntity.ok().body(userMapper.toProfileSummaryDto(savedProfile));
         }
 
+        @PostMapping("/generate-professional-summary")
+        @Operation(summary = "Generate professional summary using AI")
+        public ResponseEntity<AIProfessionalSummaryAnswer> generateProfessionalSummary(
+                        @RequestBody(required = false) UpdateUserProfileSummaryDto existingSummaryDto,
+                        @AuthenticationPrincipal CustomPrincipal principal) {
+                var userProfileId = principal.getProfileId();
+                var existingSummary = existingSummaryDto != null ? existingSummaryDto.getSummary() : null;
+                var aiSummary = userProfileService.generateAIProfessionalSummary(userProfileId,
+                                existingSummary);
+                System.out.println(
+                                "SYED-DEBUG: Generated AI Professional Summary: " + aiSummary.getProfessionalSummary());
+                return ResponseEntity.ok().body(aiSummary);
+        }
+
         @PatchMapping("/complete-profile")
         @Transactional
         @Operation(summary = "User completes their profile using complete profile form on client side")
         public ResponseEntity<UserProfileSummaryDto> completeUserProfile(
-                        @RequestPart("profileImage") MultipartFile profileImage,
+                        @RequestPart(name = "profileImage", required = false) MultipartFile profileImage,
                         @RequestPart(name = "videoIntro", required = false) MultipartFile videoIntro,
                         @RequestPart("data") String request,
                         @AuthenticationPrincipal CustomPrincipal principal) throws RuntimeException, AmazonS3Exception {

@@ -454,15 +454,17 @@ public class Prompts {
       5. The length of the description should be similar to typical job descriptions found on job posting sites.
 
       # Output Format
-      Return a String containing the job description divided into the following sections where applicable:
-      - Job Title - Setting(Remote/On-site/Hybrid) - Location
-      - Company Overview
-      - Role Overview
-      - What you'll do
-      - What we're looking for
-      - Nice to have
-      - Location and Compensation
-      - Join Us
+      Return a String containing the job description divided into the following sections.
+      All section titles MUST be bolded using Markdown syntax (**Section Title**):
+
+      - **Job Title - Setting(Remote/On-site/Hybrid) - Location**
+      - **Company Overview**
+      - **Role Overview**
+      - **What you'll do**
+      - **What we're looking for**
+      - **Nice to have**
+      - **Location and Compensation**
+      - **Join Us**
 
       # Input Schema
       {
@@ -489,6 +491,88 @@ public class Prompts {
 
       # Output Schema
       String which follows the Output Format described above
+
+      Here is the input JSON to analyze:
+      {inputJSON}
+        """;
+
+  public static final String PROFESSIONAL_SUMMARY_GENERATION = """
+      # Role Objective
+      You are an AI Assistant that generates professional summary statements for user profiles based on structured user details
+      provided in JSON format. Your task is to create a well-written, concise, and impactful professional summary that accurately reflects the user's background,
+      skills, and career objectives. The summary will be displayed on the user's profile page to attract potential employers. It should be no
+      longer than 50-90 words (no more than 500 characters). You will be provided with information on the user's skills, experiences, education, projects. Some optional informaton that may
+      or may not be provided includes the user's title, current company, and location. You may optionally also be provided with an
+      existing summary that the user has written which may be brief or generic. If an existing summary is provided, you should use it as a reference and enahnce it.
+      If no existing summary is provided, you should generate a new one from scratch based on the other information provided. You may also be given a summary that
+      the user has written and wants you to enhance it rather than writing a new one from scratch. The summary should be what you
+      typically find on LinkedIn profiles or personal websites or resumes. Here is an example of a good summary which is 52 words long.
+      Example:
+      Software Engineer skilled in building scalable, high-performance systems across enterprise and cloud environments.
+      Experienced in Java, C#, Python, React, and AWS. Proven ability to improve automation, reduce runtime, and deliver
+      measurable engineering impact. Seeking opportunities to build reliable, data-driven software that accelerates
+      development and enhances product quality.
+
+      # Instructions
+      - Parse the provided user information from the input JSON
+      - Generate a professional summary statement similar to what you would find on LinkedIn profiles
+      - Ensure that the summary is clear, concise, and free of jargon
+      - Highlight key skills, experiences, and career objectives that would appeal to potential employers
+      - Use a professional and engaging tone that reflects the user's background
+      - Only include the summary in your output. Do not include any explanations or text outside of the summary.
+
+      # Context
+      - Input: Structured JSON containing user profile details.
+      - Output: A well-formatted professional summary as a single string.
+      - Do not include any explanations or text outside of the professional summary.
+
+      # Planning and Verification
+      1. Read the user profile details from the input JSON.
+      2. Identify key elements to include in the professional summary.
+      3. Write a concise professional summary based on the provided information.
+      4. Validate that the output is a single string and is strictly valid JSON.
+      5. Ensure the summary is no longer than 200 words.
+
+      # Output Format
+      Return a String containing the professional summary.
+
+      # Input Schema
+      "user": {
+          "title": string, // Optional
+          "location": string, // Optional
+          "currentCompany": string, // Optional
+          "existingSummary": string, // Optional - An existing summary provided by the user that may be brief or generic
+          "age": integer,
+          "skills": [string],
+          "education": [
+            {
+              "institutionName": string,
+              "degree": string,
+              "fromYear": string,
+              "toYear": string
+            }
+          ],
+          "experiences": [
+            {
+              "company": string,
+              "position": string,
+              "description": string,
+              "fromYear": string,
+              "toYear": string
+            }
+          ],
+          "projects": [
+            {
+              "title": string,
+              "description": string,
+              "yearCompleted": string
+            }
+          ]
+      }
+      "summary": string // Optional - An existing summary provided by the user. User types it out and wants you to enhance it rather than writing a new one from scratch.
+
+      # Output Schema
+      String containing the professional summary
 
       Here is the input JSON to analyze:
       {inputJSON}

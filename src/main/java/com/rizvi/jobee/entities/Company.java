@@ -34,6 +34,9 @@ public class Company {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "slug", nullable = false, unique = true)
+    private String slug;
+
     @Column(name = "website", nullable = true)
     private String website;
 
@@ -71,6 +74,20 @@ public class Company {
     public void addBusinessAccount(BusinessAccount account) {
         businessAccounts.add(account);
         account.setCompany(this);
+    }
+
+    public String getLocationAsString() {
+        if (hqCity != null && hqState != null && hqCountry != null) {
+            return String.format("%s, %s, %s", hqCity, hqState, hqCountry);
+        } else if (hqCity != null && hqCountry != null) {
+            return String.format("%s, %s", hqCity, hqCountry);
+        } else if (hqState != null && hqCountry != null) {
+            return String.format("%s, %s", hqState, hqCountry);
+        } else if (hqCountry != null) {
+            return hqCountry;
+        } else {
+            return "Location not specified";
+        }
     }
 
 }

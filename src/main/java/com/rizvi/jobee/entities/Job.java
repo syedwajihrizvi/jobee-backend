@@ -205,4 +205,24 @@ public class Job {
         this.hiringTeamMembers.add(member);
         member.setJob(this);
     }
+
+    public String getJobLocation() {
+        StringBuilder locationBuilder = new StringBuilder();
+        if (this.city != null && !this.city.isEmpty()) {
+            locationBuilder.append(this.city);
+        }
+        if (this.state != null && !this.state.isEmpty()) {
+            if (locationBuilder.length() > 0) {
+                locationBuilder.append(", ");
+            }
+            locationBuilder.append(this.state);
+        }
+        if (this.country != null && !this.country.isEmpty()) {
+            if (locationBuilder.length() > 0) {
+                locationBuilder.append(", ");
+            }
+            locationBuilder.append(this.country);
+        }
+        return locationBuilder.toString();
+    }
 }

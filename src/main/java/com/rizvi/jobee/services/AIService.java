@@ -25,10 +25,12 @@ import com.rizvi.jobee.exceptions.InvalidDocumentException;
 import com.rizvi.jobee.helpers.Prompts;
 import com.rizvi.jobee.helpers.AISchemas.AIJobDescriptionAnswer;
 import com.rizvi.jobee.helpers.AISchemas.AIJobInsightAnswer;
+import com.rizvi.jobee.helpers.AISchemas.AIProfessionalSummaryAnswer;
 import com.rizvi.jobee.helpers.AISchemas.AnswerInterviewQuestionRequest;
 import com.rizvi.jobee.helpers.AISchemas.AnswerInterviewQuestionResponse;
 import com.rizvi.jobee.helpers.AISchemas.GenerateAIInsightRequest;
 import com.rizvi.jobee.helpers.AISchemas.GenerateAIJobDescriptionRequest;
+import com.rizvi.jobee.helpers.AISchemas.GenerateAIProfessionalSummaryRequest;
 import com.rizvi.jobee.helpers.AISchemas.PrepareForInterviewRequest;
 import com.rizvi.jobee.helpers.AISchemas.PrepareForInterviewResponse;
 import com.rizvi.jobee.helpers.AISchemas.ReferenceToPreviousAnswer;
@@ -43,8 +45,6 @@ public class AIService {
     public ResumeExtract extractDetailsFromResume(MultipartFile resumeFile) throws IOException {
         String resumeText = ResumeExtractService.extractText(resumeFile);
         // TODO: Validate the file is actually a resume. Use AI to check if it is a
-        // resume
-        // For now just check if experience, skillls, education words are present
         String resumeTextLower = resumeText.toLowerCase();
         if (!(resumeTextLower.contains("experience") || resumeTextLower.contains("skills")
                 || resumeTextLower.contains("education"))) {
@@ -219,6 +219,25 @@ public class AIService {
             return result.orElse(null);
         } catch (Exception e) {
             System.out.println("Error during generating job description: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public AIProfessionalSummaryAnswer generateAIProfessionalSummary(GenerateAIProfessionalSummaryRequest request) {
+        String inputJson = request.toJsonString();
+        String prompt = Prompts.PROFESSIONAL_SUMMARY_GENERATION.replace("{inputJSON}", inputJson);
+        try {
+            StructuredChatCompletionCreateParams<AIProfessionalSummaryAnswer> params = ChatCompletionCreateParams
+                    .builder().model(ChatModel.GPT_5_NANO)
+                    .addSystemMessage("You are a helpful assistant that generates professional summaries for users.")
+                    .addUserMessage(prompt)
+                    .responseFormat(AIProfessionalSummaryAnswer.class)
+                    .build();
+            Optional<AIProfessionalSummaryAnswer> result = openAIClient.chat().completions().create(params).choices()
+                    .stream().flatMap(choice -> choice.message().content().stream()).findFirst();
+            return result.orElse(null);
+        } catch (Exception e) {
+            System.out.println("Error during generating professional summary: " + e.getMessage());
             return null;
         }
     }

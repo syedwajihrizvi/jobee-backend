@@ -167,4 +167,15 @@ public class UserNotificationService {
         messagingTemplate.convertAndSend(destination, notification);
     }
 
+    public void sendInAppNotificationForResumeParsingCompletion(Long userId) {
+        var message = "Your resume has been successfully parsed and your profile has been updated.";
+        CreateNotificationDto notificationDto = new CreateNotificationDto();
+        notificationDto.setRecipientType(MessagerUserType.USER);
+        notificationDto.setMessage(message);
+        notificationDto.setRecipientId(userId);
+        notificationDto.setNotificationType(NotificationType.AI_RESUME_REVIEW_COMPLETE);
+        var savedNotification = saveNotification(notificationDto);
+        sendInAppNotification(savedNotification);
+    }
+
 }

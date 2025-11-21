@@ -24,11 +24,8 @@ public class UserDocumentService {
     private final DropBoxService dropboxService;
     private final OneDriveService oneDriveService;
     private final UserDocumentRepository userDocumentRepository;
+    private final RequestQueue requestQueue;
     private final UserProfileRepository userProfileRepository;
-    private final AIService aiService;
-    private final EducationService userEducationService;
-    private final ExperienceService userExperienceService;
-    private final UserSkillService userSkillService;
 
     private String uploadDocument(
             Long userId, MultipartFile document, UserDocumentType documentType, String title) {
@@ -57,6 +54,7 @@ public class UserDocumentService {
     public UserDocument createUserDocumentViaFile(
             MultipartFile document, UserDocumentType documentType, UserProfile userProfile,
             String title, Boolean setPrimary) {
+        System.out.println("SYED-DEBUG: Starting document upload for user ID: " + userProfile.getId());
         if (document.getSize() > 200_000) {
             throw new InvalidDocumentException("File size exceeds the maximum limit of 200KB");
         }
@@ -67,16 +65,16 @@ public class UserDocumentService {
         }
         var userDocument = UserDocument.builder().documentType(documentType)
                 .documentUrl(result).title(title).user(userProfile).build();
-        // If document is resume type, then we can update user profile information using
-        // AIService
         if (documentType == UserDocumentType.RESUME) {
-            extractResumeDetailsAndPopulateProfile(document, userProfile);
+            System.out.println("SYED-DEBUG: Processing resume parsing for user ID: " + userProfile.getId());
+            requestQueue.processResumeParsing(document, userProfile, true);
         }
         userProfile.addDocument(userDocument);
-        if (setPrimary) {
+        if (setPrimary || userProfile.getPrimaryResume() == null) {
             userProfile.setPrimaryResume(userDocument);
         }
         userProfileRepository.save(userProfile);
+        System.out.println("SYED-DEBUG: Document created and sending response");
         return userDocument;
     }
 
@@ -98,35 +96,15 @@ public class UserDocumentService {
         return userDocument;
     }
 
-    public boolean extractResumeDetailsAndPopulateProfile(MultipartFile resume, UserProfile userProfile) {
-        try {
-            var details = aiService.extractDetailsFromResume(resume);
-            var educations = details.getEducation();
-            var experiences = details.getExperience();
-            var skills = details.getSkills();
-            userEducationService.createEducationsForUserFromAISchemas(educations, userProfile);
-            userSkillService.createUserSkills(skills, userProfile);
-            userExperienceService.addExperiencesForUserFromAISchemas(experiences, userProfile);
-            return true;
-        } catch (Exception e) {
-            // Log the error but continue
-            System.err.println("Failed to extract details from resume: " + e.getMessage());
-            return false;
-        }
-    }
-
     public UserDocument userDocumentExists(Long documentId, Long userId) {
         var document = userDocumentRepository.findByIdAndUserId(documentId, userId);
         return document;
     }
 
-    // TODO: Throw proper exception that inherits from MalformedURLException
-    // TOD0: Throw proper expcetion for IOException
     public UserDocument createDocumentViaLink(
             UserProfile userProfile, String documentLink, UserDocumentType documentType, String title,
             DocumentUrlType documentUrlType) throws InvalidDocumentURLLinkException {
 
-        System.out.println("Validating Link: " + documentLink);
         MultipartFile multipartFile = null;
         if (documentUrlType == DocumentUrlType.GOOGLE_DRIVE) {
             multipartFile = googleDriveService.createMultiPartFile(documentLink, title, documentType);
@@ -142,7 +120,7 @@ public class UserDocumentService {
 
         }
         if (documentType == UserDocumentType.RESUME) {
-            extractResumeDetailsAndPopulateProfile(multipartFile, userProfile);
+            requestQueue.processResumeParsing(multipartFile, userProfile, true);
         }
         var result = uploadDocument(userProfile.getId(), multipartFile, documentType, title);
         if (result == null) {
@@ -154,4 +132,5 @@ public class UserDocumentService {
         userProfileRepository.save(userProfile);
         return userDocument;
     }
+
 }

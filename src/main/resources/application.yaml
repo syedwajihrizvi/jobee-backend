@@ -1,6 +1,7 @@
 spring:
   flyway:
     enabled: false
+    clean-disabled: false
   jpa:
     show-sql: false
   servlet:

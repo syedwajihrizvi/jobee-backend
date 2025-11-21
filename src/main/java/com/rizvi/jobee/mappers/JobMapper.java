@@ -13,18 +13,20 @@ import com.rizvi.jobee.entities.Job;
 public interface JobMapper {
     @Mapping(target = "businessName", source = "businessAccount.company.name")
     @Mapping(target = "businessAccountId", source = "businessAccount.id")
+    @Mapping(target = "location", expression = "java(job.getJobLocation())")
     @Mapping(target = "companyId", source = "businessAccount.company.id")
     @Mapping(target = "applicationCount", expression = "java(job.getApplications().size())")
     @Mapping(target = "companyLogoUrl", source = "businessAccount.company.logo")
     @Mapping(target = "level", source = "level")
-    @Mapping(target = "employmentType", source = "employmentType") 
+    @Mapping(target = "employmentType", source = "employmentType")
     @Mapping(target = "setting", source = "setting")
-    @Mapping(target = "views", expression = "java(job.getViews().toString())")
+    @Mapping(target = "views", expression = "java(job.getViews())")
     @Mapping(target = "experience", ignore = true)
     JobSummaryDto toSummaryDto(Job job);
 
     @Mapping(target = "applicants", expression = "java(job.getApplications().size())")
     @Mapping(target = "pendingApplicationsSize", expression = "java(job.getPendingApplications().size())")
+    @Mapping(target = "totalInterviews", expression = "java(job.getInterviews().size())")
     @Mapping(target = "businessName", source = "businessAccount.company.name")
     JobSummaryForBusinessDto toSummaryForBusinessDto(Job job);
 

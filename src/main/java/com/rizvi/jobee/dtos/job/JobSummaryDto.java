@@ -17,7 +17,7 @@ public class JobSummaryDto {
     private String businessName;
     private String companyLogoUrl;
     private String location;
-    private String views;
+    private Integer views;
     private String level;
     private String department;
     private String streetAddress;

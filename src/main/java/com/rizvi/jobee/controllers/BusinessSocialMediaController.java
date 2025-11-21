@@ -24,7 +24,7 @@ import lombok.AllArgsConstructor;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/business-profiles/socialMedia")
+@RequestMapping("api/business-profiles/socialMedia")
 public class BusinessSocialMediaController {
     private final BusinessSocialMediaService socialMediaService;
     private final SocialMediaMapper socialMediaMapper;
@@ -60,8 +60,8 @@ public class BusinessSocialMediaController {
             @RequestBody CreateSocialMediaDto request,
             @AuthenticationPrincipal CustomPrincipal principal,
             @PathVariable Long id) {
-        var userId = principal.getId();
-        var updatedSocial = socialMediaService.updateSocialMediaForUser(userId, id, request);
+        var profileId = principal.getProfileId();
+        var updatedSocial = socialMediaService.updateSocialMediaForUser(profileId, id, request);
         var socialMediaDto = socialMediaMapper.toSocialMediaDto(updatedSocial);
         return ResponseEntity.ok(socialMediaDto);
     }

@@ -55,7 +55,7 @@ import lombok.AllArgsConstructor;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/applications")
+@RequestMapping("/api/applications")
 public class ApplicationController {
     private final BusinessAccountRepository businessAccountRepository;
     private final ApplicationRepository applicationRepository;
@@ -87,6 +87,8 @@ public class ApplicationController {
     @Operation(summary = "Get the most recent application for the logged in user")
     public ResponseEntity<ApplicationDto> getMostRecentApplicationForLoggedInUser(
             @AuthenticationPrincipal CustomPrincipal customPrincipal) {
+        System.out
+                .println("SYED-DEBUG: Fetching most recent application for user id: " + customPrincipal.getProfileId());
         var userId = customPrincipal.getProfileId();
         var userProfile = userProfileRepository.findById(userId).orElse(null);
         if (userProfile == null) {
@@ -95,7 +97,7 @@ public class ApplicationController {
         var sort = Sort.by("createdAt").descending();
         var applications = applicationRepository.findByUserProfile(userProfile, sort);
         if (applications.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.notFound().build();
         }
         var mostRecentApplication = applications.get(0);
         var applicationDto = applicationMapper.toDto(mostRecentApplication);

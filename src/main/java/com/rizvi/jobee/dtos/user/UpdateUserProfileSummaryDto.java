@@ -4,5 +4,5 @@ import lombok.Data;
 
 @Data
 public class UpdateUserProfileSummaryDto {
-    private String summary;
+    private String summary = null;
 }

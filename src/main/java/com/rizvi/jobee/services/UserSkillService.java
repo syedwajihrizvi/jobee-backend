@@ -44,12 +44,11 @@ public class UserSkillService {
         }
         var userSkill = userSkillRepository.findByUserProfileIdAndSkillId(userProfile.getId(), skill.getId());
         if (userSkill != null) {
-            userSkill.setExperience(request.getExperience());
             userSkillRepository.save(userSkill);
             return userSkill;
         }
         var newUserSkill = UserSkill.builder().skill(skill).userProfile(userProfile)
-                .experience(request.getExperience()).build();
+                .build();
         userProfile.addSkill(newUserSkill);
         var savedUserSkill = userSkillRepository.save(newUserSkill);
         return savedUserSkill;

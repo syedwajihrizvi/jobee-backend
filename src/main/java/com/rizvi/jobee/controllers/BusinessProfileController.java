@@ -29,7 +29,7 @@ import lombok.AllArgsConstructor;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/business-profiles")
+@RequestMapping("api/business-profiles")
 public class BusinessProfileController {
     private final JobService jobService;
     private final BusinessProfileService businessProfileService;
@@ -53,15 +53,7 @@ public class BusinessProfileController {
             @AuthenticationPrincipal CustomPrincipal principal) {
         var accountId = principal.getId();
         var accountType = principal.getAccountType();
-        var userProfileId = principal.getProfileId();
         var companyId = businessProfileService.getCompanyIdForBusinessProfileId(accountId);
-        System.out.println("SYED-DEBUG: Account Type: " + accountType);
-        System.out.println("SYED-DEBUG: Company ID: " + companyId);
-        System.out.println("SYED-DEBUG: User ID: " + accountId);
-        System.out.println("SYED-DEBUG: User Profile ID: " + userProfileId);
-        // Depening on the ROLE of the user, fetch different data
-        // If the user is an admin, fectch all jobs by company
-        // If the user is a recruiter, fetch only jobs posted by that recruiter
         List<Job> jobs = null;
         if (accountType.equals(BusinessType.ADMIN.name())) {
             jobs = jobService.getJobsByCompanyId(companyId);
@@ -69,7 +61,6 @@ public class BusinessProfileController {
             jobs = jobService.getJobsByBusinessAccountIdForRecruiter(accountId, null);
         } else if (accountType.equals(BusinessType.EMPLOYEE.name())) {
             // TODO: Get jobs this employee is a part of
-            System.out.println("SYED-DEBUG: Fetching for EMPLOYEE");
             jobs = jobService.getJobsByBusinessAccountIdForEmployee(accountId, null);
         }
         var totalJobs = jobs.size();

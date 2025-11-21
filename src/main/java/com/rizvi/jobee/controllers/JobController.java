@@ -46,7 +46,7 @@ import lombok.AllArgsConstructor;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/jobs")
+@RequestMapping("/api/jobs")
 public class JobController {
     private final JobRepository jobRepository;
     private final UserProfileRepository userProfileRepository;
@@ -234,7 +234,6 @@ public class JobController {
         if (businessAccount == null) {
             throw new BusinessNotFoundException();
         }
-        System.out.println("SYED-DEBUG: HIRING TEAM " + request.getHiringTeam());
         var savedJob = jobService.createJob(request, businessAccount);
         var uri = uriComponentsBuilder.path("/jobs/{id}").buildAndExpand(savedJob.getId()).toUri();
         return ResponseEntity.created(uri).body(jobMapper.toSummaryDto(savedJob));

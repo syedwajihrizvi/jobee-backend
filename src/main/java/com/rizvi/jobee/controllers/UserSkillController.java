@@ -26,7 +26,7 @@ import lombok.AllArgsConstructor;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/profiles/skills")
+@RequestMapping("/api/profiles/skills")
 public class UserSkillController {
         private final UserProfileService userProfileService;
         private final UserSkillService userSkillService;

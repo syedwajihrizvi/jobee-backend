@@ -57,7 +57,7 @@ public class InterviewService {
     private final ApplicationRepository applicationRepository;
     private final AIService aiService;
     private final S3Service s3Service;
-    private final InterviewPrepQueue interviewPrepQueue;
+    private final RequestQueue requestQueue;
     private final UserNotificationService userNotificationService;
 
     public PaginatedResponse<Interview> getAllInterviews(InterviewQuery query, int pageNumber, int pageSize) {
@@ -187,8 +187,6 @@ public class InterviewService {
 
     @Transactional
     public Boolean prepareForInterview(Long interviewId, Long candidateId) {
-        // If the interview already has a preparation, return False since we cannot
-        // reprepare again
         var interview = interviewRepository.findInterviewForPreparation(interviewId);
         if (interview == null) {
             throw new InterviewNotFoundException("Interview not found with id: " + interviewId);
@@ -196,7 +194,6 @@ public class InterviewService {
         if (!interview.getCandidate().getId().equals(candidateId)) {
             return false;
         }
-        // Create new interview preparation
         var interviewPreparation = InterviewPreparation.builder()
                 .interview(interview)
                 .status(PreparationStatus.IN_PROGRESS)
@@ -209,7 +206,7 @@ public class InterviewService {
 
         PrepareForInterviewRequest prepareForInterviewRequest = new PrepareForInterviewRequest(aiJob, aiCompany,
                 aiCandidate, aiInterview);
-        interviewPrepQueue.processInterviewPrep(prepareForInterviewRequest, savedInterviewPreparation);
+        requestQueue.processInterviewPrep(prepareForInterviewRequest, savedInterviewPreparation);
 
         return true;
     }

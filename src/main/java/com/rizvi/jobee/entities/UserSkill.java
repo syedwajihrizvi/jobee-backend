@@ -28,9 +28,6 @@ public class UserSkill {
     @Column(name = "id", updatable = false, nullable = false)
     private Long id;
 
-    @Column(name = "experience", nullable = false)
-    private Long experience;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_profile_id", nullable = false)
     private UserProfile userProfile;

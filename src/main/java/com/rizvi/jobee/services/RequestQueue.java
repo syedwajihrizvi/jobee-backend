@@ -3,9 +3,11 @@ package com.rizvi.jobee.services;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.rizvi.jobee.entities.InterviewPreparation;
 import com.rizvi.jobee.entities.Notification;
+import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.helpers.AISchemas.PrepareForInterviewRequest;
 import com.rizvi.jobee.helpers.AISchemas.PrepareForInterviewResponse;
 import com.rizvi.jobee.interfaces.NotificationService;
@@ -16,12 +18,15 @@ import lombok.AllArgsConstructor;
 
 @Service
 @AllArgsConstructor
-public class InterviewPrepQueue {
+public class RequestQueue {
     private final NotificationService notificationService;
     private final AIService aiService;
     private final InterviewPreparationRepository interviewPreparationRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final UserNotificationService userNotificationService;
+    private final EducationService userEducationService;
+    private final UserSkillService userSkillService;
+    private final ExperienceService userExperienceService;
     private final NotificationMapper notificationMapper;
     private final EmailSender emailSender;
 
@@ -30,24 +35,39 @@ public class InterviewPrepQueue {
             InterviewPreparation interviewPrep) {
         try {
             PrepareForInterviewResponse response = aiService.generateInterviewPrep(prepareForInterviewRequest);
-            // Update the interview prep for the intreview in DB with the response
             interviewPrep.updateViaAIResponse(response);
             var savedInterview = interviewPreparationRepository.save(interviewPrep);
             notificationService.sendNotification("user-device-token", "Interview Prep Ready",
                     "Your interview preparation materials are ready for interview");
-            // Notify using WebSocket
             var interviewerId = savedInterview.getInterview().getCandidate().getId();
             String recepientDest = "/topic/notifications/user/" + interviewerId;
             Notification savedNotification = userNotificationService
                     .createInterviewPrepNotificationAndSend(interviewPrep);
             var notificationDto = notificationMapper.toNotificationDto(savedNotification);
             messagingTemplate.convertAndSend(recepientDest, notificationDto);
-            // Send Email Notification
             emailSender.sendInterviewPrepEmail(interviewPrep);
         } catch (Exception e) {
             // TODO: Handle the exception properly
             System.out.println("Interview prep processing was interrupted");
             System.out.println(e.getMessage());
+        }
+    }
+
+    public void processResumeParsing(MultipartFile resume, UserProfile userProfile, Boolean updateProfessionalSummary) {
+        try {
+            System.out.println("Starting resume parsing for user ID: " + userProfile.getId());
+            var details = aiService.extractDetailsFromResume(resume);
+            var educations = details.getEducation();
+            var experiences = details.getExperience();
+            var skills = details.getSkills();
+            userEducationService.createEducationsForUserFromAISchemas(educations, userProfile);
+            userSkillService.createUserSkills(skills, userProfile);
+            userExperienceService.addExperiencesForUserFromAISchemas(experiences, userProfile);
+            userNotificationService.sendInAppNotificationForResumeParsingCompletion(userProfile.getId());
+            System.out.println("Completed resume parsing for user ID: " + userProfile.getId());
+        } catch (Exception e) {
+            // Log the error but continue
+            System.err.println("Failed to extract details from resume: " + e.getMessage());
         }
     }
 }

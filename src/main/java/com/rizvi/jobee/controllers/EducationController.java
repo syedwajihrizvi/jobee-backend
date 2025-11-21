@@ -27,7 +27,7 @@ import lombok.AllArgsConstructor;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/profiles/education")
+@RequestMapping("/api/profiles/education")
 public class EducationController {
         private final UserProfileService userProfileService;
         private final EducationService educationService;

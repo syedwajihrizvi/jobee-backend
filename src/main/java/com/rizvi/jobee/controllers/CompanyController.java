@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.rizvi.jobee.dtos.company.CompanyDto;
@@ -19,6 +20,7 @@ import com.rizvi.jobee.dtos.company.CreateCompanyDto;
 import com.rizvi.jobee.dtos.company.TopHiringCompanyDto;
 import com.rizvi.jobee.dtos.company.UpdateCompanyDto;
 import com.rizvi.jobee.entities.Company;
+import com.rizvi.jobee.exceptions.AmazonS3Exception;
 import com.rizvi.jobee.mappers.CompanyMapper;
 import com.rizvi.jobee.principals.CustomPrincipal;
 import com.rizvi.jobee.repositories.CompanyRepository;
@@ -101,4 +103,18 @@ public class CompanyController {
         }
         return ResponseEntity.ok(companyMapper.toCompanyDto(company));
     }
+
+    @PatchMapping("/{id}/logo")
+    @Operation(summary = "Update a company's logo by ID")
+    public ResponseEntity<CompanyDto> updateCompanyLogo(
+            @RequestParam("profileImage") MultipartFile profileImage,
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomPrincipal principal) throws AmazonS3Exception {
+        if (profileImage.isEmpty()) {
+            throw new IllegalArgumentException("Profile image file is empty");
+        }
+        var savedCompany = companyService.updateCompanyLogo(id, profileImage);
+        return ResponseEntity.ok(companyMapper.toCompanyDto(savedCompany));
+    }
+
 }

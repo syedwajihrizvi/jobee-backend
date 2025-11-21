@@ -26,7 +26,7 @@ import lombok.AllArgsConstructor;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/profiles/experiences")
+@RequestMapping("/api/profiles/experiences")
 public class ExperienceController {
     private final UserProfileService userProfileService;
     private final ExperienceService experienceService;
@@ -48,6 +48,7 @@ public class ExperienceController {
         var experiences = experienceService.getExperiencesForUser(id).stream()
                 .map(experienceMapper::toExperienceDto)
                 .toList();
+        System.out.println("Experiences fetched for user ID: " + id + ", Count: " + experiences.size());
         return ResponseEntity.ok(experiences);
     }
 

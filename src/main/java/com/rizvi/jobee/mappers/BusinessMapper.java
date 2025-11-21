@@ -10,7 +10,9 @@ import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.BusinessProfile;
 import com.rizvi.jobee.entities.HiringTeam;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {
+        SocialMediaMapper.class
+})
 public interface BusinessMapper {
     @Mapping(target = "companyName", source = "company.name")
     @Mapping(target = "companyLogo", source = "company.logo")
@@ -22,6 +24,7 @@ public interface BusinessMapper {
     @Mapping(target = "city", source = "profile.city")
     @Mapping(target = "state", source = "profile.state")
     @Mapping(target = "country", source = "profile.country")
+    @Mapping(target = "socialMedias", source = "profile.socials")
     BusinessAccountDto toDto(BusinessAccount businessAccount);
 
     @Mapping(target = "email", source = "businessAccount.email")

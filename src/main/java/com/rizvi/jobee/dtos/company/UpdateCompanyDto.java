@@ -12,4 +12,5 @@ public class UpdateCompanyDto {
     private String hqCountry;
     private Integer numEmployees;
     private String description;
+    private String website;
 }

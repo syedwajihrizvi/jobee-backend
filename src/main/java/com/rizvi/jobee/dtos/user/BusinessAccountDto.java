@@ -1,5 +1,10 @@
 package com.rizvi.jobee.dtos.user;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.rizvi.jobee.dtos.socialMedia.SocialMediaDto;
+
 import lombok.Data;
 
 @Data
@@ -19,4 +24,5 @@ public class BusinessAccountDto {
     private Boolean verified;
     private String profileImageUrl;
     private String role;
+    private List<SocialMediaDto> socialMedias = new ArrayList<>();
 }
