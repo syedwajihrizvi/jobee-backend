@@ -221,6 +221,13 @@ public class UserProfile {
         }
     }
 
+    public void addProject(Project project) {
+        if (project != null) {
+            this.projects.add(project);
+            project.setUserProfile(this);
+        }
+    }
+
     public List<String> getSkillsAsStringList() {
         return this.skills.stream().map(s -> s.getSkill().getName()).toList();
     }

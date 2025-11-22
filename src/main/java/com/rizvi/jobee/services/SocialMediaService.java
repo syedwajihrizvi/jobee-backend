@@ -6,9 +6,11 @@ import org.springframework.stereotype.Service;
 
 import com.rizvi.jobee.dtos.socialMedia.CreateSocialMediaDto;
 import com.rizvi.jobee.entities.Social;
+import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.enums.SocialType;
 import com.rizvi.jobee.repositories.SocialMediaRepository;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
+import com.rizvi.jobee.helpers.AISchemas.AISocialMedia;
 
 import lombok.AllArgsConstructor;
 
@@ -43,5 +45,40 @@ public class SocialMediaService {
         socialMedia.setUrl(request.getUrl());
         socialMedia.setType(SocialType.valueOf(request.getType()));
         return socialMediaRepository.save(socialMedia);
+    }
+
+    public boolean createSocialMediaLinksForUserFromAISchemas(
+            List<AISocialMedia> socialMediaLinks,
+            UserProfile userProfile) {
+        for (var socialMediaLink : socialMediaLinks) {
+            SocialType type = null;
+            try {
+                type = SocialType.valueOf(socialMediaLink.getType());
+            } catch (Exception e) {
+                continue;
+            }
+            if (!socialMediaLinkExists(socialMediaLink, userProfile) &&
+                    socialMediaLink.getUrl() != null) {
+                var newSocialMedia = Social.builder()
+                        .url(socialMediaLink.getUrl())
+                        .type(type)
+                        .userProfile(userProfile)
+                        .build();
+                socialMediaRepository.save(newSocialMedia);
+            }
+        }
+        return true;
+    }
+
+    public boolean socialMediaLinkExists(AISocialMedia socialMedia, UserProfile userProfile) {
+        SocialType type = null;
+        try {
+            type = SocialType.valueOf(socialMedia.getType());
+        } catch (Exception e) {
+            return true;
+        }
+        var social = socialMediaRepository.findByTypeAndUserProfileId(type, userProfile.getId());
+        return social.isPresent();
+
     }
 }

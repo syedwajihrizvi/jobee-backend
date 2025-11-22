@@ -7,5 +7,6 @@ public enum EducationLevel {
     BACHELORS,
     MASTERS,
     PHD,
-    POSTDOCTORATE
+    POSTDOCTORATE,
+    OTHER
 }

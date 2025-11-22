@@ -53,15 +53,26 @@ public class EducationService {
     public boolean createEducationsForUserFromAISchemas(
             List<AIEducation> educations, UserProfile userProfile) {
         for (AIEducation education : educations) {
-            if (!educationExists(education, userProfile) &&
-                    education.degree != null &&
-                    education.institution != null) {
+            var id = education.id;
+            // Convert empty strings to null for year fields
+            String fromYear = education.fromYear != null && !education.fromYear.trim().isEmpty()
+                    ? education.fromYear
+                    : null;
+            String toYear = education.toYear != null && !education.toYear.trim().isEmpty()
+                    ? education.toYear
+                    : null;
+            String degree = education.degree;
+            String institution = education.institution;
+            if (!id.isEmpty()) {
+                CreateEducationDto request = new CreateEducationDto(degree, institution, fromYear, toYear);
+                updateEducation(Long.parseLong(id), request);
+            } else {
                 var newEducation = Education.builder()
                         .degree(education.degree)
                         .institution(education.institution)
                         .userProfile(userProfile)
-                        .fromYear(education.fromYear)
-                        .toYear(education.toYear)
+                        .fromYear(fromYear)
+                        .toYear(toYear)
                         .build();
                 userProfile.addEducation(newEducation);
                 educationRepository.save(newEducation);
@@ -81,15 +92,5 @@ public class EducationService {
         education.setFromYear(request.getFromYear());
         education.setToYear(request.getToYear());
         return educationRepository.save(education);
-    }
-
-    public boolean educationExists(AIEducation education, UserProfile userProfile) {
-        var educations = educationRepository.findByUserProfileId(userProfile.getId());
-        for (Education edu : educations) {
-            if (edu.isNew(education)) {
-                return true;
-            }
-        }
-        return false;
     }
 }

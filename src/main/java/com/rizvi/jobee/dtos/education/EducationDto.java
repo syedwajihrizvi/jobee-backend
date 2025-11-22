@@ -9,4 +9,5 @@ public class EducationDto {
     private String institution;
     private String fromYear;
     private String toYear;
+    private String level;
 }

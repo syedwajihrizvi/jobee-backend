@@ -25,7 +25,9 @@ public class RequestQueue {
     private final SimpMessagingTemplate messagingTemplate;
     private final UserNotificationService userNotificationService;
     private final EducationService userEducationService;
+    private final ProjectService userProjectService;
     private final UserSkillService userSkillService;
+    private final SocialMediaService userSocialMediaService;
     private final ExperienceService userExperienceService;
     private final NotificationMapper notificationMapper;
     private final EmailSender emailSender;
@@ -56,13 +58,32 @@ public class RequestQueue {
     public void processResumeParsing(MultipartFile resume, UserProfile userProfile, Boolean updateProfessionalSummary) {
         try {
             System.out.println("Starting resume parsing for user ID: " + userProfile.getId());
-            var details = aiService.extractDetailsFromResume(resume);
-            var educations = details.getEducation();
-            var experiences = details.getExperience();
+            var details = aiService.extractDetailsFromResume(resume, userProfile);
+            System.out.println("Extracted details from resume for user ID: " + userProfile.getId());
+            System.out.println("SYED-DEBUG: AI Extracted Details: " + details);
+            var educations = details.getEducations();
+            var experiences = details.getExperiences();
+            var projects = details.getProjects();
+            var socialMediaLinks = details.getSocialMediaLinks();
             var skills = details.getSkills();
+            String currentCompany = details.getCurrentCompany();
+            String currentPosition = details.getCurrentPosition();
+            if (currentCompany != null && !currentCompany.isBlank()) {
+                userProfile.setCompany(currentCompany);
+            }
+            if (currentPosition != null && !currentPosition.isBlank()) {
+                userProfile.setTitle(currentPosition);
+            }
             userEducationService.createEducationsForUserFromAISchemas(educations, userProfile);
+            System.out.println("Added educations for user ID: " + userProfile.getId());
             userSkillService.createUserSkills(skills, userProfile);
+            System.out.println("Added skills for user ID: " + userProfile.getId());
             userExperienceService.addExperiencesForUserFromAISchemas(experiences, userProfile);
+            System.out.println("Added experiences for user ID: " + userProfile.getId());
+            userProjectService.createProjectsForUserFromAISchemas(projects, userProfile);
+            System.out.println("Added projects for user ID: " + userProfile.getId());
+            userSocialMediaService.createSocialMediaLinksForUserFromAISchemas(socialMediaLinks, userProfile);
+            System.out.println("Added social media links for user ID: " + userProfile.getId());
             userNotificationService.sendInAppNotificationForResumeParsingCompletion(userProfile.getId());
             System.out.println("Completed resume parsing for user ID: " + userProfile.getId());
         } catch (Exception e) {

@@ -21,8 +21,10 @@ import com.openai.models.audio.speech.SpeechCreateParams.Voice;
 import com.openai.models.chat.completions.ChatCompletionCreateParams;
 import com.openai.models.chat.completions.StructuredChatCompletionCreateParams;
 import com.rizvi.jobee.dtos.user.ResumeExtract;
+import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.exceptions.InvalidDocumentException;
 import com.rizvi.jobee.helpers.Prompts;
+import com.rizvi.jobee.helpers.AISchemas.AICandidate;
 import com.rizvi.jobee.helpers.AISchemas.AIJobDescriptionAnswer;
 import com.rizvi.jobee.helpers.AISchemas.AIJobInsightAnswer;
 import com.rizvi.jobee.helpers.AISchemas.AIProfessionalSummaryAnswer;
@@ -42,16 +44,19 @@ import lombok.AllArgsConstructor;
 public class AIService {
     private final OpenAIClient openAIClient;
 
-    public ResumeExtract extractDetailsFromResume(MultipartFile resumeFile) throws IOException {
+    public ResumeExtract extractDetailsFromResume(MultipartFile resumeFile, UserProfile userProfile)
+            throws IOException {
         String resumeText = ResumeExtractService.extractText(resumeFile);
+        AICandidate candidate = new AICandidate(userProfile);
         // TODO: Validate the file is actually a resume. Use AI to check if it is a
         String resumeTextLower = resumeText.toLowerCase();
         if (!(resumeTextLower.contains("experience") || resumeTextLower.contains("skills")
                 || resumeTextLower.contains("education"))) {
             throw new InvalidDocumentException("The uploaded file does not appear to be a valid resume.");
         }
-        String prompt = Prompts.RESUME_ANALYSIS.replace("{resumeText}", resumeText);
-
+        String prompt = Prompts.RESUME_ANALYSIS.replace("{resumeText}", resumeText)
+                .replace("{existingCandidateInfoJSON}", candidate.toJsonString());
+        System.out.println("SYED-DEBUG: Resume Analysis Prompt: " + prompt);
         StructuredChatCompletionCreateParams<ResumeExtract> params = ChatCompletionCreateParams.builder()
                 .model(ChatModel.GPT_5_NANO)
                 .addSystemMessage("You are a helpful assistant that extracts structured information from resumes.")

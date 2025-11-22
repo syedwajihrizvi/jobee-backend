@@ -24,7 +24,7 @@ import lombok.AllArgsConstructor;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/api/profiles/socialMedia")
+@RequestMapping("/api/profiles/social-media")
 public class SocialMediaController {
     private final SocialMediaService socialMediaService;
     private final SocialMediaMapper socialMediaMapper;

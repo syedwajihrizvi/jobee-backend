@@ -13,6 +13,8 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AIEducation {
+    @JsonPropertyDescription("Education ID")
+    public String id;
     @JsonPropertyDescription("Institution name")
     public String institution;
     @JsonPropertyDescription("Degree obtained")
@@ -21,17 +23,21 @@ public class AIEducation {
     public String fromYear;
     @JsonPropertyDescription("End year of education")
     public String toYear;
+    @JsonPropertyDescription("Education level such as BACHELORS, MASTERS, PHD etc.")
+    public String level;
 
     public AIEducation(Education education) {
+        this.id = education.getId().toString();
         this.institution = education.getInstitution();
         this.degree = education.getDegree();
         this.fromYear = education.getFromYear();
         this.toYear = education.getToYear();
+        this.level = education.getLevel().toString();
     }
 
     public String toJsonString() {
         return """
-                {"institutionName": "%s", "degree": "%s", "fromYear": "%s", "toYear": "%s"}
-                """.formatted(institution, degree, fromYear, toYear);
+                {"id": "%s", "institutionName": "%s", "degree": "%s", "fromYear": "%s", "toYear": "%s", "level": "%s"}
+                """.formatted(id, institution, degree, fromYear, toYear, level);
     }
 }

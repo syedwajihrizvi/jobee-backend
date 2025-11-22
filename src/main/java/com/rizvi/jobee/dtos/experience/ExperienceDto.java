@@ -9,6 +9,7 @@ public class ExperienceDto {
     private String description;
     private String company;
     private String city;
+    private String state;
     private String country;
     private String from;
     private String to;

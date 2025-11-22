@@ -38,6 +38,36 @@ public class ProjectController {
             @AuthenticationPrincipal CustomPrincipal principal) {
         var id = principal.getId();
         var projects = projectService.getProjectsByUserId(id).stream()
+                .sorted((p1, p2) -> {
+                    String year1 = p1.getYearCompleted();
+                    String year2 = p2.getYearCompleted();
+
+                    // "present" comes first
+                    if ("present".equalsIgnoreCase(year1))
+                        return -1;
+                    if ("present".equalsIgnoreCase(year2))
+                        return 1;
+
+                    // null/empty comes last
+                    boolean year1Empty = year1 == null || year1.trim().isEmpty();
+                    boolean year2Empty = year2 == null || year2.trim().isEmpty();
+
+                    if (year1Empty && year2Empty)
+                        return 0;
+                    if (year1Empty)
+                        return 1;
+                    if (year2Empty)
+                        return -1;
+
+                    // Compare as Long (most recent first)
+                    try {
+                        Long y1 = Long.parseLong(year1.trim());
+                        Long y2 = Long.parseLong(year2.trim());
+                        return y2.compareTo(y1); // descending order
+                    } catch (NumberFormatException e) {
+                        return year1.compareTo(year2);
+                    }
+                })
                 .map(projectMapper::toProjectDto)
                 .toList();
         return ResponseEntity.ok(projects);

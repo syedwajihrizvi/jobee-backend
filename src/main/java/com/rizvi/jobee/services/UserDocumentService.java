@@ -54,7 +54,6 @@ public class UserDocumentService {
     public UserDocument createUserDocumentViaFile(
             MultipartFile document, UserDocumentType documentType, UserProfile userProfile,
             String title, Boolean setPrimary) {
-        System.out.println("SYED-DEBUG: Starting document upload for user ID: " + userProfile.getId());
         if (document.getSize() > 200_000) {
             throw new InvalidDocumentException("File size exceeds the maximum limit of 200KB");
         }

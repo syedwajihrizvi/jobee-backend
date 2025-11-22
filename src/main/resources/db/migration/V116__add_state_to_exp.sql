@@ -1,0 +1,2 @@
+ALTER TABLE experiences
+ADD COLUMN state VARCHAR(100);

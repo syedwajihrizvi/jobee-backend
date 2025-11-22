@@ -2,6 +2,8 @@ package com.rizvi.jobee.entities;
 
 import java.time.LocalDateTime;
 
+import com.rizvi.jobee.helpers.AISchemas.AIProject;
+
 import jakarta.annotation.Generated;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -50,4 +52,14 @@ public class Project {
     @JoinColumn(name = "user_profile_id", nullable = false)
     private UserProfile userProfile;
     // TODO: Add images or videos for project as well
+
+    public boolean isNew(AIProject project) {
+        return this.name.equals(project.getTitle()) &&
+                this.description.equals(project.getDescription()) &&
+                ((this.yearCompleted == null && project.getYearCompleted() == null) ||
+                        (this.yearCompleted != null && this.yearCompleted.equals(project.getYearCompleted())))
+                &&
+                ((this.link == null && project.getLink() == null) ||
+                        (this.link != null && this.link.equals(project.getLink())));
+    }
 }

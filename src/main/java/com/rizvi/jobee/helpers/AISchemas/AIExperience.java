@@ -15,10 +15,18 @@ import lombok.ToString;
 @NoArgsConstructor
 @Getter
 public class AIExperience {
+    @JsonPropertyDescription("Experience ID")
+    public String id;
     @JsonPropertyDescription("Company name")
     public String company;
     @JsonPropertyDescription("Job title")
     public String title;
+    @JsonPropertyDescription("Job city")
+    public String city;
+    @JsonPropertyDescription("Job country")
+    public String country;
+    @JsonPropertyDescription("Job state or province such as ON, CA, TX, NY etc.")
+    public String state;
     @JsonPropertyDescription("Job description")
     public String description;
     @JsonPropertyDescription("Job start year")
@@ -27,7 +35,10 @@ public class AIExperience {
     public String toYear;
 
     public AIExperience(Experience experience) {
+        this.id = experience.getId().toString();
         this.company = experience.getCompany();
+        this.city = experience.getCity();
+        this.country = experience.getCountry();
         this.title = experience.getTitle();
         this.description = experience.getDescription();
         this.fromYear = experience.getFrom();
@@ -36,7 +47,8 @@ public class AIExperience {
 
     public String toJsonString() {
         return """
-                {"company": "%s", "position": "%s", "description": "%s", "fromYear": "%s", "toYear": "%s"}
-                """.formatted(company, title, description, fromYear, toYear);
+                {"id": "%s", "company": "%s", "city": "%s", "country": "%s", "state": "%s", "position": "%s", "description": "%s", "fromYear": "%s", "toYear": "%s"}
+                """
+                .formatted(id, company, city, country, state, title, description, fromYear, toYear);
     }
 }

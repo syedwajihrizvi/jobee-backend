@@ -12,6 +12,7 @@ import com.rizvi.jobee.exceptions.UnauthorizedException;
 import com.rizvi.jobee.helpers.AISchemas.AIExperience;
 import com.rizvi.jobee.repositories.ExperienceRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -43,21 +44,47 @@ public class ExperienceService {
         var experience = Experience.builder().title(request.getTitle())
                 .company(request.getCompany()).city(request.getCity())
                 .country(request.getCountry()).from(request.getFrom())
+                .state(request.getState())
                 .to(request.getTo()).description(request.getDescription())
                 .userProfile(userProfile).build();
         return experienceRepository.save(experience);
     }
 
+    @Transactional
     public boolean addExperiencesForUserFromAISchemas(
             List<AIExperience> experiences, UserProfile userProfile) {
         for (AIExperience experience : experiences) {
-            if (!experienceExists(experience, userProfile)) {
+            var id = experience.id;
+            String fromYear = experience.getFromYear() != null && !experience.getFromYear().trim().isEmpty()
+                    ? experience.getFromYear()
+                    : null;
+            String toYear = experience.getToYear() != null && !experience.getToYear().trim().isEmpty()
+                    ? experience.getToYear()
+                    : null;
+            String title = experience.getTitle();
+            String company = experience.getCompany();
+            String city = experience.getCity();
+            String country = experience.getCountry();
+            String state = experience.getState();
+            String description = experience.getDescription();
+            if (!id.isEmpty()) {
+                CreateExperienceDto request = new CreateExperienceDto(
+                        title,
+                        description,
+                        company,
+                        state,
+                        city,
+                        country,
+                        fromYear,
+                        toYear);
+                updateExperience(request, Long.parseLong(id));
+            } else {
                 var newExperience = Experience.builder()
                         .title(experience.getTitle())
                         .company(experience.getCompany())
                         .description(experience.getDescription())
-                        .from(experience.getFromYear())
-                        .to(experience.getToYear())
+                        .from(fromYear)
+                        .to(toYear)
                         .userProfile(userProfile)
                         .build();
                 experienceRepository.save(newExperience);
@@ -72,20 +99,11 @@ public class ExperienceService {
         experience.setCompany(request.getCompany());
         experience.setCity(request.getCity());
         experience.setCountry(request.getCountry());
+        experience.setState(request.getState());
         experience.setFrom(request.getFrom());
         experience.setTo(request.getTo());
         experience.setDescription(request.getDescription());
         return experienceRepository.save(experience);
-    }
-
-    public boolean experienceExists(AIExperience experience, UserProfile userProfile) {
-        var experiences = experienceRepository.findByUserProfileId(userProfile.getId());
-        for (Experience exp : experiences) {
-            if (exp.isNew(experience)) {
-                return true;
-            }
-        }
-        return false;
     }
 
 }

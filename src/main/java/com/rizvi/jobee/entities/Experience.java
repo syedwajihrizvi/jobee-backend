@@ -51,6 +51,9 @@ public class Experience {
     @Column(name = "country", nullable = true)
     private String country;
 
+    @Column(name = "state", nullable = true)
+    private String state;
+
     @ManyToOne
     @JoinColumn(name = "user_profile_id", nullable = false)
     private UserProfile userProfile;
