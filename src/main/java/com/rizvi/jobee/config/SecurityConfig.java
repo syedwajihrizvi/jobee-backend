@@ -85,6 +85,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/business-profiles/dashboard").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/api/business-profiles/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/user-documents").permitAll()
+                        .requestMatchers(HttpMethod.PATCH, "/api/user-documents/**").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/api/user-documents/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/user-documents/link").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/user-documents/image").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/profiles/**").permitAll()

@@ -15,6 +15,7 @@ import com.rizvi.jobee.exceptions.IncompleteProfileException;
 import com.rizvi.jobee.exceptions.IncorrectEmailOrPasswordException;
 import com.rizvi.jobee.exceptions.InvalidDocumentURLLinkException;
 import com.rizvi.jobee.exceptions.SkillNotFoundException;
+import com.rizvi.jobee.exceptions.UserDocumentNotFoundException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -65,5 +66,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleIncompleteProfileException(
             IncompleteProfileException ex) {
         return ResponseEntity.badRequest().body(Map.of("Error", "Incomplete profile: " + ex.getMessage()));
+    }
+
+    @ExceptionHandler(UserDocumentNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleUserDocumentNotFoundException(
+            UserDocumentNotFoundException ex) {
+        return ResponseEntity.badRequest().body(Map.of("Error", "User document not found: " + ex.getMessage()));
     }
 }

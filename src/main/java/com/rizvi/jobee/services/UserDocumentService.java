@@ -2,8 +2,11 @@ package com.rizvi.jobee.services;
 
 import java.util.List;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import org.springframework.transaction.annotation.Transactional;
 
 import com.rizvi.jobee.entities.UserDocument;
 import com.rizvi.jobee.entities.UserProfile;
@@ -11,6 +14,7 @@ import com.rizvi.jobee.enums.DocumentUrlType;
 import com.rizvi.jobee.enums.UserDocumentType;
 import com.rizvi.jobee.exceptions.InvalidDocumentException;
 import com.rizvi.jobee.exceptions.InvalidDocumentURLLinkException;
+import com.rizvi.jobee.exceptions.UserDocumentNotFoundException;
 import com.rizvi.jobee.repositories.UserDocumentRepository;
 import com.rizvi.jobee.repositories.UserProfileRepository;
 
@@ -48,7 +52,8 @@ public class UserDocumentService {
     }
 
     public List<UserDocument> getUserDocuments(Long userId) {
-        return userDocumentRepository.findByUserId(userId);
+        Sort sort = Sort.by("createdAt").descending();
+        return userDocumentRepository.findByUserId(userId, sort);
     }
 
     public UserDocument createUserDocumentViaFile(
@@ -65,7 +70,6 @@ public class UserDocumentService {
         var userDocument = UserDocument.builder().documentType(documentType)
                 .documentUrl(result).title(title).user(userProfile).build();
         if (documentType == UserDocumentType.RESUME) {
-            System.out.println("SYED-DEBUG: Processing resume parsing for user ID: " + userProfile.getId());
             requestQueue.processResumeParsing(document, userProfile, true);
         }
         userProfile.addDocument(userDocument);
@@ -132,4 +136,54 @@ public class UserDocumentService {
         return userDocument;
     }
 
+    public UserDocument updateUserDocument(
+            Long documentId,
+            Long userProfileId,
+            String title,
+            UserDocumentType documentType) {
+        var userDocument = userDocumentRepository.findByIdAndUserId(documentId, userProfileId);
+        if (userDocument == null) {
+            throw new UserDocumentNotFoundException("Document not found for the user");
+        }
+        if (title != null && !title.isBlank()) {
+            userDocument.setTitle(title);
+        }
+        if (documentType != null) {
+            userDocument.setDocumentType(documentType);
+        }
+        userDocumentRepository.save(userDocument);
+        return userDocument;
+    }
+
+    @Transactional
+    public void deleteUserDocument(Long documentId, Long userId) {
+        var userDocument = userDocumentRepository.findByIdAndUserId(documentId, userId);
+        if (userDocument == null) {
+            System.out.println("SYED-DEBUG: Document not found for deletion: " + documentId);
+            throw new UserDocumentNotFoundException("Document not found for the user");
+        }
+
+        var userProfile = userDocument.getUser();
+
+        // Remove from user's document list first
+        userProfile.getDocuments().remove(userDocument);
+
+        // Handle primary resume reference
+        if (userProfile.getPrimaryResume() != null &&
+                userProfile.getPrimaryResume().getId().equals(documentId)) {
+            userProfile.setPrimaryResume(null);
+            System.out.println("SYED-DEBUG: Removed primary resume reference for user ID: " + userProfile.getId());
+        }
+
+        // Save the user profile first
+        userProfileRepository.save(userProfile);
+
+        // Now delete the document directly using the entity
+        System.out.println("SYED-DEBUG: Deleting document with ID: " + documentId);
+        userDocumentRepository.delete(userDocument);
+
+        // Verify deletion
+        var deletedDoc = userDocumentRepository.findById(documentId);
+        System.out.println("SYED-DEBUG: Document deletion verification - exists: " + deletedDoc.isPresent());
+    }
 }
