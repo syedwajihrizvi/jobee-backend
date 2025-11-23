@@ -164,26 +164,13 @@ public class UserDocumentService {
         }
 
         var userProfile = userDocument.getUser();
-
-        // Remove from user's document list first
         userProfile.getDocuments().remove(userDocument);
-
-        // Handle primary resume reference
         if (userProfile.getPrimaryResume() != null &&
                 userProfile.getPrimaryResume().getId().equals(documentId)) {
             userProfile.setPrimaryResume(null);
             System.out.println("SYED-DEBUG: Removed primary resume reference for user ID: " + userProfile.getId());
         }
-
-        // Save the user profile first
         userProfileRepository.save(userProfile);
-
-        // Now delete the document directly using the entity
-        System.out.println("SYED-DEBUG: Deleting document with ID: " + documentId);
         userDocumentRepository.delete(userDocument);
-
-        // Verify deletion
-        var deletedDoc = userDocumentRepository.findById(documentId);
-        System.out.println("SYED-DEBUG: Document deletion verification - exists: " + deletedDoc.isPresent());
     }
 }
