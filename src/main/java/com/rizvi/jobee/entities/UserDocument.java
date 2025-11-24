@@ -47,6 +47,13 @@ public class UserDocument {
     @Column(name = "created_at", nullable = true, insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "format_type", nullable = true)
+    @Builder.Default
+    private String formatType = "NON_IMG";
+
+    @Column(name = "preview_url", nullable = true)
+    private String previewUrl;
+
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", nullable = false)
     private UserProfile user;

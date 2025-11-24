@@ -1,5 +1,7 @@
 package com.rizvi.jobee.dtos.education;
 
+import com.rizvi.jobee.enums.EducationLevel;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -10,4 +12,5 @@ public class CreateEducationDto {
     private String institution;
     private String fromYear;
     private String toYear;
+    private EducationLevel educationLevel;
 }

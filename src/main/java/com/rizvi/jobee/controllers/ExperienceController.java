@@ -48,7 +48,6 @@ public class ExperienceController {
         var experiences = experienceService.getExperiencesForUser(id).stream()
                 .map(experienceMapper::toExperienceDto)
                 .sorted((e1, e2) -> {
-                    // Experiences with empty 'to' field come first
                     boolean e1ToEmpty = e1.getTo() == null || e1.getTo().isEmpty()
                             || e1.getTo().equalsIgnoreCase("present");
                     boolean e2ToEmpty = e2.getTo() == null || e2.getTo().isEmpty()
@@ -60,17 +59,23 @@ public class ExperienceController {
                         return 1;
                     Long frome1 = Long.valueOf(e1.getFrom());
                     Long frome2 = Long.valueOf(e2.getFrom());
-                    Long toe1 = Long.valueOf(e1.getTo());
-                    Long toe2 = Long.valueOf(e2.getTo());
-                    // Both have same 'to' status, sort by fromYear descending, then toYear
-                    // descending
                     int fromCompare = frome2.compareTo(frome1);
                     if (fromCompare != 0)
                         return fromCompare;
+                    if (!e1ToEmpty && !e2ToEmpty) {
+                        try {
+                            Long toe1 = Long.valueOf(e1.getTo());
+                            Long toe2 = Long.valueOf(e2.getTo());
+                            return toe2.compareTo(toe1);
+                        } catch (NumberFormatException e) {
+                            return e2.getTo().compareTo(e1.getTo());
+                        }
+                    }
 
-                    return toe2.compareTo(toe1);
+                    return 0;
                 })
                 .toList();
+        System.out.println(experiences);
         return ResponseEntity.ok(experiences);
     }
 

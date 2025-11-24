@@ -54,6 +54,7 @@ public class ProjectService {
     public boolean createProjectsForUserFromAISchemas(
             List<AIProject> projects, UserProfile userProfile) {
         for (AIProject project : projects) {
+            System.out.println("Processing AIProject: " + project);
             var id = project.id;
             var title = project.title;
             var description = project.description;

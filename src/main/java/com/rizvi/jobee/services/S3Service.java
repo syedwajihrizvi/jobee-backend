@@ -83,6 +83,19 @@ public class S3Service {
                                                 logoImage.getSize()));
         }
 
+        public String uploadDocumentPreviewImage(
+                        Long documentId,
+                        byte[] imageBytes) {
+                final String key = "document-previews/" + documentId + ".png";
+                s3Client.putObject(
+                                PutObjectRequest.builder()
+                                                .bucket(awsProperties.getBucket())
+                                                .key(key).contentType("image/png")
+                                                .build(),
+                                software.amazon.awssdk.core.sync.RequestBody.fromBytes(imageBytes));
+                return "document-previews/" + documentId + ".png";
+        }
+
         public String uploadDocumentImage(
                         Long userId,
                         MultipartFile documentImage,

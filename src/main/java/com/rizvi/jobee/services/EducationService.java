@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import com.rizvi.jobee.dtos.education.CreateEducationDto;
 import com.rizvi.jobee.entities.Education;
 import com.rizvi.jobee.entities.UserProfile;
+import com.rizvi.jobee.enums.EducationLevel;
 import com.rizvi.jobee.exceptions.EducationNotFoundException;
 import com.rizvi.jobee.exceptions.UnauthorizedException;
 import com.rizvi.jobee.helpers.AISchemas.AIEducation;
@@ -63,14 +64,18 @@ public class EducationService {
                     : null;
             String degree = education.degree;
             String institution = education.institution;
+            String level = education.level;
+            EducationLevel educationLevel = level.isEmpty() ? EducationLevel.OTHER : EducationLevel.valueOf(level);
             if (!id.isEmpty()) {
-                CreateEducationDto request = new CreateEducationDto(degree, institution, fromYear, toYear);
+                CreateEducationDto request = new CreateEducationDto(degree, institution, fromYear, toYear,
+                        educationLevel);
                 updateEducation(Long.parseLong(id), request);
             } else {
                 var newEducation = Education.builder()
                         .degree(education.degree)
                         .institution(education.institution)
                         .userProfile(userProfile)
+                        .level(educationLevel)
                         .fromYear(fromYear)
                         .toYear(toYear)
                         .build();

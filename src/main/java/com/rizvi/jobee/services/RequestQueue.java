@@ -55,12 +55,10 @@ public class RequestQueue {
         }
     }
 
+    @Async
     public void processResumeParsing(MultipartFile resume, UserProfile userProfile, Boolean updateProfessionalSummary) {
         try {
-            System.out.println("Starting resume parsing for user ID: " + userProfile.getId());
             var details = aiService.extractDetailsFromResume(resume, userProfile);
-            System.out.println("Extracted details from resume for user ID: " + userProfile.getId());
-            System.out.println("SYED-DEBUG: AI Extracted Details: " + details);
             var educations = details.getEducations();
             var experiences = details.getExperiences();
             var projects = details.getProjects();

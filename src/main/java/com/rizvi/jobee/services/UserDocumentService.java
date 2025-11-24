@@ -1,7 +1,14 @@
 package com.rizvi.jobee.services;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.List;
 
+import javax.imageio.ImageIO;
+
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.PDFRenderer;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,6 +37,7 @@ public class UserDocumentService {
     private final UserDocumentRepository userDocumentRepository;
     private final RequestQueue requestQueue;
     private final UserProfileRepository userProfileRepository;
+    private final FileService fileService;
 
     private String uploadDocument(
             Long userId, MultipartFile document, UserDocumentType documentType, String title) {
@@ -63,22 +71,47 @@ public class UserDocumentService {
             throw new InvalidDocumentException("File size exceeds the maximum limit of 200KB");
         }
         var userId = userProfile.getId();
-        var result = uploadDocument(userId, document, documentType, title);
+        // Convert documen to pdf if it is not pdf so S3 Previews it better
+        var finalDocument = document;
+        if (!document.getContentType().equals("application/pdf")) {
+            System.out.println("SYED-DEBUG: Document is not PDF, converting to PDF from: " + document.getContentType());
+            try {
+                finalDocument = fileService.convertBytesToMultipartFile(
+                        document.getBytes(), document.getOriginalFilename(), "application/pdf");
+            } catch (Exception e) {
+                System.out.println("SYED-DEBUG: Error converting document to PDF: " + e.getMessage());
+            }
+            System.out.println("SYED-DEBUG: Converting document to PDF for upload.");
+        }
+        var result = uploadDocument(userId, finalDocument, documentType, title);
         if (result == null) {
             return null;
         }
         var userDocument = UserDocument.builder().documentType(documentType)
                 .documentUrl(result).title(title).user(userProfile).build();
-        if (documentType == UserDocumentType.RESUME) {
-            requestQueue.processResumeParsing(document, userProfile, true);
+        var savedDocument = userDocumentRepository.save(userDocument);
+        byte[] previewBytes;
+        try {
+            previewBytes = renderPdfPreview(document);
+            String previewImageUrl = s3Service.uploadDocumentPreviewImage(savedDocument.getId(), previewBytes);
+            savedDocument.setPreviewUrl(previewImageUrl);
+        } catch (Exception e) {
+            System.out.println("SYED-DEBUG: Error generating PDF preview: " + e.getMessage());
         }
-        userProfile.addDocument(userDocument);
+        if (documentType == UserDocumentType.RESUME) {
+            try {
+                requestQueue.processResumeParsing(document, userProfile, true);
+                System.out.println("SYED-DEBUG: Async resume parsing queued for user ID: " + userId);
+            } catch (Exception e) {
+                System.out.println("SYED-DEBUG: Failed to queue resume parsing: " + e.getMessage());
+            }
+        }
+        userProfile.addDocument(savedDocument);
         if (setPrimary || userProfile.getPrimaryResume() == null) {
-            userProfile.setPrimaryResume(userDocument);
+            userProfile.setPrimaryResume(savedDocument);
         }
         userProfileRepository.save(userProfile);
-        System.out.println("SYED-DEBUG: Document created and sending response");
-        return userDocument;
+        return savedDocument;
     }
 
     public UserDocument createUserDocumentViaImage(
@@ -88,12 +121,12 @@ public class UserDocumentService {
             throw new InvalidDocumentException("File size exceeds the maximum limit of 5MB");
         }
         var userId = userProfile.getId();
-        var result = uploadDocumentImage(userId, documentImage, title, title);
+        var result = uploadDocumentImage(userId, documentImage, documentType.toString(), title);
         if (result == null) {
             return null;
         }
         var userDocument = UserDocument.builder().documentType(documentType)
-                .documentUrl(result).title(title).user(userProfile).build();
+                .documentUrl(result).title(title).formatType("IMG").user(userProfile).build();
         userProfile.addDocument(userDocument);
         userProfileRepository.save(userProfile);
         return userDocument;
@@ -173,4 +206,30 @@ public class UserDocumentService {
         userProfileRepository.save(userProfile);
         userDocumentRepository.delete(userDocument);
     }
+
+    private byte[] renderPdfPreview(MultipartFile document) throws IOException {
+        System.out.println("SYED-DEBUG: Rendering PDF preview for document: " + document.getContentType());
+        // If it is not pdf type, we convert to pdf
+        byte[] pdfBytes = new byte[0];
+        if (!document.getContentType().equals("application/pdf")) {
+            System.out.println("SYED-DEBUG: Document is not PDF, converting to PDF from: " + document.getContentType());
+            try {
+                pdfBytes = fileService.convertDocxToPdf(document.getBytes());
+            } catch (Exception e) {
+                System.out.println("SYED-DEBUG: Error converting document to PDF: " + e.getMessage());
+                return pdfBytes;
+            }
+            System.out.println("SYED-DEBUG: Converting document to PDF for preview generation.");
+        } else {
+            pdfBytes = document.getBytes();
+        }
+        try (PDDocument pdfDocument = PDDocument.load(pdfBytes)) {
+            PDFRenderer renderer = new PDFRenderer(pdfDocument);
+            BufferedImage image = renderer.renderImageWithDPI(0, 120);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ImageIO.write(image, "png", baos);
+            return baos.toByteArray();
+        }
+    }
+
 }

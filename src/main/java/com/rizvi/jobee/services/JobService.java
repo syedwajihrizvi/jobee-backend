@@ -201,10 +201,9 @@ public class JobService {
         }
         var totalExperience = userProfile.getExperiences().stream()
                 .mapToLong(exp -> {
-                    String fromYear = exp.getFrom().replace(" ", "");
-                    String toYear = exp.getTo() != null ? exp.getTo().replace(" ", "") : "present";
+                    String fromYear = exp.getFrom().replace(" ", "").toLowerCase();
+                    String toYear = exp.getTo() != null ? exp.getTo().replace(" ", "").toLowerCase() : "present";
                     if (fromYear != null && toYear != null && !toYear.equals("present")) {
-                        System.out.println("present".equals(toYear));
                         return Long.parseLong(toYear) - Long.parseLong(fromYear);
                     } else if (toYear == null || toYear.equals("present")) {
                         var currentYear = String.valueOf(java.time.LocalDate.now().getYear());

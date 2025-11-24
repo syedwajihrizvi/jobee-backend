@@ -1,0 +1,2 @@
+ALTER TABLE user_documents
+ADD COLUMN format_type VARCHAR(50) NOT NULL DEFAULT 'PDF';

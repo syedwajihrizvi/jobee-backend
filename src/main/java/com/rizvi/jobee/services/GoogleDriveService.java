@@ -51,8 +51,6 @@ public class GoogleDriveService implements LinkService {
             connection.connect();
             byte[] documentBytes = inputStream.readAllBytes();
             String contentType = fileService.detectMimeType(url, documentBytes, title);
-            System.out.println("Content-Type of the document: " + contentType);
-            System.out.println("Successfully read " + documentBytes.length + " bytes from Google Drive document.");
             var documentTitle = title != null && !title.isEmpty() ? title
                     : "google_drive_document_" + documentType.name().toLowerCase();
             MultipartFile multipartFile = new MockMultipartFile(documentTitle, documentTitle,

@@ -99,7 +99,7 @@ public class Prompts {
           "fromYear": "<start year or '' if not found>",
           "toYear": "<end year or 'present' or set to '' if not found>",
           "degree": "<degree name or '' if not found>",
-          "level": "<education level of the degree. It could be specified or you can infer it based on the degree title. Please ONLY (I repeat, ONLY) match from the following and match the case as well: HIGH_SCHOOL, DIPLOMA, BACHELORS, MASTERS, PHD, POSTDOCTORATE. Your can use OTHER if you cannot match any of these levels.>",
+          "level": "<education level of the degree. It could be specified or you can infer it based on the degree title. Please ONLY (I repeat, ONLY) match from the following and match the case as well: HIGH_SCHOOL, DIPLOMA, BACHELORS, MASTERS, PHD, POSTDOCTORATE. You can use OTHER if you cannot match any of these levels.>",
           }
       ],
       "experiences": [

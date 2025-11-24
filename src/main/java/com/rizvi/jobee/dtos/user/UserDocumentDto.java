@@ -13,5 +13,7 @@ public class UserDocumentDto {
     private String documentUrl;
     private String filename;
     private String title;
+    private String formatType;
+    private String previewUrl;
     private LocalDateTime createdAt;
 }

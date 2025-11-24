@@ -54,6 +54,7 @@ public class ExperienceService {
     public boolean addExperiencesForUserFromAISchemas(
             List<AIExperience> experiences, UserProfile userProfile) {
         for (AIExperience experience : experiences) {
+            System.out.println("Processing AIExperience: " + experience);
             var id = experience.id;
             String fromYear = experience.getFromYear() != null && !experience.getFromYear().trim().isEmpty()
                     ? experience.getFromYear()
@@ -63,9 +64,9 @@ public class ExperienceService {
                     : null;
             String title = experience.getTitle();
             String company = experience.getCompany();
-            String city = experience.getCity();
-            String country = experience.getCountry();
-            String state = experience.getState();
+            String city = experience.getCity().isEmpty() ? null : experience.getCity();
+            String country = experience.getCountry().isEmpty() ? null : experience.getCountry();
+            String state = experience.getState().isEmpty() ? null : experience.getState();
             String description = experience.getDescription();
             if (!id.isEmpty()) {
                 CreateExperienceDto request = new CreateExperienceDto(
@@ -83,6 +84,9 @@ public class ExperienceService {
                         .title(experience.getTitle())
                         .company(experience.getCompany())
                         .description(experience.getDescription())
+                        .city(experience.getCity())
+                        .country(experience.getCountry())
+                        .state(experience.getState())
                         .from(fromYear)
                         .to(toYear)
                         .userProfile(userProfile)

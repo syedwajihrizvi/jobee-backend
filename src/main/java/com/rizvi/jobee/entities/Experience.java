@@ -92,4 +92,27 @@ public class Experience {
         return isEmptyOrNull(year1) && isEmptyOrNull(year2);
     }
 
+    public String getLocation() {
+        StringBuilder location = new StringBuilder();
+        if (city == null && state == null && country == null) {
+            return null;
+        }
+        if (city != null && !city.isEmpty()) {
+            location.append(city);
+        }
+        if (state != null && !state.isEmpty()) {
+            if (location.length() > 0) {
+                location.append(", ");
+            }
+            location.append(state);
+        }
+        if (country != null && !country.isEmpty()) {
+            if (location.length() > 0) {
+                location.append(", ");
+            }
+            location.append(country);
+        }
+        return location.toString();
+    }
+
 }
