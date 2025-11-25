@@ -15,7 +15,8 @@ import com.rizvi.jobee.entities.UserProfile;
                 SkillMapper.class,
                 EducationMapper.class,
                 ExperienceMapper.class,
-                ProjectMapper.class
+                ProjectMapper.class,
+                CompanyMapper.class
 })
 public interface UserMapper {
         UserAccountSummaryDto toSummaryDto(UserAccount userAccount);

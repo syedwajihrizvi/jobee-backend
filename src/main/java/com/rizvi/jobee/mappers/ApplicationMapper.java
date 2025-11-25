@@ -10,7 +10,7 @@ import com.rizvi.jobee.dtos.application.ApplicationSummaryDto;
 import com.rizvi.jobee.dtos.user.UserApplicationDto;
 import com.rizvi.jobee.entities.Application;
 
-@Mapper(componentModel = "spring", uses = { UserProfileMapper.class, JobMapper.class })
+@Mapper(componentModel = "spring", uses = { UserProfileMapper.class, JobMapper.class, UserDocumentMapper.class })
 public interface ApplicationMapper {
     @Mapping(target = "job", source = "job")
     @Mapping(target = "jobTitle", source = "job.title")
@@ -47,5 +47,6 @@ public interface ApplicationMapper {
     @Mapping(target = "jobTitle", source = "job.title")
     @Mapping(target = "companyName", source = "job.businessAccount.company.name")
     @Mapping(target = "interviewIds", expression = "java(application.getInterviewIds())")
+    @Mapping(target = "userDocuments", source = "userDocuments")
     ApplicationDetailsForBusinessDto toApplicationDetailsForBusinessDto(Application application);
 }

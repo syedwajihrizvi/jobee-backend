@@ -23,6 +23,7 @@ import com.rizvi.jobee.dtos.job.JobDetailedSummaryForBusinessDto;
 import com.rizvi.jobee.dtos.job.JobSummaryDto;
 import com.rizvi.jobee.dtos.job.JobSummaryForBusinessDto;
 import com.rizvi.jobee.dtos.job.PaginatedResponse;
+import com.rizvi.jobee.dtos.user.BusinessProfileDashboardSummaryDto;
 import com.rizvi.jobee.dtos.user.FindCandidateDto;
 import com.rizvi.jobee.entities.Application;
 import com.rizvi.jobee.entities.Job;
@@ -37,6 +38,7 @@ import com.rizvi.jobee.queries.JobQuery;
 import com.rizvi.jobee.repositories.JobRepository;
 import com.rizvi.jobee.repositories.UserProfileRepository;
 import com.rizvi.jobee.services.AccountService;
+import com.rizvi.jobee.services.BusinessProfileService;
 import com.rizvi.jobee.services.CompanyService;
 import com.rizvi.jobee.services.JobService;
 import com.rizvi.jobee.services.UserProfileService;
@@ -51,6 +53,7 @@ public class JobController {
     private final JobRepository jobRepository;
     private final UserProfileRepository userProfileRepository;
     private final UserProfileService userProfileService;
+    private final BusinessProfileService businessProfileService;
     private final AccountService accountService;
     private final CompanyService companyService;
     private final JobService jobService;
@@ -115,6 +118,41 @@ public class JobController {
         var company = companyService.findCompanyById(companyId);
         var aiJobInsight = jobService.generateAIJobInsight(job, company);
         return ResponseEntity.ok(aiJobInsight.getAiAnalysis());
+    }
+
+    @GetMapping("/popular-jobs")
+    @Operation(summary = "Get most popular jobs for the authenticated business profile")
+    public ResponseEntity<BusinessProfileDashboardSummaryDto> getMostPopularJobs(
+            @AuthenticationPrincipal CustomPrincipal principal) {
+        var accountId = principal.getId();
+        var accountType = principal.getAccountType();
+        var companyId = businessProfileService.getCompanyIdForBusinessProfileId(accountId);
+        List<Job> jobs = null;
+        if (accountType.equals(BusinessType.ADMIN.name())) {
+            jobs = jobService.getJobsByCompanyId(companyId);
+        } else if (accountType.equals(BusinessType.RECRUITER.name())) {
+            jobs = jobService.getJobsByBusinessAccountIdForRecruiter(accountId, null);
+        } else if (accountType.equals(BusinessType.EMPLOYEE.name())) {
+            // TODO: Get jobs this employee is a part of
+            jobs = jobService.getJobsByBusinessAccountIdForEmployee(accountId, null);
+        }
+        var mostAppliedJobs = jobs.stream()
+                .sorted((j1, j2) -> Integer.compare(j2.getApplications().size(), j1.getApplications().size()))
+                .limit(3)
+                .map(jobMapper::toDetailedSummaryForBusinessDto)
+                .toList();
+        var mostViewedJobs = jobs.stream()
+                .sorted((j1, j2) -> Integer.compare(j2.getViews() != null ? j2.getViews() : 0,
+                        j1.getViews() != null ? j1.getViews() : 0))
+                .limit(3)
+                .map(jobMapper::toDetailedSummaryForBusinessDto)
+                .toList();
+
+        var response = BusinessProfileDashboardSummaryDto.builder()
+                .mostAppliedJobs(mostAppliedJobs)
+                .mostViewedJobs(mostViewedJobs)
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/applied")
@@ -246,8 +284,6 @@ public class JobController {
             @PathVariable Long id) {
         var job = jobService.getJobById(id);
         var shortListedApplicants = job.getShortListedApplications().stream().map(Application::getId).toList();
-        System.out.println("Found " + shortListedApplicants.size() + " shortlisted applicants for job ID: " + id);
-        System.out.println(shortListedApplicants);
         return ResponseEntity.ok(shortListedApplicants);
     }
 
@@ -308,4 +344,5 @@ public class JobController {
         String aiJobDescription = jobService.generateAIJobDescription(request, businessAccount.getCompany());
         return ResponseEntity.ok(new AIJobDescriptionResponse(aiJobDescription));
     }
+
 }

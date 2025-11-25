@@ -80,6 +80,14 @@ public class Application {
     @Builder.Default
     private Set<Interview> interviews = new HashSet<>();
 
+    public List<UserDocument> getUserDocuments() {
+        List<UserDocument> documents = new java.util.ArrayList<>();
+        userProfile.getDocuments().stream()
+                .filter(doc -> doc.getIsViewableByEmployers())
+                .forEach(doc -> documents.add(doc));
+        return documents;
+    }
+
     public void setJob(Job job) {
         this.job = job;
         job.getApplications().add(this);

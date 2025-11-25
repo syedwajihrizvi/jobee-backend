@@ -32,5 +32,6 @@ public class JobDetailedSummaryForBusinessDto {
     private List<HiringTeamMemberResponseDto> hiringTeam = new ArrayList<>();
     private LocalDateTime createdAt;
     private Integer totalShortListedCandidates;
+    private Integer pendingApplicationsSize;
     private LocalDateTime appDeadline;
 }

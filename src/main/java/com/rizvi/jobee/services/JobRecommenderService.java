@@ -28,6 +28,9 @@ public class JobRecommenderService {
         var jobs = jobRepository.findJobsWithSkills(skills);
         for (Job job : jobs) {
             var matchScore = jobService.checkJobMatch(job.getId(), user);
+            if (job.hasUserApplied(user.getId())) {
+                continue;
+            }
             recommendedJobs.put(job, matchScore);
         }
         return recommendedJobs;

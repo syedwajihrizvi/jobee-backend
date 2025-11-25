@@ -72,4 +72,8 @@ public class UserDocument {
 
         return documentUrl.substring(lastSlashIndex + 1, lastDotIndex);
     }
+
+    public boolean getIsViewableByEmployers() {
+        return this.documentType != UserDocumentType.RESUME && this.documentType != UserDocumentType.COVER_LETTER;
+    }
 }

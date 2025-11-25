@@ -78,7 +78,8 @@ public class UserProfile {
     private String company;
 
     @Column(name = "profile_views", nullable = false)
-    private Integer profileViews;
+    @Builder.Default
+    private Integer profileViews = 0;
 
     @OneToOne(optional = false)
     @JoinColumn(name = "account_id", nullable = false, unique = true)

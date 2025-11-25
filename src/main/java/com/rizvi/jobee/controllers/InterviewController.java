@@ -53,7 +53,7 @@ public class InterviewController {
 
     @GetMapping()
     @Operation(summary = "Get interviews")
-    public ResponseEntity<PaginatedResponse<InterviewSummaryDto>> getInterviewsByJobId(
+    public ResponseEntity<PaginatedResponse<InterviewSummaryDto>> getInterviews(
             @ModelAttribute InterviewQuery query,
             @RequestParam(defaultValue = "0") Integer pageNumber,
             @RequestParam(defaultValue = "10") Integer pageSize,
@@ -72,7 +72,6 @@ public class InterviewController {
         var businessAccount = accountService.getBusinessAccountById(businessAccountId);
         var companyId = businessAccount.getCompany().getId();
         query.setCompanyId(companyId);
-        System.out.println("SYED-DEBUG: Fetching interviews with query: " + query);
         // May need to add additional checks based on principal info and business
         // account type
         // If ADMIN account, then can view all interviews for the company
@@ -84,7 +83,6 @@ public class InterviewController {
         var hasMore = paginatedInterviews.isHasMore();
         var totalInterviews = paginatedInterviews.getTotalElements();
         var interviewDtos = interviews.stream().map(interviewMapper::toSummaryDto).toList();
-        System.out.println("SYED-DEBUG: Retrieved " + interviewDtos.size() + " interviews for query: " + query);
         PaginatedResponse<InterviewSummaryDto> response = new PaginatedResponse<>(hasMore, interviewDtos,
                 totalInterviews);
         return ResponseEntity.ok(response);

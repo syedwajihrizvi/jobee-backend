@@ -20,6 +20,7 @@ public interface ApplicationRepository extends JpaRepository<Application, Long>,
         @EntityGraph(attributePaths = { "userProfile", "userProfile.account", "userProfile.skills",
                         "userProfile.skills.skill", "userProfile.education", "userProfile.experiences",
                         "userProfile.projects",
+                        "userProfile.documents",
                         "resumeDocument",
                         "interviews",
                         "coverLetterDocument" })

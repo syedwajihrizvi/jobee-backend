@@ -20,6 +20,7 @@ import com.rizvi.jobee.entities.HiringTeam;
 import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.entities.Tag;
 import com.rizvi.jobee.entities.UserProfile;
+import com.rizvi.jobee.enums.BusinessType;
 import com.rizvi.jobee.exceptions.JobNotFoundException;
 import com.rizvi.jobee.helpers.AISchemas.AIJobDescriptionAnswer;
 import com.rizvi.jobee.helpers.AISchemas.AIJobInsightAnswer;
