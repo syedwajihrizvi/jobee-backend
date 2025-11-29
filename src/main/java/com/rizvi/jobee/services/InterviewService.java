@@ -24,6 +24,7 @@ import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.enums.ApplicationStatus;
 import com.rizvi.jobee.enums.InterviewDecisionResult;
+import com.rizvi.jobee.enums.InterviewMeetingPlatform;
 import com.rizvi.jobee.enums.InterviewStatus;
 import com.rizvi.jobee.enums.PreparationStatus;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
@@ -59,6 +60,7 @@ public class InterviewService {
     private final S3Service s3Service;
     private final RequestQueue requestQueue;
     private final UserNotificationService userNotificationService;
+    private final EmailSender emailSender;
 
     public PaginatedResponse<Interview> getAllInterviews(InterviewQuery query, int pageNumber, int pageSize) {
         PageRequest pageRequest = PageRequest.of(
@@ -135,6 +137,7 @@ public class InterviewService {
     public Interview createInterview(
             CreateInterviewDto request, BusinessAccount businessAccount,
             UserProfile candidate, Job job, Application application) {
+        System.out.println("Creating interview with request: " + request);
         var interview = Interview.builder()
                 .job(job)
                 .candidate(candidate)
@@ -151,10 +154,19 @@ public class InterviewService {
                 .contactInstructionsOnArrival(request.getContactInstructionsOnArrival())
                 .meetingLink(request.getMeetingLink())
                 .phoneNumber(request.getPhoneNumber())
-                .interviewMeetingPlatform(request.getMeetingPlatform())
                 .status(InterviewStatus.SCHEDULED)
                 .createdBy(businessAccount)
                 .build();
+        String meetingPlatformStr = request.getMeetingPlatform();
+        if (meetingPlatformStr != null && !meetingPlatformStr.isEmpty()) {
+            try {
+                var meetingPlatform = InterviewMeetingPlatform.valueOf(meetingPlatformStr.toUpperCase());
+                interview.setInterviewMeetingPlatform(meetingPlatform);
+            } catch (IllegalArgumentException e) {
+                System.out.println("Invalid meeting platform: " + meetingPlatformStr);
+            }
+
+        }
         interview.setApplication(application);
         for (ConductorDto conductor : request.getConductors()) {
             var interviewer = businessAccountRepository.findByEmail(conductor.getEmail()).orElse(null);
@@ -181,7 +193,7 @@ public class InterviewService {
         }
         application.setStatus(ApplicationStatus.INTERVIEW_SCHEDULED);
         applicationRepository.save(application);
-        userNotificationService.createInterviewScheduledNotificationAndSend(savedInterview);
+        requestQueue.sendInterviewScheduledEmailsAndNotifications(savedInterview);
         return savedInterview;
     }
 
@@ -207,7 +219,6 @@ public class InterviewService {
         PrepareForInterviewRequest prepareForInterviewRequest = new PrepareForInterviewRequest(aiJob, aiCompany,
                 aiCandidate, aiInterview);
         requestQueue.processInterviewPrep(prepareForInterviewRequest, savedInterviewPreparation);
-
         return true;
     }
 

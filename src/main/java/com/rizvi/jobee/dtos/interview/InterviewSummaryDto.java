@@ -17,6 +17,7 @@ public class InterviewSummaryDto {
     private String jobId;
     private String jobTitle;
     private String companyName;
+    private String companyLogoUrl;
     private String interviewType;
     private String status;
     private String decisionDate;

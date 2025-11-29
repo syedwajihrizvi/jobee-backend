@@ -41,7 +41,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 @RestController
-@RequestMapping("/interviews")
+@RequestMapping("/api/interviews")
 @AllArgsConstructor
 public class InterviewController {
     private final AccountService accountService;
@@ -105,8 +105,6 @@ public class InterviewController {
         var interviewSummaryDtos = interviews.stream()
                 .map(interviewMapper::toSummaryDto)
                 .toList();
-        System.out.println("SYED-DEBUG: Retrieved " + interviewSummaryDtos.size() + " interviews for candidate ID: "
-                + candidateId);
         return ResponseEntity.ok(interviewSummaryDtos);
     }
 
@@ -156,9 +154,12 @@ public class InterviewController {
             @AuthenticationPrincipal CustomPrincipal principal,
             UriComponentsBuilder uriComponentsBuilder) throws RuntimeException {
         var creatorId = principal.getId();
+        System.out.println("SYED-DEBUG: Creating interview by creator ID: " + creatorId);
         var creator = accountService.getBusinessAccountById(creatorId);
         var job = jobService.getJobById(request.getJobId());
+        System.out.println("SYED-DEBUG: Creating interview for job ID: " + job.getId());
         var userProfile = userProfileService.getUserProfileById(request.getCandidateId());
+        System.out.println("SYED-DEBUG: Creating interview for candidate ID: " + userProfile.getId());
         var applicationId = request.getApplicationId();
         var application = applicationService.findById(applicationId);
         var savedInterview = interviewService.createInterview(request, creator, userProfile, job, application);

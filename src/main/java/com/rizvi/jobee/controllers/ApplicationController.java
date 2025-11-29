@@ -345,12 +345,7 @@ public class ApplicationController {
     public ResponseEntity<ApplicationDto> updateApplicationStatus(
             @PathVariable Long id,
             @RequestParam ApplicationStatus status) {
-        System.out.println("Updating application ID " + id + " to status " + status);
-        var application = applicationRepository.findById(id)
-                .orElseThrow(() -> new ApplicationNotFoundException("Application with ID " + id + " not found"));
-        // Ensure application status is valid
-        application.setStatus(status);
-        var savedApplication = applicationRepository.save(application);
+        var savedApplication = applicationService.updateApplicationStatus(id, status);
         return ResponseEntity.ok(applicationMapper.toDto(savedApplication));
     }
 }

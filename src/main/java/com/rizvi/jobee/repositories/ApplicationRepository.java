@@ -23,6 +23,9 @@ public interface ApplicationRepository extends JpaRepository<Application, Long>,
                         "userProfile.documents",
                         "resumeDocument",
                         "interviews",
+                        "job",
+                        "job.businessAccount",
+                        "job.businessAccount.company",
                         "coverLetterDocument" })
         Optional<Application> findById(Long id);
 

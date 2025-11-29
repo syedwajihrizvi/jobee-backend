@@ -14,7 +14,7 @@ import lombok.Data;
 public class BusinessProfileDashboardSummaryDto {
     Integer totalJobsPosted;
     Integer totalApplicationsReceived;
-    Integer totalInterviewsScheduled;
+    Integer totalInterviews;
     Integer totalJobViews;
     Integer totalOffersMade;
     Integer totalHires;

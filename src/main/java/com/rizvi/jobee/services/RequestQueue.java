@@ -5,6 +5,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.rizvi.jobee.entities.Interview;
 import com.rizvi.jobee.entities.InterviewPreparation;
 import com.rizvi.jobee.entities.Notification;
 import com.rizvi.jobee.entities.UserProfile;
@@ -73,20 +74,20 @@ public class RequestQueue {
                 userProfile.setTitle(currentPosition);
             }
             userEducationService.createEducationsForUserFromAISchemas(educations, userProfile);
-            System.out.println("Added educations for user ID: " + userProfile.getId());
             userSkillService.createUserSkills(skills, userProfile);
-            System.out.println("Added skills for user ID: " + userProfile.getId());
             userExperienceService.addExperiencesForUserFromAISchemas(experiences, userProfile);
-            System.out.println("Added experiences for user ID: " + userProfile.getId());
             userProjectService.createProjectsForUserFromAISchemas(projects, userProfile);
-            System.out.println("Added projects for user ID: " + userProfile.getId());
             userSocialMediaService.createSocialMediaLinksForUserFromAISchemas(socialMediaLinks, userProfile);
-            System.out.println("Added social media links for user ID: " + userProfile.getId());
             userNotificationService.sendInAppNotificationForResumeParsingCompletion(userProfile.getId());
-            System.out.println("Completed resume parsing for user ID: " + userProfile.getId());
         } catch (Exception e) {
             // Log the error but continue
             System.err.println("Failed to extract details from resume: " + e.getMessage());
         }
+    }
+
+    @Async
+    public void sendInterviewScheduledEmailsAndNotifications(Interview interview) {
+        userNotificationService.createInterviewScheduledNotificationAndSend(interview);
+        // emailSender.sendScheduledInterviewEmail(interview);
     }
 }

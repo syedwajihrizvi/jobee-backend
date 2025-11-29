@@ -79,7 +79,7 @@ public class Interview {
     private InterviewType interviewType;
 
     @Enumerated(value = EnumType.STRING)
-    @Column(name = "meeting_platform", nullable = false)
+    @Column(name = "meeting_platform", nullable = true)
     private InterviewMeetingPlatform interviewMeetingPlatform;
 
     @Column(name = "street_address", nullable = true)

@@ -23,6 +23,7 @@ import lombok.AllArgsConstructor;
 public class ApplicationService {
     private final ApplicationRepository applicationRepository;
     private final ApplicationMapper applicationMapper;
+    private final UserNotificationService userNotificationService;
 
     public Application findById(Long id) {
         return applicationRepository.findById(id)
@@ -40,18 +41,22 @@ public class ApplicationService {
 
     public Application updateApplicationStatus(Long applicationId, ApplicationStatus newStatus) {
         var application = findById(applicationId);
+        if (application == null) {
+            throw new ApplicationNotFoundException("Application not found with id: " + applicationId);
+        }
         application.setStatus(newStatus);
+        if (newStatus == ApplicationStatus.REJECTED) {
+            userNotificationService.createApplicationRejectionsNotificationAndSend(application);
+        }
         return applicationRepository.save(application);
     }
 
     public PaginatedResponse<Application> getAllApplications(ApplicationQuery query, int pageNumber, int pageSize) {
         PageRequest pageRequest = PageRequest.of(pageNumber, pageSize,
                 Sort.by("createdAt").descending().and(Sort.by("id").ascending()));
-        System.out.println("SYED-DEBUG: Fetching applications with query: " + query);
         Specification<Application> specification = ApplicantSpecification.withFilters(query);
         Page<Application> page = applicationRepository.findAll(specification, pageRequest);
         var applications = page.getContent();
-        System.out.println("SYED-DEBUG: Retrieved " + applications.size() + " applications");
         var hasMore = pageNumber < page.getTotalPages() - 1;
         var totalApplications = page.getTotalElements();
         return new PaginatedResponse<Application>(hasMore, applications, totalApplications);

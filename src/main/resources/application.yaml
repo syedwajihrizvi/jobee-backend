@@ -33,3 +33,8 @@ email:
   from: ${JOBEE_EMAIL_FROM:no-reply@jobee.solutions}
 openai:
   apiKey: ${OPENAI_API_KEY:your-openai-api-key}
+zoom:
+  clientId: ${ZOOM_CLIENT_ID:your-zoom-client-id}
+  clientSecret: ${ZOOM_CLIENT_SECRET:your-zoom-client-secret}
+resend:
+  apiKey: ${RESEND_API_KEY:your-resend-api-key}

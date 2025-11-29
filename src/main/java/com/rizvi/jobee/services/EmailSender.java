@@ -1,5 +1,7 @@
 package com.rizvi.jobee.services;
 
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,7 @@ import software.amazon.awssdk.services.ses.model.SendEmailRequest;
 @RequiredArgsConstructor
 public class EmailSender {
   private final SesClient sesClient;
+  private final ResendService resendService;
 
   @Value("${email.from}")
   private String senderEmail;
@@ -37,19 +40,27 @@ public class EmailSender {
     String companyName = interview.getCreatedBy().getCompany().getName();
 
     try {
-      Destination destination = createEmailDestination(to);
-      String subject = "You have a scheduled interview for " + jobTitle + " at " + companyName;
-      String htmlString = generateScheduledInterviewHtml(fullName, jobTitle, interviewDate, companyName);
-      String textString = "Hello " + fullName + ",\n\nYou have a scheduled interview for the position of " + jobTitle +
-          " at " + companyName + " on " + interviewDate + ".\n\nBest of luck!\n\n- The Jobee Team";
-      Message message = createEmail(subject, htmlString, textString);
-      SendEmailRequest emailRequest = SendEmailRequest.builder()
-          .source("Jobee <" + senderEmail + ">")
-          .destination(destination)
-          .message(message)
-          .replyToAddresses("support@jobee.solutions")
-          .build();
-      sesClient.sendEmail(emailRequest);
+      // Send email to candidate
+      String candidateSubject = "You have a scheduled interview for " + jobTitle + " at " + companyName;
+      String candidateHtml = generateScheduledInterviewEmailForCandidate(fullName, jobTitle, interviewDate,
+          companyName);
+      resendService.sendEmail(to, candidateSubject, candidateHtml);
+      // Send email to conductors who are on Jobee + creator
+
+      String conductorSubject = "Interview Scheduled to Conduct for " + jobTitle;
+      Set<BusinessAccount> validConductors = interview.getInterviewers();
+      validConductors.add(interview.getCreatedBy());
+      validConductors.forEach(conductor -> {
+        try {
+          String conductorHtml = generateScheduledInterviewEmailForConductorWithAccount(
+              interview.getCreatedBy(), jobTitle, interviewDate, companyName, conductor);
+          resendService.sendEmail(conductor.getEmail(), conductorSubject, conductorHtml);
+        } catch (Exception e) {
+          System.out.println("Failed to send scheduled interview email to conductor: " + e.getMessage());
+        }
+      });
+
+      // TODO: Send email to conductors who are not on Jobee
     } catch (Exception e) {
       System.out.println("Failed to send scheduled interview email: " + e.getMessage());
     }
@@ -331,7 +342,7 @@ public class EmailSender {
     return htmlString;
   }
 
-  private String generateScheduledInterviewHtml(String fullName, String jobTitle, String interviewDate,
+  private String generateScheduledInterviewEmailForCandidate(String fullName, String jobTitle, String interviewDate,
       String companyName) {
     String htmlString = """
                         <html>
@@ -365,8 +376,103 @@ public class EmailSender {
                 </body>
               </html>
         """
-        .formatted(companyName, fullName, companyName, jobTitle, interviewDate);
+        .formatted(companyName, fullName, companyName, jobTitle, interviewDate, "https://google.com");
     return htmlString;
+  }
+
+  private String generateScheduledInterviewEmailForConductorWithAccount(
+      BusinessAccount interviewCreator,
+      String jobTitle,
+      String interviewDate,
+      String companyName,
+      BusinessAccount conductor) {
+
+    String creatorName = interviewCreator.getFullName();
+    String conductorName = conductor.getFullName();
+    Long creatorId = interviewCreator.getId();
+    Long conductorId = conductor.getId();
+
+    boolean isSelfCreated = creatorId.equals(conductorId);
+
+    if (isSelfCreated) {
+      return """
+          <html>
+            <body style="font-family: Arial, sans-serif; background-color: #f6f9fc; padding: 40px; text-align: center;">
+              <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 40px;">
+                <h2 style="color: #2d3748;">Interview Created for %s</h2>
+                <p style="color: #4a5568;">Hello %s,</p>
+                <p style="color: #4a5568;">
+                  Your interview for <strong>%s</strong> has been successfully scheduled.
+                </p>
+                <p style="color: #4a5568;">
+                  The interview is set for <strong>%s</strong>.
+                </p>
+                <div>
+                  <a href="%s" style="
+                      display: inline-block;
+                      margin: 20px 0;
+                      padding: 14px 28px;
+                      background-color: #2563eb;
+                      color: white;
+                      font-weight: bold;
+                      border-radius: 6px;
+                      text-decoration: none;">
+                    View on Jobee
+                  </a>
+                </div>
+                <p style="margin-top: 40px; font-size: 12px; color: #a0aec0;">
+                  If you did not expect this email, you can safely ignore it.
+                </p>
+              </div>
+            </body>
+          </html>
+          """
+          .formatted(
+              jobTitle,
+              creatorName,
+              jobTitle,
+              interviewDate,
+              "https://google.com");
+    }
+    return """
+        <html>
+          <body style="font-family: Arial, sans-serif; background-color: #f6f9fc; padding: 40px; text-align: center;">
+            <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 40px;">
+              <h2 style="color: #2d3748;">You Are Invited to Conduct an Interview for %s!</h2>
+              <p style="color: #4a5568;">Hello %s,</p>
+              <p style="color: #4a5568;">
+                <strong>%s</strong> has scheduled an interview and invited you to conduct it for the <strong>%s</strong> role.
+              </p>
+              <p style="color: #4a5568;">
+                The interview is scheduled for <strong>%s</strong>.
+              </p>
+              <div>
+                <a href="%s" style="
+                    display: inline-block;
+                    margin: 20px 0;
+                    padding: 14px 28px;
+                    background-color: #21c55e;
+                    color: white;
+                    font-weight: bold;
+                    border-radius: 6px;
+                    text-decoration: none;">
+                  View on Jobee
+                </a>
+              </div>
+              <p style="margin-top: 40px; font-size: 12px; color: #a0aec0;">
+                If you didn't expect this invitation, you can safely ignore this email.
+              </p>
+            </div>
+          </body>
+        </html>
+        """
+        .formatted(
+            jobTitle,
+            conductorName,
+            creatorName,
+            jobTitle,
+            interviewDate,
+            "https://google.com");
   }
 
   private String generateInterviewPrepHtml(String fullName, String jobTitle, String interviewDate,
