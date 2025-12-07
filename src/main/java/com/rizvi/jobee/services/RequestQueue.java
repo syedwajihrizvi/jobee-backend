@@ -1,10 +1,14 @@
 package com.rizvi.jobee.services;
 
+import java.util.Set;
+
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.rizvi.jobee.dtos.interview.ConductorDto;
+import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.Interview;
 import com.rizvi.jobee.entities.InterviewPreparation;
 import com.rizvi.jobee.entities.Notification;
@@ -88,6 +92,35 @@ public class RequestQueue {
     @Async
     public void sendInterviewScheduledEmailsAndNotifications(Interview interview) {
         userNotificationService.createInterviewScheduledNotificationAndSend(interview);
-        // emailSender.sendScheduledInterviewEmail(interview);
+        emailSender.sendScheduledInterviewEmail(interview);
+    }
+
+    @Async
+    public void sendRejectionAfterInterviewEmailsAndNotifications(Interview interview) {
+        userNotificationService.createInterviewRejectionNotificationAndSend(interview);
+        emailSender.sendRejectionEmail(interview);
+    }
+
+    @Async
+    public void sendInterviewCancelledEmailsAndNotifications(Interview interview) {
+        userNotificationService.createInterviewCancelledNotificationAndSend(interview);
+        // emailSender.sendInterviewCancellationEmail(interview);
+    }
+
+    @Async
+    public void sendInterviewUpdatedEmailsAndNotifications(
+            Interview interview, Set<BusinessAccount> newInterviewers, Set<ConductorDto> newOtherInterviewers,
+            Set<BusinessAccount> removedInterviewers, Set<ConductorDto> removedOtherInterviewers) {
+        userNotificationService.createInterviewUpdatedNotificationAndSend(interview, newInterviewers,
+                removedInterviewers);
+        // emailSender.sendUpdatedInterviewEmail(interview, newInterviewers,
+        // newOtherInterviewers,
+        // removedInterviewers, removedOtherInterviewers);
+    }
+
+    @Async
+    public void sendInterviewRescheduleRequestEmailsAndNotifications(Interview interview) {
+        userNotificationService.createInterviewRescheduleRequestNotificationAndSend(interview);
+        // emailSender.sendInterviewRescheduleRequestEmail(interview);
     }
 }

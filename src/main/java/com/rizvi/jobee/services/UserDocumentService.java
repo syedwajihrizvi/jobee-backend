@@ -74,14 +74,12 @@ public class UserDocumentService {
         // Convert documen to pdf if it is not pdf so S3 Previews it better
         var finalDocument = document;
         if (!document.getContentType().equals("application/pdf")) {
-            System.out.println("SYED-DEBUG: Document is not PDF, converting to PDF from: " + document.getContentType());
             try {
                 finalDocument = fileService.convertBytesToMultipartFile(
                         document.getBytes(), document.getOriginalFilename(), "application/pdf");
             } catch (Exception e) {
                 System.out.println("SYED-DEBUG: Error converting document to PDF: " + e.getMessage());
             }
-            System.out.println("SYED-DEBUG: Converting document to PDF for upload.");
         }
         var result = uploadDocument(userId, finalDocument, documentType, title);
         if (result == null) {

@@ -92,6 +92,7 @@ public class MessageService {
             Long lastMessageId = conversation.getLastMessageId();
             Message lastMessage = messageRepository.findById(lastMessageId).orElse(null);
             var conversationDto = new ConversationDto();
+            conversationDto.setLastMessageType(lastMessage.getMessageType());
             conversationDto.setId(conversation.getId());
             conversationDto.setLastMessageContent(lastMessage.getText());
             conversationDto.setLastMessageRead(lastMessage.getRead());
@@ -228,4 +229,5 @@ public class MessageService {
         messageRepository.save(message);
         return message;
     }
+
 }

@@ -31,4 +31,6 @@ public class CreateInterviewDto {
     private Long previousInterviewId;
     private List<ConductorDto> conductors;
     private List<String> preparationTipsFromInterviewer;
+    private ZoomMeetingDetailsDto zoomMeetingDetails;
+    private GoogleMeetingDetailsDto googleMeetingDetails;
 }

@@ -1,7 +1,20 @@
 package com.rizvi.jobee.enums;
 
 public enum Timezone {
-    EST,
     UTC,
-    PST
+    PT,
+    MT,
+    CT,
+    ET,
+    UK,
+    CET,
+    FRANCE,
+    GERMANY,
+    IST,
+    PKT,
+    UAE,
+    CHINA,
+    SINGAPORE,
+    JAPAN,
+    AUSTRALIA
 }

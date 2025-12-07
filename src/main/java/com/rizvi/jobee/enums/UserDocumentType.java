@@ -5,5 +5,6 @@ public enum UserDocumentType {
     COVER_LETTER,
     CERTIFICATE,
     TRANSCRIPT,
-    RECOMMENDATION
+    RECOMMENDATION,
+    MESSAGE_ATTACHMENT
 }

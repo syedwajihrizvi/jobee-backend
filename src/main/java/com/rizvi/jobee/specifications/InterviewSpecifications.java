@@ -21,27 +21,27 @@ public class InterviewSpecifications {
             Join<Interview, Job> jobJoin = root.join("job");
             Join<Job, BusinessAccount> businessJoin = jobJoin.join("businessAccount");
             Join<BusinessAccount, Company> companyJoin = businessJoin.join("company");
-            
-            // Always filter by companyId since it's always provided
+            System.out.println("Using Query: " + query);
             predicates.add(cb.equal(companyJoin.get("id"), query.getCompanyId()));
-            
-            // Only filter by jobId if it's provided
             if (query.getJobId() != null) {
                 predicates.add(cb.equal(jobJoin.get("id"), query.getJobId()));
             }
-            
+
             if (query.getInterviewStatus() != null) {
                 predicates.add(cb.equal(root.get("status"), query.getInterviewStatus()));
             }
-            
+
             if (query.getDecisionResult() != null) {
-                predicates.add(cb.equal(root.get("decisionResult"), query.getDecisionResult()));
+                predicates.add(
+                        cb.and(
+                                cb.equal(root.get("decisionResult"), query.getDecisionResult()),
+                                cb.equal(root.get("status"), "COMPLETED")));
             }
-            
+
             if (query.getPostedById() != null) {
                 predicates.add(cb.equal(businessJoin.get("id"), query.getPostedById()));
             }
-            
+
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }

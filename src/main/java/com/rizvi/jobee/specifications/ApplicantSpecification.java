@@ -10,13 +10,16 @@ import com.rizvi.jobee.entities.Education;
 import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.entities.UserSkill;
+import com.rizvi.jobee.enums.ApplicationStatus;
 import com.rizvi.jobee.queries.ApplicationQuery;
+import com.twilio.type.App;
 
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 
 public class ApplicantSpecification {
     public static Specification<Application> withFilters(ApplicationQuery query) {
+        System.out.println(query.getApplicationStatus());
         return (root, _, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             Join<Application, Job> jobJoin = root.join("job");
@@ -78,7 +81,12 @@ public class ApplicantSpecification {
                 predicates.add(cb.equal(root.get("shortlisted"), query.getShortlisted()));
             }
             if (query.getApplicationStatus() != null) {
-                predicates.add(cb.equal(root.get("status"), query.getApplicationStatus()));
+                var status = query.getApplicationStatus();
+                if (status.equals(ApplicationStatus.INTERVIEW_COMPLETED)) {
+                    predicates.add(cb.notEqual(root.get("status"), ApplicationStatus.INTERVIEW_SCHEDULED));
+                } else {
+                    predicates.add(cb.equal(root.get("status"), query.getApplicationStatus()));
+                }
             }
             return cb.and(predicates.toArray(new Predicate[0]));
         };

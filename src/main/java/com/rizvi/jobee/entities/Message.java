@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.rizvi.jobee.enums.MessageType;
 import com.rizvi.jobee.enums.MessagerUserType;
 
 import jakarta.persistence.Column;
@@ -36,8 +37,25 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "text", nullable = false, length = 1000)
+    @Column(name = "text", nullable = true, length = 1000)
     private String text;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    @Column(name = "message_type", nullable = false)
+    private MessageType messageType = MessageType.TEXT;
+
+    @Column(name = "file_url", nullable = true)
+    private String fileUrl;
+
+    @Column(name = "file_name", nullable = true)
+    private String fileName;
+
+    @Column(name = "file_type", nullable = true)
+    private String fileType; // "image", "document", "video", etc.
+
+    @Column(name = "file_size", nullable = true)
+    private Long fileSize;
 
     @Column(name = "sender_id", nullable = false)
     private Long senderId;

@@ -62,4 +62,14 @@ public class Conversation {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    public Long getOtherPartyId(Long userId, MessagerUserType userType) {
+        if (participantOneId.equals(userId) && participantOneType == userType) {
+            return participantTwoId;
+        } else if (participantTwoId.equals(userId) && participantTwoType == userType) {
+            return participantOneId;
+        } else {
+            throw new IllegalArgumentException("User is not a participant in this conversation");
+        }
+    }
 }

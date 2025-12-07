@@ -11,7 +11,11 @@ import java.util.List;
 
 import org.hibernate.annotations.Type;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rizvi.jobee.dtos.interview.ConductorDto;
+import com.rizvi.jobee.dtos.interview.CreateInterviewDto;
+import com.rizvi.jobee.enums.ApplicationStatus;
 import com.rizvi.jobee.enums.InterviewDecisionResult;
 import com.rizvi.jobee.enums.InterviewMeetingPlatform;
 import com.rizvi.jobee.enums.InterviewStatus;
@@ -94,11 +98,11 @@ public class Interview {
     @Column(name = "contact_instructions", nullable = true)
     private String contactInstructionsOnArrival;
 
-    @Column(name = "meeting_link", nullable = false)
-    private String meetingLink;
-
     @Column(name = "phone_number", nullable = true)
     private String phoneNumber;
+
+    @Column(name = "cancellation_reason", nullable = true)
+    private String cancellationReason;
 
     @OneToMany(mappedBy = "interview", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @Builder.Default
@@ -111,12 +115,20 @@ public class Interview {
     @Column(name = "decision_date", nullable = true)
     private LocalDateTime decisionDate;
 
+    @Builder.Default
     @Enumerated(value = EnumType.STRING)
     @Column(name = "decision_result", nullable = true)
-    private InterviewDecisionResult decisionResult;
+    private InterviewDecisionResult decisionResult = InterviewDecisionResult.PENDING;
 
     @Column(name = "created_at", nullable = true, insertable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @Type(JsonType.class)
+    @Column(name = "online_meeting_information", columnDefinition = "jsonb", nullable = true)
+    private JsonNode onlineMeetingInformation;
+
+    @OneToOne(mappedBy = "interview", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private InterviewRescheduleRequest rescheduleRequest;
 
     @OneToOne(mappedBy = "interview", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private InterviewPreparation preparation;
@@ -128,7 +140,7 @@ public class Interview {
     @JoinColumn(name = "created_by_user_id", nullable = true)
     private BusinessAccount createdBy;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "application_id", nullable = true)
     private Application application;
 
@@ -149,7 +161,7 @@ public class Interview {
     @Type(JsonType.class)
     @Column(name = "other_interviewers", columnDefinition = "jsonb", nullable = true)
     @Builder.Default
-    private List<ConductorDto> otherInterviewers = new ArrayList<>();
+    private Set<ConductorDto> otherInterviewers = new HashSet<>();
 
     public boolean interviewersInclude(String email) {
         for (BusinessAccount interviewer : interviewers) {
@@ -191,7 +203,6 @@ public class Interview {
 
     // Custom setter to maintain bidirectional relationship
     public void setApplication(Application application) {
-        // Remove from previous application if exists
         if (this.application != null && !this.application.equals(application)) {
             this.application.getInterviews().remove(this);
         }
@@ -203,6 +214,10 @@ public class Interview {
         if (application != null && !application.getInterviews().contains(this)) {
             application.getInterviews().add(this);
         }
+    }
+
+    public void updateInterviewApplicationStatus() {
+        this.application.setStatus(ApplicationStatus.PENDING);
     }
 
     public String getCandidateEmail() {
@@ -225,5 +240,40 @@ public class Interview {
         return this.job != null && this.job.getBusinessAccount() != null
                 ? this.job.getBusinessAccount().getCompany().getId()
                 : null;
+    }
+
+    public void updateMeetingPlatform(
+            String meetingPlatformStr, ObjectMapper objectMapper,
+            CreateInterviewDto request) {
+        var meetingPlatform = InterviewMeetingPlatform.valueOf(meetingPlatformStr.toUpperCase());
+        this.setInterviewMeetingPlatform(meetingPlatform);
+        if (meetingPlatform == InterviewMeetingPlatform.ZOOM && request.getZoomMeetingDetails() != null) {
+            var onlineMeetingInformation = request.getZoomMeetingDetails();
+            var jsonNode = onlineMeetingInformation.toJsonNode(objectMapper);
+            this.setOnlineMeetingInformation(jsonNode);
+        } else if (meetingPlatform == InterviewMeetingPlatform.GOOGLE_MEET
+                && request.getGoogleMeetingDetails() != null) {
+            var onlineMeetingInformation = request.getGoogleMeetingDetails();
+            var jsonNode = onlineMeetingInformation.toJsonNode(objectMapper);
+            this.setOnlineMeetingInformation(jsonNode);
+        }
+    }
+
+    public void clearAllInterviewTips() {
+        this.interviewTips.clear();
+    }
+
+    public void clearAllInterviewersAndOtherInterviewers() {
+        // Clear interviewers' reference to this interview
+        for (BusinessAccount interviewer : this.interviewers) {
+            interviewer.getInterviews().remove(this);
+        }
+        this.interviewers.clear();
+        this.otherInterviewers.clear();
+    }
+
+    public void removeRescheduleRequest() {
+        this.rescheduleRequest.setInterview(null);
+        this.rescheduleRequest = null;
     }
 }

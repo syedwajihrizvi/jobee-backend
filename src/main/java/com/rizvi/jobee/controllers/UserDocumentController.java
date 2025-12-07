@@ -22,6 +22,7 @@ import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.mappers.UserDocumentMapper;
 import com.rizvi.jobee.principals.CustomPrincipal;
 import com.rizvi.jobee.repositories.UserProfileRepository;
+import com.rizvi.jobee.services.MessageFileService;
 import com.rizvi.jobee.services.UserDocumentService;
 import com.rizvi.jobee.dtos.user.CreateDocViaLinkDto;
 import com.rizvi.jobee.dtos.user.UpdateUserDocumentRequestDto;
@@ -38,6 +39,7 @@ public class UserDocumentController {
         private final UserDocumentService userDocumentService;
         private final UserProfileRepository userProfileRepository;
         private final UserDocumentMapper userDocumentMapper;
+        private final MessageFileService messageFileService;
 
         @GetMapping("/user/me")
         @Operation(summary = "Get documents for the authenticated user")
@@ -51,16 +53,27 @@ public class UserDocumentController {
 
         @PostMapping("/image")
         @Operation(summary = "Create a document via an image")
-        public ResponseEntity<UserDocumentDto> createUserDocumentViaImage(
+        public ResponseEntity<?> createUserDocumentViaImage(
                         @RequestParam("documentImage") MultipartFile documentImage,
                         @RequestParam("documentType") String documentType,
                         @RequestParam(name = "title", required = false) String title,
                         @AuthenticationPrincipal CustomPrincipal principal,
                         UriComponentsBuilder uriComponentsBuilder) {
+                // If the documentType is a Message Attachement, we use the MessageFileService
+                var userDocumentType = UserDocumentType.valueOf(documentType);
+                if (userDocumentType == UserDocumentType.MESSAGE_ATTACHMENT) {
+                        var conversationId = Long.valueOf(title);
+                        try {
+                                var uploadedFile = messageFileService.uploadMessageFile(
+                                                conversationId, documentImage, principal.getId(), principal.getRole());
+                                return ResponseEntity.ok(uploadedFile);
+                        } catch (Exception e) {
+                                return ResponseEntity.badRequest().build();
+                        }
+                }
                 Long userId = principal.getId();
                 var userProfile = userProfileRepository.findById(userId).orElseThrow(
                                 () -> new AccountNotFoundException("User profile not found"));
-                var userDocumentType = UserDocumentType.valueOf(documentType);
                 var createdDocument = userDocumentService.createUserDocumentViaImage(documentImage, userDocumentType,
                                 userProfile, title);
                 if (createdDocument == null) {
@@ -74,16 +87,29 @@ public class UserDocumentController {
 
         @PostMapping()
         @Operation(summary = "Create a user document via file")
-        public ResponseEntity<UserDocumentDto> createUserDocumentViaFile(
+        public ResponseEntity<?> createUserDocumentViaFile(
                         @RequestParam("document") MultipartFile document,
                         @RequestParam("documentType") String documentType,
                         @RequestParam(name = "title", required = false) String title,
                         @AuthenticationPrincipal CustomPrincipal principal,
                         UriComponentsBuilder uriComponentsBuilder) throws RuntimeException {
                 Long userId = principal.getId();
+
+                // Only users will upload documents outside of message attachments
+                var userDocumentType = UserDocumentType.valueOf(documentType);
+                if (userDocumentType == UserDocumentType.MESSAGE_ATTACHMENT) {
+                        var conversationId = Long.valueOf(title);
+                        try {
+                                var uploadedFile = messageFileService.uploadMessageFile(conversationId, document,
+                                                principal.getId(), principal.getRole());
+                                System.out.println("SYED-DEBUG: Uploaded message attachment via file");
+                                return ResponseEntity.ok(uploadedFile);
+                        } catch (Exception e) {
+                                return ResponseEntity.badRequest().build();
+                        }
+                }
                 var userProfile = userProfileRepository.findById(userId).orElseThrow(
                                 () -> new AccountNotFoundException("User profile not found"));
-                var userDocumentType = UserDocumentType.valueOf(documentType);
                 var createdDocument = userDocumentService.createUserDocumentViaFile(document, userDocumentType,
                                 userProfile, title, false);
                 if (createdDocument == null) {

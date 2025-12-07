@@ -109,6 +109,10 @@ public class Job {
     @JoinColumn(name = "business_account_id", nullable = false)
     private BusinessAccount businessAccount;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
+
     @OneToMany(mappedBy = "job", orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @Builder.Default
     private Set<Application> applications = new HashSet<>();

@@ -8,10 +8,12 @@ import com.rizvi.jobee.dtos.interview.InterviewDto;
 import com.rizvi.jobee.dtos.interview.InterviewPrepQuestionDto;
 import com.rizvi.jobee.dtos.interview.InterviewPreparationDto;
 import com.rizvi.jobee.dtos.interview.InterviewSummaryDto;
+import com.rizvi.jobee.dtos.interview.RequestRescheduleDto;
 import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.Interview;
 import com.rizvi.jobee.entities.InterviewPreparation;
 import com.rizvi.jobee.entities.InterviewPreparationQuestion;
+import com.rizvi.jobee.entities.InterviewRescheduleRequest;
 import com.rizvi.jobee.helpers.AISchemas.InterviewPrepQuestion;
 
 @Mapper(componentModel = "spring")
@@ -58,4 +60,6 @@ public interface InterviewMapper {
     @Mapping(target = "overallAdvice", source = "overallAdvice")
     @Mapping(target = "notesFromInterviewer", expression = "java(interviewPreparation.getNotesFromInterviewerAsList())")
     InterviewPreparationDto toPreparationDto(InterviewPreparation interviewPreparation);
+
+    RequestRescheduleDto toRequestRescheduleDto(InterviewRescheduleRequest request);
 }

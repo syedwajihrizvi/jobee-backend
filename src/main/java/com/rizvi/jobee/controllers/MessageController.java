@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/messages")
+@RequestMapping("/api/messages")
 public class MessageController {
     private final MessageService messageService;
     private final MessageMapper messageMapper;
@@ -65,7 +65,6 @@ public class MessageController {
             @AuthenticationPrincipal CustomPrincipal userPrincipal,
             @RequestParam String otherPartyId,
             @RequestParam String otherPartyRole) {
-        System.out.println("Other Party ID: " + otherPartyId);
         var userId = userPrincipal.getId();
         var userRole = userPrincipal.getRole();
         var conversation = messageService.getConversationBetweenUsers(userId, userRole, Long.valueOf(otherPartyId),

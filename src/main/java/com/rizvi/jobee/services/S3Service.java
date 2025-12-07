@@ -273,4 +273,25 @@ public class S3Service {
                                 return null;
                 }
         }
+
+        public String uploadMessageFile(MultipartFile file, Long userId, String fileType) throws IOException {
+                String originalName = file.getOriginalFilename();
+                String safeFileName = originalName
+                                .trim()
+                                .replaceAll("\\s+", "_")
+                                .replaceAll("[^a-zA-Z0-9._-]", "");
+
+                String timestamp = String.valueOf(System.currentTimeMillis());
+                final String key = "message-files/" + fileType + "/" + userId + "/" + timestamp + "_" + safeFileName;
+
+                s3Client.putObject(
+                                PutObjectRequest.builder()
+                                                .bucket(awsProperties.getBucket())
+                                                .key(key)
+                                                .contentType(file.getContentType())
+                                                .build(),
+                                RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+
+                return fileType + "/" + userId + "/" + timestamp + "_" + safeFileName;
+        }
 }

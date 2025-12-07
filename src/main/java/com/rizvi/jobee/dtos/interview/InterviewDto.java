@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.rizvi.jobee.enums.PreparationStatus;
 
 import lombok.Data;
@@ -35,14 +36,16 @@ public class InterviewDto {
     private String buildingName;
     private String parkingInfo;
     private String contactInstructionsOnArrival;
-    private String meetingLink;
     private String interviewMeetingPlatform;
     private String phoneNumber;
     private String timezone;
     private String rejectionFeedback;
     private String rejectionReason;
+    private String cancellationReason;
     private List<String> preparationTipsFromInterviewer;
     private List<InterviewConductorDto> interviewers;
     private List<ConductorDto> otherInterviewers;
     private PreparationStatus preparationStatus;
+    private JsonNode onlineMeetingInformation;
+    private RequestRescheduleDto rescheduleRequest;
 }

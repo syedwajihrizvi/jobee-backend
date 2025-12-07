@@ -17,7 +17,9 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
 
     Page<Interview> findAll(Specification<Interview> specification, Pageable pageable);
 
-    @EntityGraph(attributePaths = { "interviewers.profile", "rejection" })
+    @EntityGraph(attributePaths = { "interviewers.profile", "rejection", "candidate", "candidate.account", "createdBy",
+            "job.company",
+            "application", "interviewers", "rescheduleRequest" })
     @Query("select i from Interview i where i.id = :id")
     Optional<Interview> findById(Long id);
 
@@ -40,7 +42,7 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
     Interview findInterviewForPreparation(Long interviewId);
 
     @EntityGraph(attributePaths = { "job", "candidate", "createdBy", "createdBy.company", "interviewers.profile" })
-    @Query("select i from Interview i where i.job.businessAccount.company.id = :companyId")
+    @Query("select i from Interview i where i.job.company.id = :companyId")
     List<Interview> findByCompanyId(Long companyId, Sort sort);
 
     @EntityGraph(attributePaths = { "job", "job.businessAccount" })

@@ -87,7 +87,7 @@ public class BusinessProfileController {
                 .totalJobsPosted(totalJobs)
                 .totalApplicationsReceived(totalApplications)
                 .totalJobViews(totalViews)
-                .totalInterviewsScheduled(totalInterviews)
+                .totalInterviews(totalInterviews)
                 .lastJobPosted(lastJobPosted != null ? jobMapper.toSummaryDto(lastJobPosted) : null)
                 .mostAppliedJobs(mostAppliedJobs)
                 .mostViewedJobs(mostViewedJobs)

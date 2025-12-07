@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,8 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.rizvi.jobee.dtos.interview.CancelInterviewRequestDto;
 import com.rizvi.jobee.dtos.interview.CreateInterviewDto;
 import com.rizvi.jobee.dtos.interview.CreateInterviewRejectionDto;
+import com.rizvi.jobee.dtos.interview.CreateInterviewRescheduleDto;
 import com.rizvi.jobee.dtos.interview.InterviewDto;
 import com.rizvi.jobee.dtos.interview.InterviewPrepQuestionDto;
 import com.rizvi.jobee.dtos.interview.InterviewPreparationDto;
@@ -61,23 +64,13 @@ public class InterviewController {
             @AuthenticationPrincipal CustomPrincipal principal) {
         var accountId = principal.getId();
         var accountType = principal.getAccountType();
+        var companyId = principal.getCompanyId();
         if (accountType.equals(BusinessType.RECRUITER.name())) {
             query.setPostedById(accountId);
         } else if (accountType.equals(BusinessType.EMPLOYEE.name())) {
             query.setConductorId(accountId);
         }
-        // Either way, we set the company Id in the query
-        // TODO: Maybe add the company Id to the principal to avoid this extra call
-        var businessAccountId = principal.getId();
-        var businessAccount = accountService.getBusinessAccountById(businessAccountId);
-        var companyId = businessAccount.getCompany().getId();
         query.setCompanyId(companyId);
-        // May need to add additional checks based on principal info and business
-        // account type
-        // If ADMIN account, then can view all interviews for the company
-        // If RECRUITER account, then can view all interviews posted by that recruiter
-        // If EMPLOYEE account, then can view all interviews that employee is a
-        // condcutor for
         var paginatedInterviews = interviewService.getAllInterviews(query, pageNumber, pageSize);
         var interviews = paginatedInterviews.getContent();
         var hasMore = paginatedInterviews.isHasMore();
@@ -90,10 +83,16 @@ public class InterviewController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get interview by ID")
-    public ResponseEntity<InterviewDto> getInterviewById(@PathVariable Long id) {
+    public ResponseEntity<InterviewDto> getInterviewById(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomPrincipal principal) {
         var interview = interviewService.getInterviewById(id);
+        System.out.println("SYED-DEBUG: Reschedule Request: " + interview.getRescheduleRequest());
+        var userEmail = principal.getEmail();
         var interviewDto = interviewMapper.toDto(interview);
-        return ResponseEntity.ok(interviewDto);
+        var secureInterviewDto = interviewService.secureDetailedInterview(interviewDto, userEmail);
+        System.out.println("SYED-DEBUG: Reschedule Request: " + secureInterviewDto.getRescheduleRequest());
+        return ResponseEntity.ok(secureInterviewDto);
     }
 
     @GetMapping("/candidate/me")
@@ -154,12 +153,9 @@ public class InterviewController {
             @AuthenticationPrincipal CustomPrincipal principal,
             UriComponentsBuilder uriComponentsBuilder) throws RuntimeException {
         var creatorId = principal.getId();
-        System.out.println("SYED-DEBUG: Creating interview by creator ID: " + creatorId);
         var creator = accountService.getBusinessAccountById(creatorId);
         var job = jobService.getJobById(request.getJobId());
-        System.out.println("SYED-DEBUG: Creating interview for job ID: " + job.getId());
         var userProfile = userProfileService.getUserProfileById(request.getCandidateId());
-        System.out.println("SYED-DEBUG: Creating interview for candidate ID: " + userProfile.getId());
         var applicationId = request.getApplicationId();
         var application = applicationService.findById(applicationId);
         var savedInterview = interviewService.createInterview(request, creator, userProfile, job, application);
@@ -183,6 +179,16 @@ public class InterviewController {
             @PathVariable Long id,
             @AuthenticationPrincipal CustomPrincipal principal) {
         interviewService.markInterviewAsCompleted(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{id}/cancel")
+    @Operation(summary = "Cancel an interview")
+    public ResponseEntity<Void> cancelInterview(
+            @PathVariable Long id,
+            @RequestBody @Valid CancelInterviewRequestDto request,
+            @AuthenticationPrincipal CustomPrincipal principal) {
+        interviewService.cancelInterview(id, request.getCancellationReason());
         return ResponseEntity.ok().build();
     }
 
@@ -262,5 +268,25 @@ public class InterviewController {
         var feedback = request.getFeedback();
         var savedInterview = interviewService.rejectCandidateInterview(id, reason, feedback);
         return ResponseEntity.ok(interviewMapper.toDto(savedInterview));
+    }
+
+    @PostMapping("{id}/request-reschedule")
+    @Operation(summary = "Candidate can submit a request to reschedule an interview")
+    public ResponseEntity<Void> submitRescheduleRequest(
+            @PathVariable Long id, @RequestBody CreateInterviewRescheduleDto request,
+            @AuthenticationPrincipal CustomPrincipal principal) {
+        interviewService.createInterviewRescheduleRequest(id, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("{id}")
+    @Operation(summary = "Business can update an interview")
+    public ResponseEntity<InterviewDto> updateInterview(
+            @PathVariable Long id,
+            @RequestBody @Valid CreateInterviewDto request,
+            @AuthenticationPrincipal CustomPrincipal principal) {
+
+        var updatedInterview = interviewService.updateInterview(id, request);
+        return ResponseEntity.ok(interviewMapper.toDto(updatedInterview));
     }
 }

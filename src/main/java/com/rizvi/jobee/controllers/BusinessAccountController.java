@@ -92,7 +92,6 @@ public class BusinessAccountController {
         invitationService.updateInvitationStatus(invitation, InvitationStatus.ACCEPTED);
         var uri = uriComponentsBuilder.path("/business-accounts/{id}")
                 .buildAndExpand(savedBusinessAccount.getId()).toUri();
-        System.out.println("Business account created with ID: " + savedBusinessAccount.getId());
         return ResponseEntity.created(uri).body(businessMapper.toDto(savedBusinessAccount));
     }
 

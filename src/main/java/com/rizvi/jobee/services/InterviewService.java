@@ -1,6 +1,8 @@
 package com.rizvi.jobee.services;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -10,8 +12,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rizvi.jobee.dtos.interview.ConductorDto;
 import com.rizvi.jobee.dtos.interview.CreateInterviewDto;
+import com.rizvi.jobee.dtos.interview.CreateInterviewRescheduleDto;
+import com.rizvi.jobee.dtos.interview.InterviewDto;
 import com.rizvi.jobee.dtos.job.PaginatedResponse;
 import com.rizvi.jobee.entities.Application;
 import com.rizvi.jobee.entities.BusinessAccount;
@@ -19,13 +27,14 @@ import com.rizvi.jobee.entities.Interview;
 import com.rizvi.jobee.entities.InterviewPreparation;
 import com.rizvi.jobee.entities.InterviewPreparationQuestion;
 import com.rizvi.jobee.entities.InterviewRejection;
+import com.rizvi.jobee.entities.InterviewRescheduleRequest;
 import com.rizvi.jobee.entities.InterviewTip;
 import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.enums.ApplicationStatus;
 import com.rizvi.jobee.enums.InterviewDecisionResult;
-import com.rizvi.jobee.enums.InterviewMeetingPlatform;
 import com.rizvi.jobee.enums.InterviewStatus;
+import com.rizvi.jobee.enums.InterviewType;
 import com.rizvi.jobee.enums.PreparationStatus;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.InterviewNotFoundException;
@@ -60,7 +69,7 @@ public class InterviewService {
     private final S3Service s3Service;
     private final RequestQueue requestQueue;
     private final UserNotificationService userNotificationService;
-    private final EmailSender emailSender;
+    private final ObjectMapper objectMapper;
 
     public PaginatedResponse<Interview> getAllInterviews(InterviewQuery query, int pageNumber, int pageSize) {
         PageRequest pageRequest = PageRequest.of(
@@ -137,7 +146,6 @@ public class InterviewService {
     public Interview createInterview(
             CreateInterviewDto request, BusinessAccount businessAccount,
             UserProfile candidate, Job job, Application application) {
-        System.out.println("Creating interview with request: " + request);
         var interview = Interview.builder()
                 .job(job)
                 .candidate(candidate)
@@ -152,7 +160,6 @@ public class InterviewService {
                 .buildingName(request.getBuildingName())
                 .parkingInfo(request.getParkingInfo())
                 .contactInstructionsOnArrival(request.getContactInstructionsOnArrival())
-                .meetingLink(request.getMeetingLink())
                 .phoneNumber(request.getPhoneNumber())
                 .status(InterviewStatus.SCHEDULED)
                 .createdBy(businessAccount)
@@ -160,12 +167,10 @@ public class InterviewService {
         String meetingPlatformStr = request.getMeetingPlatform();
         if (meetingPlatformStr != null && !meetingPlatformStr.isEmpty()) {
             try {
-                var meetingPlatform = InterviewMeetingPlatform.valueOf(meetingPlatformStr.toUpperCase());
-                interview.setInterviewMeetingPlatform(meetingPlatform);
+                interview.updateMeetingPlatform(meetingPlatformStr, objectMapper, request);
             } catch (IllegalArgumentException e) {
                 System.out.println("Invalid meeting platform: " + meetingPlatformStr);
             }
-
         }
         interview.setApplication(application);
         for (ConductorDto conductor : request.getConductors()) {
@@ -195,6 +200,89 @@ public class InterviewService {
         applicationRepository.save(application);
         requestQueue.sendInterviewScheduledEmailsAndNotifications(savedInterview);
         return savedInterview;
+    }
+
+    public Interview updateInterview(Long interviewId, CreateInterviewDto request) {
+        var interview = interviewRepository.findById(interviewId)
+                .orElseThrow(() -> new InterviewNotFoundException("Interview not found with id: " + interviewId));
+        interview.setTitle(request.getTitle());
+        interview.setDescription(request.getDescription());
+        interview.setInterviewDate(request.getInterviewDate());
+        interview.setStartTime(request.getStartTime());
+        interview.setEndTime(request.getEndTime());
+        interview.setInterviewType(request.getInterviewType());
+        interview.setTimezone(request.getTimezone());
+        interview.setStreetAddress(request.getStreetAddress());
+        interview.setBuildingName(request.getBuildingName());
+        interview.setParkingInfo(request.getParkingInfo());
+        interview.setContactInstructionsOnArrival(request.getContactInstructionsOnArrival());
+        interview.setPhoneNumber(request.getPhoneNumber());
+
+        if (request.getInterviewType() != InterviewType.ONLINE) {
+            interview.setInterviewMeetingPlatform(null);
+            interview.setOnlineMeetingInformation(null);
+        } else {
+            // Update the meeting platform details if needed
+            String meetingPlatformStr = request.getMeetingPlatform();
+            if (meetingPlatformStr != null && !meetingPlatformStr.isEmpty()) {
+                try {
+                    interview.updateMeetingPlatform(meetingPlatformStr, objectMapper, request);
+                } catch (IllegalArgumentException e) {
+                    System.out.println("Invalid meeting platform: " + meetingPlatformStr);
+                }
+            }
+        }
+
+        // Replace all the interview tips
+        interview.clearAllInterviewTips();
+        for (String tip : request.getPreparationTipsFromInterviewer()) {
+            InterviewTip interviewTip = InterviewTip.builder().tip(tip).interview(interview).build();
+            interview.getInterviewTips().add(interviewTip);
+        }
+
+        // Get current interviewers and other interviewers
+        var originalInterviewers = interview.getInterviewers();
+        var originalOtherInterviewers = interview.getOtherInterviewers();
+        interview.clearAllInterviewersAndOtherInterviewers();
+        Set<BusinessAccount> newInterviewers = new HashSet<>();
+        Set<ConductorDto> newOtherInterviewers = new HashSet<>();
+
+        // Update the hiring team
+        for (ConductorDto conductor : request.getConductors()) {
+            var interviewer = businessAccountRepository.findByEmail(conductor.getEmail()).orElse(null);
+            if (interviewer == null) {
+                interview.addOtherInterviewer(conductor);
+                if (!originalOtherInterviewers.contains(conductor)) {
+                    newOtherInterviewers.add(conductor);
+                }
+            } else {
+                interview.addInterviewer(interviewer);
+                if (!originalInterviewers.contains(interviewer)) {
+                    newInterviewers.add(interviewer);
+                }
+            }
+        }
+        Set<BusinessAccount> removedInterviewers = new HashSet<>();
+        Set<ConductorDto> removedOtherInterviewers = new HashSet<>();
+        for (BusinessAccount interviewer : originalInterviewers) {
+            if (!interview.getInterviewers().contains(interviewer)) {
+                removedInterviewers.add(interviewer);
+            }
+        }
+        for (ConductorDto otherInterviewer : originalOtherInterviewers) {
+            if (!interview.getOtherInterviewers().contains(otherInterviewer)) {
+                removedOtherInterviewers.add(otherInterviewer);
+            }
+        }
+        // After the update set it to null
+        interview.setRescheduleRequest(null);
+        System.out.println("SYED-DEBUG: After update, rescheduleRequest: " + interview.getRescheduleRequest());
+        // Interviewers divided into two groups: existing, new, and removed
+        // Each one need to be handled differently
+        var updatedInterview = interviewRepository.save(interview);
+        requestQueue.sendInterviewUpdatedEmailsAndNotifications(updatedInterview, newInterviewers, newOtherInterviewers,
+                removedInterviewers, removedOtherInterviewers);
+        return updatedInterview;
     }
 
     @Transactional
@@ -236,12 +324,9 @@ public class InterviewService {
         if (question == null) {
             throw new InterviewNotFoundException("Interview question not found with id: " + interviewQuestionId);
         }
-        // If it has an audio url, then we already generated it so simply return the aws
-        // bucket url
         if (question.getQuestionAudioUrl() != null && !question.getQuestionAudioUrl().isEmpty()) {
             return question;
         }
-        // Otherwise, we need to generate the audio using AI and store it in the bucket
         try {
             byte[] audioBytes = aiService.textToSpeech(question.getQuestion());
             var audioFileName = s3Service.uploadInterviewPrepQuestionAudio(interviewId, interviewQuestionId,
@@ -377,6 +462,18 @@ public class InterviewService {
     }
 
     @Transactional
+    public void cancelInterview(Long interviewId, String reason) {
+        var interview = interviewRepository.findById(interviewId)
+                .orElseThrow(() -> new InterviewNotFoundException("Interview not found with id: " + interviewId));
+        interview.setStatus(InterviewStatus.CANCELLED);
+        interview.setCancellationReason(reason);
+        interview.setOnlineMeetingInformation(null);
+        interview.updateInterviewApplicationStatus();
+        requestQueue.sendInterviewCancelledEmailsAndNotifications(interview);
+        interviewRepository.save(interview);
+    }
+
+    @Transactional
     public Interview rejectCandidateInterview(Long interviewId, String reason, String feedback) {
         var interview = interviewRepository.findByInterviewWithApplication(interviewId)
                 .orElseThrow(() -> new InterviewNotFoundException("Interview not found with id: " + interviewId));
@@ -394,7 +491,54 @@ public class InterviewService {
         var savedInterview = interviewRepository.save(interview);
         application.setStatus(ApplicationStatus.REJECTED);
         applicationRepository.save(application);
-        userNotificationService.createInterviewRejectionNotificationAndSend(savedInterview);
+        requestQueue.sendRejectionAfterInterviewEmailsAndNotifications(savedInterview);
         return savedInterview;
+    }
+
+    public InterviewDto secureDetailedInterview(InterviewDto interviewDto, String userEmail) {
+        JsonNode onlineMeetingInfo = interviewDto.getOnlineMeetingInformation();
+        if (onlineMeetingInfo != null && onlineMeetingInfo.has("registrants")) {
+            ArrayNode registrants = (ArrayNode) onlineMeetingInfo.get("registrants");
+            // Find registrant matching the user's email
+            JsonNode userRegistrant = null;
+            for (JsonNode registrant : registrants) {
+                if (registrant.has("email") && userEmail.equalsIgnoreCase(registrant.get("email").asText())) {
+                    userRegistrant = registrant;
+                    break;
+                }
+            }
+            ObjectNode safeMeetingInfo = onlineMeetingInfo.deepCopy();
+            safeMeetingInfo.remove("registrants");
+            if (userRegistrant != null && userRegistrant.has("join_url")) {
+                safeMeetingInfo.put("joinUrl", userRegistrant.get("join_url").asText());
+            }
+            safeMeetingInfo.putNull("meetingPassword");
+            interviewDto.setOnlineMeetingInformation(safeMeetingInfo);
+        }
+        return interviewDto;
+    }
+
+    public void createInterviewRescheduleRequest(Long interviewId, CreateInterviewRescheduleDto request) {
+        var interview = interviewRepository.findById(interviewId)
+                .orElseThrow(() -> new InterviewNotFoundException("Interview not found with id: " + interviewId));
+        var existingRequest = interview.getRescheduleRequest();
+        if (existingRequest != null) {
+            existingRequest.setInterviewDate(request.getInterviewDate());
+            existingRequest.setStartTime(request.getStartTime());
+            existingRequest.setReason(request.getReason());
+            existingRequest.setTimezone(request.getTimezone());
+            interview.setRescheduleRequest(existingRequest);
+        } else {
+            var rescheduleRequest = InterviewRescheduleRequest.builder()
+                    .interview(interview)
+                    .interviewDate(request.getInterviewDate())
+                    .startTime(request.getStartTime())
+                    .reason(request.getReason())
+                    .timezone(request.getTimezone())
+                    .build();
+            interview.setRescheduleRequest(rescheduleRequest);
+        }
+        interviewRepository.save(interview);
+        requestQueue.sendInterviewRescheduleRequestEmailsAndNotifications(interview);
     }
 }

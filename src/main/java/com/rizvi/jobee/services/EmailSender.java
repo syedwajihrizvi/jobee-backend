@@ -5,10 +5,10 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.rizvi.jobee.dtos.interview.ConductorDto;
 import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.Interview;
 import com.rizvi.jobee.entities.InterviewPreparation;
-import com.rizvi.jobee.entities.InterviewRejection;
 import com.rizvi.jobee.entities.Job;
 
 import lombok.RequiredArgsConstructor;
@@ -28,8 +28,102 @@ public class EmailSender {
   @Value("${email.from}")
   private String senderEmail;
 
-  public void sendRejectionEmail(InterviewRejection rejection) {
-    System.out.println("Sending rejection email...");
+  public void sendRejectionEmail(Interview interview) {
+    String to = interview.getCandidateEmail();
+    String fullName = interview.getCandidate().getFullName();
+    String jobTitle = interview.getJob().getTitle();
+    String companyName = interview.getCreatedBy().getCompany().getName();
+    String reasonForRejection = interview.getRejection().getReason();
+    String feedbackForRejection = interview.getRejection().getFeedback();
+    try {
+      String subject = "Update on your application for " + jobTitle + " at " + companyName;
+      String htmlString = generateRejectionEmailHtml(fullName, jobTitle, companyName, reasonForRejection,
+          feedbackForRejection);
+      resendService.sendEmail(to, subject, htmlString);
+    } catch (Exception e) {
+      System.out.println("Failed to send rejection email: " + e.getMessage());
+    }
+  }
+
+  public void sendUpdatedInterviewEmail(
+      Interview interview, Set<BusinessAccount> newInterviewers, Set<ConductorDto> newOtherInterviewers,
+      Set<BusinessAccount> removedInterviewers, Set<ConductorDto> removedOtherInterviewers) {
+    String to = interview.getCandidateEmail();
+    String fullName = interview.getCandidate().getFullName();
+    String jobTitle = interview.getJob().getTitle();
+    String interviewDate = interview.getInterviewDate().toString();
+    String companyName = interview.getCreatedBy().getCompany().getName();
+
+    try {
+      String candidateSubject = "IMPORTANT: Your interview for " + jobTitle + " at " + companyName
+          + " has been updated";
+      String candidateHtml = generateUpdatedInterviewEmailForCandidate(fullName, jobTitle, interviewDate,
+          companyName);
+      resendService.sendEmail(to, candidateSubject, candidateHtml);
+    } catch (Exception e) {
+      System.out.println("Failed to send scheduled interview email: " + e.getMessage());
+    }
+
+    // Send email to conductors who are on Jobee + creator
+    String conductorSubject = "Updated regarding the interview for " + jobTitle;
+    Set<BusinessAccount> validConductors = interview.getInterviewers();
+    validConductors.add(interview.getCreatedBy());
+    validConductors.forEach(conductor -> {
+      try {
+        if (removedInterviewers.contains(conductor)) {
+          String conductorHtml = generateConductorWithAccountRemovedFromInterviewEmail(
+              interview.getCreatedBy(), jobTitle, companyName, conductor);
+          resendService.sendEmail(conductor.getEmail(), conductorSubject, conductorHtml);
+          return;
+        } else if (newInterviewers.contains(conductor)) {
+          String conductorHtml = generateScheduledInterviewEmailForConductorWithAccount(
+              interview.getCreatedBy(), jobTitle, interviewDate, companyName, conductor);
+          resendService.sendEmail(conductor.getEmail(), conductorSubject, conductorHtml);
+          return;
+        } else {
+          String conductorHtml = generateUpdatedInterviewEmailForConductorWithAccount(
+              interview.getCreatedBy(), jobTitle, companyName, conductor);
+          resendService.sendEmail(conductor.getEmail(), conductorSubject, conductorHtml);
+        }
+      } catch (Exception e) {
+        System.out.println("Failed to send scheduled interview email to conductor: " + e.getMessage());
+      }
+    });
+
+    // TODO: Send email to conductors who are not on Jobee
+  }
+
+  public void sendInterviewCancellationEmail(Interview interview) {
+    String to = interview.getCandidateEmail();
+    String fullName = interview.getCandidate().getFullName();
+    String jobTitle = interview.getJob().getTitle();
+    String companyName = interview.getJob().getCompany().getName();
+    String cancellationReason = interview.getCancellationReason();
+
+    try {
+      String candidateSubject = "Your interview for " + jobTitle + " at " + companyName + " has been cancelled";
+      String candidateHtml = generateInterviewCancellationEmailHtml(fullName, jobTitle, companyName,
+          cancellationReason);
+      resendService.sendEmail(to, candidateSubject, candidateHtml);
+    } catch (Exception e) {
+      System.out.println("Failed to send interview cancellation email: " + e.getMessage());
+    }
+
+    // Send email to conductors who are on Jobee + creator
+    String conductorSubject = "Interview Cancelled for " + jobTitle;
+    Set<BusinessAccount> validConductors = interview.getInterviewers();
+    validConductors.add(interview.getCreatedBy());
+    validConductors.forEach(conductor -> {
+      try {
+        String conductorHtml = generateInterviewCancellationEmailForConductorWithAccount(
+            interview.getCreatedBy(), jobTitle, companyName, cancellationReason, conductor);
+        resendService.sendEmail(conductor.getEmail(), conductorSubject, conductorHtml);
+      } catch (Exception e) {
+        System.out.println("Failed to send interview cancellation email to conductor: " + e.getMessage());
+      }
+    });
+
+    // TODO: Send email to conductors who are not on Jobee
   }
 
   public void sendScheduledInterviewEmail(Interview interview) {
@@ -40,30 +134,30 @@ public class EmailSender {
     String companyName = interview.getCreatedBy().getCompany().getName();
 
     try {
-      // Send email to candidate
       String candidateSubject = "You have a scheduled interview for " + jobTitle + " at " + companyName;
       String candidateHtml = generateScheduledInterviewEmailForCandidate(fullName, jobTitle, interviewDate,
           companyName);
       resendService.sendEmail(to, candidateSubject, candidateHtml);
-      // Send email to conductors who are on Jobee + creator
-
-      String conductorSubject = "Interview Scheduled to Conduct for " + jobTitle;
-      Set<BusinessAccount> validConductors = interview.getInterviewers();
-      validConductors.add(interview.getCreatedBy());
-      validConductors.forEach(conductor -> {
-        try {
-          String conductorHtml = generateScheduledInterviewEmailForConductorWithAccount(
-              interview.getCreatedBy(), jobTitle, interviewDate, companyName, conductor);
-          resendService.sendEmail(conductor.getEmail(), conductorSubject, conductorHtml);
-        } catch (Exception e) {
-          System.out.println("Failed to send scheduled interview email to conductor: " + e.getMessage());
-        }
-      });
-
-      // TODO: Send email to conductors who are not on Jobee
     } catch (Exception e) {
       System.out.println("Failed to send scheduled interview email: " + e.getMessage());
     }
+
+    // Send email to conductors who are on Jobee + creator
+    String conductorSubject = "Interview Scheduled to Conduct for " + jobTitle;
+    Set<BusinessAccount> validConductors = interview.getInterviewers();
+    validConductors.add(interview.getCreatedBy());
+    validConductors.forEach(conductor -> {
+      try {
+        String conductorHtml = generateScheduledInterviewEmailForConductorWithAccount(
+            interview.getCreatedBy(), jobTitle, interviewDate, companyName, conductor);
+        resendService.sendEmail(conductor.getEmail(), conductorSubject, conductorHtml);
+      } catch (Exception e) {
+        System.out.println("Failed to send scheduled interview email to conductor: " + e.getMessage());
+      }
+    });
+
+    // TODO: Send email to conductors who are not on Jobee
+
   }
 
   public void sendInterviewPrepEmail(InterviewPreparation interviewPrep) {
@@ -380,6 +474,209 @@ public class EmailSender {
     return htmlString;
   }
 
+  private String generateInterviewCancellationEmailForConductorWithAccount(
+      BusinessAccount interviewCreator, String jobTitle, String companyName, String cancellationReason,
+      BusinessAccount conductorAccount) {
+    String createdBy = interviewCreator.getFullName();
+    String conductor = conductorAccount.getFullName();
+    String htmlString = """
+                        <html>
+                <body style="font-family: Arial, sans-serif; background-color: #f6f9fc; padding: 40px; text-align: center;">
+                  <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 40px;">
+                    <h2 style="color: #2d3748;">Interview for %s has been cancelled</h2>
+                    <p style="color: #4a5568;">Hello %s,</p>
+                    <p style="color: #4a5568;">
+                      You were supposed to conduct theinterview for the position of <strong>%s</strong> at <strong>%s</strong>.
+                      However, the interview has been cancelled by <strong>%s</strong>.
+                    </p>
+                    <p style="color: #4a5568;">
+                      Reason for cancellation: <strong>%s</strong>
+                    </p>
+                    <p style="margin-top: 40px; font-size: 12px; color: #a0aec0;">
+                      If you have any questions, feel free to reach out to our support team.
+                    </p>
+                      <div style="
+                        display: inline-block;
+                        margin: 20px 0;
+                        padding: 14px 28px;
+                        background-color: #21c55e;
+                        color: white;
+                        font-weight: bold;
+                        border-radius: 6px;
+                        text-decoration: none;">
+                        View on Jobee
+                      </div>
+                  </div>
+                </body>
+              </html>
+        """
+        .formatted(jobTitle, conductor, jobTitle, companyName, createdBy, cancellationReason);
+    return htmlString;
+  }
+
+  private String generateUpdatedInterviewEmailForCandidate(String fullName, String jobTitle, String interviewDate,
+      String companyName) {
+    String htmlString = """
+              <html>
+                <body style="font-family: Arial, sans-serif; background-color: #f6f9fc; padding: 40px; text-align: center;">
+                  <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 40px;">
+                    <h2 style="color: #2d3748;">Your Interview for %s has been Updated!</h2>
+                    <p style="color: #4a5568;">Hello %s,</p>
+                    <p style="color: #4a5568;">
+                      Your interview for the position of <strong>%s</strong> at <strong>%s</strong> has been updated. Please review the new details on Jobee.
+                    </p>
+                    <div>
+                    <a href="%s" style="
+                        display: inline-block;
+                        margin: 20px 0;
+                        padding: 14px 28px;
+                        background-color: #2563eb;
+                        color: white;
+                        font-weight: bold;
+                        border-radius: 6px;
+                        text-decoration: none;">
+                      View on Jobee
+                    </a>
+                    </div>
+                    <p style="margin-top: 40px; font-size: 12px; color: #a0aec0;">
+                      If you didn't expect this update, you can safely ignore this email.
+                    </p>
+                  </div>
+                </body>
+              </html>
+        """
+        .formatted(jobTitle, fullName, jobTitle, companyName, "https://google.com");
+    return htmlString;
+  }
+
+  private String generateUpdatedInterviewEmailForConductorWithAccount(
+      BusinessAccount createdBy, String jobTitle, String companyName, BusinessAccount conductor) {
+    String creatorName = createdBy.getFullName();
+    String conductorName = conductor.getFullName();
+    Long creatorId = createdBy.getId();
+    Long conductorId = conductor.getId();
+    boolean isSelfCreated = creatorId.equals(conductorId);
+    if (isSelfCreated) {
+      return """
+          <html>
+            <body style="font-family: Arial, sans-serif; background-color: #f6f9fc; padding: 40px; text-align: center;">
+              <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 40px;">
+                <h2 style="color: #2d3748;">Interview Updated for %s</h2>
+                <p style="color: #4a5568;">Hello %s,</p>
+                <p style="color: #4a5568;">
+                  Your interview for <strong>%s</strong> has been successfully updated.
+                </p>
+                <p style="color: #4a5568;">
+                  Please review the updated details on Jobee.
+                </p>
+                <div>
+                  <a href="%s" style="
+                      display: inline-block;
+                      margin: 20px 0;
+                      padding: 14px 28px;
+                      background-color: #2563eb;
+                      color: white;
+                      font-weight: bold;
+                      border-radius: 6px;
+                      text-decoration: none;">
+                    View on Jobee
+                  </a>
+                </div>
+                <p style="margin-top: 40px; font-size: 12px; color: #a0aec0;">
+                  If you did not expect this email, you can safely ignore it.
+                </p>
+              </div>
+            </body>
+          </html>
+          """
+          .formatted(
+              jobTitle,
+              creatorName,
+              jobTitle,
+              "https://google.com");
+    } else {
+      return """
+          <html>
+            <body style="font-family: Arial, sans-serif; background-color: #f6f9fc; padding: 40px; text-align: center;">
+              <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 40px;">
+                <h2 style="color: #2d37448;">Interview Update for %s</h2>
+                <p style="color: #4a5568;">Hello %s,</p>
+                <p style="color: #4a5568;">
+                  <strong>%s</strong> has updated the interview details for the <strong>%s</strong> role.
+                </p>
+                <p style="color: #4a5568;">
+                 Please review details on Jobee.
+                </p>
+                <div>
+                  <a href="%s" style="
+                      display: inline-block;
+                      margin: 20px 0;
+                      padding: 14px 28px;
+                      background-color: #21c55e;
+                      color: white;
+                      font-weight: bold;
+                      border-radius: 6px;
+                      text-decoration: none;">
+                    View on Jobee
+                  </a>
+                </div>
+                <p style="margin-top: 40px; font-size: 12px; color: #a0aec0;">
+                  If you didn't expect this update, you can safely ignore this email.
+                </p>
+              </div>
+            </body>
+          </html>
+          """
+          .formatted(
+              jobTitle,
+              conductorName,
+              creatorName,
+              jobTitle,
+              "https://google.com");
+    }
+  }
+
+  private String generateConductorWithAccountRemovedFromInterviewEmail(
+      BusinessAccount createdBy, String jobTitle, String companyName, BusinessAccount conductor) {
+    String creatorName = createdBy.getFullName();
+    String conductorName = conductor.getFullName();
+    return """
+        <html>
+          <body style="font-family: Arial, sans-serif; background-color: #f6f9fc; padding: 40px; text-align: center;">
+            <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 40px;">
+              <h2 style="color: #2d3748;">You have been removed from the Interview for %s</h2>
+              <p style="color: #4a5568;">Hello %s,</p>
+              <p style="color: #4a5568;">
+                <strong>%s</strong> has removed you from conducting the interview for the <strong>%s</strong> role.
+              </p>
+              <p style="margin-top: 40px; font-size: 12px; color: #a0aec0;">
+                If you have any questions, feel free to reach out to our support team.
+              </p>
+                <div>
+                  <a href="%s" style="
+                      display: inline-block;
+                      margin: 20px 0;
+                      padding: 14px 28px;
+                      background-color: #2563eb;
+                      color: white;
+                      font-weight: bold;
+                      border-radius: 6px;
+                      text-decoration: none;">
+                    View on Jobee
+                  </a>
+                </div>
+            </div>
+          </body>
+        </html>
+        """
+        .formatted(
+            jobTitle,
+            conductorName,
+            creatorName,
+            jobTitle,
+            "https://google.com");
+  }
+
   private String generateScheduledInterviewEmailForConductorWithAccount(
       BusinessAccount interviewCreator,
       String jobTitle,
@@ -473,6 +770,83 @@ public class EmailSender {
             jobTitle,
             interviewDate,
             "https://google.com");
+  }
+
+  private String generateInterviewCancellationEmailHtml(String fullName, String jobTitle, String companyName,
+      String cancellationReason) {
+    String htmlString = """
+                        <html>
+                <body style="font-family: Arial, sans-serif; background-color: #f6f9fc; padding: 40px; text-align: center;">
+                  <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 40px;">
+                    <p style="color: #4a5568;">Hello %s,</p>
+                    <p style="color: #4a5568;">
+                      We regret to inform you that your interview for the position of <strong>%s</strong> at <strong>%s</strong> has been cancelled.
+                    </p>
+                    <p style="color: #4a5568;">
+                      Reason for cancellation: <strong>%s</strong>
+                    </p>
+                    <p style="margin-top: 40px; font-size: 12px; color: #a0aec0;">
+                      If you have any questions, feel free to reach out to our support team.
+                    </p>
+                      <div style="
+                        display: inline-block;
+                        margin: 20px 0;
+                        padding: 14px 28px;
+                        background-color: #21c55e;
+                        color: white;
+                        font-weight: bold;
+                        border-radius: 6px;
+                        text-decoration: none;">
+                      View on Jobee
+                    </div>
+                  </div>
+                </body>
+              </html>
+        """
+        .formatted(fullName, jobTitle, companyName, cancellationReason);
+    return htmlString;
+  }
+
+  private String generateRejectionEmailHtml(String fullName, String jobTitle, String companyName,
+      String reasonForRejection, String feedbackForRejection) {
+    String htmlString = """
+                        <html>
+                <body style="font-family: Arial, sans-serif; background-color: #f6f9fc; padding: 40px; text-align: center;">
+                  <div style="max-width: 700px; margin: auto; background: white; border-radius: 10px; padding: 40px;">
+                    <p style="color: #4a5568;">Hello %s,</p>
+                    <p style="color: #4a5568;">
+                      We appreciate your interest in the %s position at %s. After careful consideration, we regret to inform you that we will not be moving forward with your application.
+                    </p>
+                    <p style="color: #4a5568;">
+                      Reason for rejection: <strong>%s</strong>
+                    </p>
+                    <p style="color: #4a5568;">
+                      Feedback: <strong>%s</strong>
+                    <p style="color: #4a5568;">
+                      We encourage you to apply for future openings that match your skills and experience. Thank you again for considering a career with us.
+                    </p>
+                    <p style="margin-top: 40px; font-size: 12px; color: #a0aec0;">
+                      If you have any questions, feel free to reach out to our support team.
+                    </p>
+                  </div>
+                    <div style="
+                        display: inline-block;
+                        margin: 20px 0;
+                        padding: 14px 28px;
+                        background-color: #21c55e;
+                        color: white;
+                        font-weight: bold;
+                        border-radius: 6px;
+                        text-decoration: none;">
+                      View on Jobee
+                    </div>
+                  </div>
+                </body>
+              </html>
+        """
+        .formatted(fullName, jobTitle, companyName, reasonForRejection,
+            feedbackForRejection.isEmpty() ? "No Additional Feedback" : feedbackForRejection);
+    return htmlString;
   }
 
   private String generateInterviewPrepHtml(String fullName, String jobTitle, String interviewDate,
