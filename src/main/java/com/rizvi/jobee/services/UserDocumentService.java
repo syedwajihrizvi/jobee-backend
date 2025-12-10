@@ -210,14 +210,12 @@ public class UserDocumentService {
         // If it is not pdf type, we convert to pdf
         byte[] pdfBytes = new byte[0];
         if (!document.getContentType().equals("application/pdf")) {
-            System.out.println("SYED-DEBUG: Document is not PDF, converting to PDF from: " + document.getContentType());
             try {
                 pdfBytes = fileService.convertDocxToPdf(document.getBytes());
             } catch (Exception e) {
                 System.out.println("SYED-DEBUG: Error converting document to PDF: " + e.getMessage());
                 return pdfBytes;
             }
-            System.out.println("SYED-DEBUG: Converting document to PDF for preview generation.");
         } else {
             pdfBytes = document.getBytes();
         }
@@ -228,6 +226,10 @@ public class UserDocumentService {
             ImageIO.write(image, "png", baos);
             return baos.toByteArray();
         }
+    }
+
+    public void sendDocumentAsEmail(Long userProfileId, Long documentId) {
+
     }
 
 }

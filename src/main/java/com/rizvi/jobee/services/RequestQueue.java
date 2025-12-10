@@ -1,5 +1,6 @@
 package com.rizvi.jobee.services;
 
+import java.io.File;
 import java.util.Set;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -26,6 +27,7 @@ import lombok.AllArgsConstructor;
 public class RequestQueue {
     private final NotificationService notificationService;
     private final AIService aiService;
+    private final S3Service s3Service;
     private final InterviewPreparationRepository interviewPreparationRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final UserNotificationService userNotificationService;
@@ -113,14 +115,21 @@ public class RequestQueue {
             Set<BusinessAccount> removedInterviewers, Set<ConductorDto> removedOtherInterviewers) {
         userNotificationService.createInterviewUpdatedNotificationAndSend(interview, newInterviewers,
                 removedInterviewers);
-        // emailSender.sendUpdatedInterviewEmail(interview, newInterviewers,
-        // newOtherInterviewers,
-        // removedInterviewers, removedOtherInterviewers);
+        emailSender.sendUpdatedInterviewEmail(interview, newInterviewers,
+                newOtherInterviewers,
+                removedInterviewers, removedOtherInterviewers);
     }
 
     @Async
     public void sendInterviewRescheduleRequestEmailsAndNotifications(Interview interview) {
         userNotificationService.createInterviewRescheduleRequestNotificationAndSend(interview);
+        // TODO: Implement email sending
         // emailSender.sendInterviewRescheduleRequestEmail(interview);
+    }
+
+    @Async
+    public void sendDocumentViaEmail(String fullName, String email, String fileUrl, String otherPartyName,
+            boolean isDocument) {
+        emailSender.sendDocumentViaEmail(fullName, email, fileUrl, otherPartyName, isDocument);
     }
 }

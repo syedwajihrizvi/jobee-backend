@@ -20,8 +20,12 @@ public class BusinessProfileService {
     private final BusinessAccountRepository businessAccountRepository;
     private final S3Service s3Service;
 
-    public BusinessProfile getUserProfileById(Long userId) {
+    public BusinessProfile getBusinessProfileByAccountId(Long userId) {
         return businessProfileRepository.findByBusinessAccountId(userId).orElse(null);
+    }
+
+    public BusinessProfile getBusinessProfileById(Long businessProfileId) {
+        return businessProfileRepository.findById(businessProfileId).orElse(null);
     }
 
     public BusinessProfile getBusinessProfileByEmail(String email) {

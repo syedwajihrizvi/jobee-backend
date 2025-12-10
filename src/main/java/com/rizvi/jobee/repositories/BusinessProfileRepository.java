@@ -15,4 +15,7 @@ public interface BusinessProfileRepository extends JpaRepository<BusinessProfile
 
     @Query("select bp from BusinessProfile bp where bp.businessAccount.id = :businessAccountId")
     Optional<BusinessProfile> findByBusinessAccountId(Long businessAccountId);
+
+    @EntityGraph(attributePaths = { "businessAccount" })
+    Optional<BusinessProfile> findById(Long id);
 }

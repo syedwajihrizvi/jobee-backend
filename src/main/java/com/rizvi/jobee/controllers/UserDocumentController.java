@@ -22,8 +22,11 @@ import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.mappers.UserDocumentMapper;
 import com.rizvi.jobee.principals.CustomPrincipal;
 import com.rizvi.jobee.repositories.UserProfileRepository;
+import com.rizvi.jobee.services.BusinessProfileService;
 import com.rizvi.jobee.services.MessageFileService;
 import com.rizvi.jobee.services.UserDocumentService;
+import com.rizvi.jobee.services.UserProfileService;
+import com.rizvi.jobee.dtos.message.SendMessageAttachmentDocumentEmailRequestDto;
 import com.rizvi.jobee.dtos.user.CreateDocViaLinkDto;
 import com.rizvi.jobee.dtos.user.UpdateUserDocumentRequestDto;
 import com.rizvi.jobee.dtos.user.UserDocumentDto;
@@ -35,7 +38,8 @@ import lombok.AllArgsConstructor;
 @RestController
 @RequestMapping("/api/user-documents")
 public class UserDocumentController {
-
+        private final UserProfileService userProfileService;
+        private final BusinessProfileService businessProfileService;
         private final UserDocumentService userDocumentService;
         private final UserProfileRepository userProfileRepository;
         private final UserDocumentMapper userDocumentMapper;
@@ -166,10 +170,39 @@ public class UserDocumentController {
         public ResponseEntity<Void> deleteUserDocument(
                         @PathVariable Long id,
                         @AuthenticationPrincipal CustomPrincipal principal) {
-                System.out.println(
-                                "SYED-DEBUG: Deleting document with ID");
                 Long userId = principal.getProfileId();
                 userDocumentService.deleteUserDocument(id, userId);
                 return ResponseEntity.noContent().build();
         }
+
+        @PostMapping("/email-document")
+        @Operation(summary = "Send a message attachment document via email")
+        public ResponseEntity<Void> sendDocumentViaEmail(
+                        @RequestBody SendMessageAttachmentDocumentEmailRequestDto request,
+                        @AuthenticationPrincipal CustomPrincipal principal) {
+                Long userProfileId = principal.getProfileId();
+                String userRole = principal.getRole();
+                String email;
+                String fullName;
+                if (userRole.equals("USER")) {
+                        var userProfile = userProfileService.getUserProfileById(userProfileId);
+                        email = userProfile.getAccount().getEmail();
+                        fullName = userProfile.getFullName();
+                } else {
+                        var businessProfile = businessProfileService.getBusinessProfileById(userProfileId);
+                        email = businessProfile.getBusinessAccount().getEmail();
+                        fullName = businessProfile.getBusinessAccount().getFullName();
+                }
+                String fileUrl = request.getFileUrl();
+                String otherPartyName = request.getOtherPartyName();
+                if (fileUrl == null || fileUrl.isEmpty()) {
+                        return ResponseEntity.badRequest().build();
+                }
+                boolean isDocument = "document".equalsIgnoreCase(request.getFormatType()) || "non_img"
+                                .equalsIgnoreCase(request.getFormatType());
+                messageFileService.sendDocumentViaEmail(fullName, email, fileUrl, otherPartyName,
+                                isDocument);
+                return ResponseEntity.ok().build();
+        }
+
 }

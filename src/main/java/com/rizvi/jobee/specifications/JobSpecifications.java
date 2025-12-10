@@ -24,9 +24,21 @@ public class JobSpecifications {
             Join<BusinessAccount, Company> companyJoin = businessAccountJoin.join("company");
             if (query.getSearch() != null && !query.getSearch().isEmpty()) {
                 String search = query.getSearch().toLowerCase().trim();
+                String[] searchTerms = search.split("\\s+");
+
+                List<Predicate> titlePredicates = new ArrayList<>();
+                List<Predicate> descriptionPredicates = new ArrayList<>();
+
+                for (String term : searchTerms) {
+                    if (!term.isEmpty()) {
+                        titlePredicates.add(cb.like(cb.lower(root.get("title")), "%" + term + "%"));
+                        descriptionPredicates.add(cb.like(cb.lower(root.get("description")), "%" + term + "%"));
+                    }
+                }
+
                 predicates.add(cb.or(
-                        cb.like(cb.lower(root.get("title")), "%" + search + "%"),
-                        cb.like(cb.lower(root.get("description")), "%" + search + "%")));
+                        cb.and(titlePredicates.toArray(new Predicate[0])),
+                        cb.and(descriptionPredicates.toArray(new Predicate[0]))));
             }
             if (query.getLocations() != null && !query.getLocations().isEmpty()) {
                 List<Predicate> locationPredicates = new ArrayList<>();
@@ -59,10 +71,9 @@ public class JobSpecifications {
             if (query.getHiringTeamMemberAccountId() != null) {
                 Join<Job, HiringTeam> hiringTeamJoin = root.join("hiringTeamMembers");
                 predicates.add(cb.and(
-                    cb.isNotNull(hiringTeamJoin.get("businessAccount")),
-                    cb.equal(hiringTeamJoin.get("businessAccount").get("id"),
-                            query.getHiringTeamMemberAccountId())
-                ));
+                        cb.isNotNull(hiringTeamJoin.get("businessAccount")),
+                        cb.equal(hiringTeamJoin.get("businessAccount").get("id"),
+                                query.getHiringTeamMemberAccountId())));
             }
             if (query.getExperience() != null && !query.getExperience().isEmpty()) {
                 List<Predicate> experiencePredicates = new ArrayList<>();

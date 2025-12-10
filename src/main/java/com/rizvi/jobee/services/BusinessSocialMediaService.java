@@ -23,7 +23,7 @@ public class BusinessSocialMediaService {
     }
 
     public BusinessSocial createSocialMediaForUser(Long userId, CreateSocialMediaDto request) {
-        var businessProfile = businessProfileService.getUserProfileById(userId);
+        var businessProfile = businessProfileService.getBusinessProfileByAccountId(userId);
         if (businessProfile == null) {
             throw new AccountNotFoundException("User profile not found for id: " + userId);
         }

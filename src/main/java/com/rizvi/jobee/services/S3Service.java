@@ -1,5 +1,7 @@
 package com.rizvi.jobee.services;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -17,7 +19,10 @@ import com.rizvi.jobee.enums.UserDocumentType;
 
 import lombok.AllArgsConstructor;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
 
 @AllArgsConstructor
@@ -25,6 +30,10 @@ import software.amazon.awssdk.core.sync.RequestBody;
 public class S3Service {
         private S3Client s3Client;
         private AWSProperties awsProperties;
+
+        public static String generateMessageAttachmentUrl(String fileUrl) {
+                return "https://" + "your-bucket-name" + ".s3.amazonaws.com/message-files/" + fileUrl;
+        }
 
         public String uploadDocument(
                         Long userId,
@@ -294,4 +303,33 @@ public class S3Service {
 
                 return fileType + "/" + userId + "/" + timestamp + "_" + safeFileName;
         }
+
+        public File getS3File(String fileUrl, String requestType) {
+                String key;
+                if (requestType.equals("MESSAGE_FILE")) {
+                        key = "message-files/" + fileUrl;
+                } else {
+                        key = "user-documents/" + fileUrl;
+                }
+                GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                                .bucket(awsProperties.getBucket())
+                                .key(key)
+                                .build();
+                File localFile = new File("/tmp/" + Path.of(key).getFileName().toString());
+                try (ResponseInputStream<GetObjectResponse> s3Object = s3Client.getObject(getObjectRequest)) {
+                        FileOutputStream fos = new FileOutputStream(localFile);
+                        byte[] readBuf = new byte[1024];
+                        int readLen = 0;
+                        while ((readLen = s3Object.read(readBuf)) > 0) {
+                                fos.write(readBuf, 0, readLen);
+                        }
+                        fos.close();
+                } catch (IOException e) {
+                        System.out.println("Exception while getting S3 file: " + e.getMessage());
+                } finally {
+                        s3Client.close();
+                }
+                return localFile;
+        }
+
 }
