@@ -87,11 +87,9 @@ public class InterviewController {
             @PathVariable Long id,
             @AuthenticationPrincipal CustomPrincipal principal) {
         var interview = interviewService.getInterviewById(id);
-        System.out.println("SYED-DEBUG: Reschedule Request: " + interview.getRescheduleRequest());
         var userEmail = principal.getEmail();
         var interviewDto = interviewMapper.toDto(interview);
         var secureInterviewDto = interviewService.secureDetailedInterview(interviewDto, userEmail);
-        System.out.println("SYED-DEBUG: Reschedule Request: " + secureInterviewDto.getRescheduleRequest());
         return ResponseEntity.ok(secureInterviewDto);
     }
 

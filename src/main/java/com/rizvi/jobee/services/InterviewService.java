@@ -40,12 +40,10 @@ import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.InterviewNotFoundException;
 import com.rizvi.jobee.helpers.AISchemas.AICandidate;
 import com.rizvi.jobee.helpers.AISchemas.AICompany;
-import com.rizvi.jobee.helpers.AISchemas.AIInterview;
 import com.rizvi.jobee.helpers.AISchemas.AIJob;
 import com.rizvi.jobee.helpers.AISchemas.AnswerInterviewQuestionRequest;
 import com.rizvi.jobee.helpers.AISchemas.AnswerInterviewQuestionResponse;
 import com.rizvi.jobee.helpers.AISchemas.InterviewPrepQuestion;
-import com.rizvi.jobee.helpers.AISchemas.PrepareForInterviewRequest;
 import com.rizvi.jobee.helpers.AISchemas.ReferenceToPreviousAnswer;
 import com.rizvi.jobee.queries.InterviewQuery;
 import com.rizvi.jobee.repositories.ApplicationRepository;
@@ -274,11 +272,7 @@ public class InterviewService {
                 removedOtherInterviewers.add(otherInterviewer);
             }
         }
-        // After the update set it to null
         interview.setRescheduleRequest(null);
-        System.out.println("SYED-DEBUG: After update, rescheduleRequest: " + interview.getRescheduleRequest());
-        // Interviewers divided into two groups: existing, new, and removed
-        // Each one need to be handled differently
         var updatedInterview = interviewRepository.save(interview);
         requestQueue.sendInterviewUpdatedEmailsAndNotifications(updatedInterview, newInterviewers, newOtherInterviewers,
                 removedInterviewers, removedOtherInterviewers);
@@ -294,19 +288,14 @@ public class InterviewService {
         if (!interview.getCandidate().getId().equals(candidateId)) {
             return false;
         }
+        // Initially set to generating so user cannot spam requests
         var interviewPreparation = InterviewPreparation.builder()
                 .interview(interview)
-                .status(PreparationStatus.IN_PROGRESS)
+                .status(PreparationStatus.GENERATING_PREP)
                 .build();
         var savedInterviewPreparation = interviewPreparationRepository.save(interviewPreparation);
-        AIJob aiJob = new AIJob(interview.getJob());
-        AICompany aiCompany = new AICompany(interview.getJob().getBusinessAccount().getCompany());
-        AICandidate aiCandidate = new AICandidate(interview.getCandidate());
-        AIInterview aiInterview = new AIInterview(interview);
-
-        PrepareForInterviewRequest prepareForInterviewRequest = new PrepareForInterviewRequest(aiJob, aiCompany,
-                aiCandidate, aiInterview);
-        requestQueue.processInterviewPrep(prepareForInterviewRequest, savedInterviewPreparation);
+        System.out.println("SYED-DEBUG: Interview Service prepareForInterview - before requestQueue: " + interview);
+        requestQueue.processInterviewPrep(savedInterviewPreparation, interview);
         return true;
     }
 

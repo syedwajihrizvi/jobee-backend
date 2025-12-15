@@ -119,12 +119,15 @@ public class UserNotificationService {
         notificationRepository.deleteByRecipientIdAndRecipientTypeAndReadIsTrue(userId, type);
     }
 
-    public Notification createInterviewPrepNotificationAndSend(InterviewPreparation interviewPrep) {
-        var message = "Your preparation materials your interview for the position of "
+    public Notification createInterviewPrepNotificationAndSend(InterviewPreparation interviewPrep,
+            Interview interview) {
+        var message = "Your preparation materials for the position of "
                 + interviewPrep.getInterview().getJob().getTitle() + " are ready.";
         CreateNotificationDto notificationDto = new CreateNotificationDto();
         notificationDto.setRecipientType(MessagerUserType.USER);
         notificationDto.setMessage(message);
+        notificationDto.setInterviewId(interview.getId());
+        notificationDto.setCompanyId(interview.getJob().getCompany().getId());
         notificationDto.setRecipientId(interviewPrep.getInterview().getCandidate().getId());
         notificationDto.setNotificationType(NotificationType.INTERVIEW_PREP_READY);
         var savedNotification = saveNotification(notificationDto);

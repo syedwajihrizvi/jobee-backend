@@ -181,20 +181,9 @@ public class EmailSender {
     String interviewDate = interviewPrep.getInterview().getInterviewDate().toString();
 
     try {
-      Destination destination = createEmailDestination(to);
       String subject = "Your Interview Preparation Materials are Ready for " + jobTitle;
       String htmlString = generateInterviewPrepHtml(fullName, jobTitle, interviewDate, companyName);
-      String textString = "Hello " + fullName + ",\n\nYour interview preparation materials for the position of "
-          + jobTitle + " at " + companyName + " are now ready. Please log in to your Jobee account to access them.\n\n"
-          + "Best of luck!\n\n- The Jobee Team";
-      Message message = createEmail(subject, htmlString, textString);
-      SendEmailRequest emailRequest = SendEmailRequest.builder()
-          .source("Jobee <" + senderEmail + ">")
-          .destination(destination)
-          .message(message)
-          .replyToAddresses("support@jobee.solutions")
-          .build();
-      sesClient.sendEmail(emailRequest);
+      resendService.sendEmail(to, subject, htmlString);
     } catch (Exception e) {
       System.out.println("Failed to send interview preparation email: " + e.getMessage());
     }
@@ -206,7 +195,6 @@ public class EmailSender {
       String inviterFullName = from.getFullName();
       String jobTitle = job.getTitle();
       String companyName = from.getCompany().getName();
-      System.out.println("SYED-DEBUG: Destination for Hiring Team Invite: " + to.getEmail());
 
       String subject = "Invitation to join the hiring team for job: " + jobTitle;
       String jobeeUrl = generateJobeeUrl();

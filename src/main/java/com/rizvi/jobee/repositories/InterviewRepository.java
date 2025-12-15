@@ -37,7 +37,10 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
     @Query(value = "SELECT * FROM INTERVIEWS WHERE JOB_ID = :jobId ORDER BY created_at LIMIT :limit", nativeQuery = true)
     List<Interview> findByJobIdWithLimit(Long jobId, Number limit, Sort sort);
 
-    @EntityGraph(attributePaths = { "job", "candidate", "createdBy", "createdBy.company", "interviewTips" })
+    @EntityGraph(attributePaths = {
+            "job", "candidate", "job.tags", "job.company",
+            "interviewTips", "candidate.company", "candidate.skills", "candidate.skills.skill", "candidate.experiences",
+            "candidate.projects", "candidate.education" })
     @Query("select i from Interview i where i.id = :interviewId")
     Interview findInterviewForPreparation(Long interviewId);
 

@@ -37,6 +37,8 @@ public class JwtFilter extends OncePerRequestFilter {
         var token = authHeader.replace("Bearer", "").trim();
         if (!jwtService.validateToken(token)) {
             System.out.println("Invalid JWT token: " + token);
+            System.out.println("Request URI: " + request.getRequestURI());
+            System.out.println("Request Method: " + request.getMethod());
             filterChain.doFilter(request, response);
             return;
         }

@@ -1,9 +1,7 @@
 package com.rizvi.jobee.services;
 
-import java.io.File;
 import java.util.Set;
 
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,12 +10,14 @@ import com.rizvi.jobee.dtos.interview.ConductorDto;
 import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.Interview;
 import com.rizvi.jobee.entities.InterviewPreparation;
-import com.rizvi.jobee.entities.Notification;
 import com.rizvi.jobee.entities.UserProfile;
+import com.rizvi.jobee.enums.PreparationStatus;
+import com.rizvi.jobee.helpers.AISchemas.AICandidate;
+import com.rizvi.jobee.helpers.AISchemas.AICompany;
+import com.rizvi.jobee.helpers.AISchemas.AIInterview;
+import com.rizvi.jobee.helpers.AISchemas.AIJob;
 import com.rizvi.jobee.helpers.AISchemas.PrepareForInterviewRequest;
 import com.rizvi.jobee.helpers.AISchemas.PrepareForInterviewResponse;
-import com.rizvi.jobee.interfaces.NotificationService;
-import com.rizvi.jobee.mappers.NotificationMapper;
 import com.rizvi.jobee.repositories.InterviewPreparationRepository;
 
 import lombok.AllArgsConstructor;
@@ -25,40 +25,46 @@ import lombok.AllArgsConstructor;
 @Service
 @AllArgsConstructor
 public class RequestQueue {
-    private final NotificationService notificationService;
     private final AIService aiService;
-    private final S3Service s3Service;
     private final InterviewPreparationRepository interviewPreparationRepository;
-    private final SimpMessagingTemplate messagingTemplate;
     private final UserNotificationService userNotificationService;
     private final EducationService userEducationService;
     private final ProjectService userProjectService;
     private final UserSkillService userSkillService;
     private final SocialMediaService userSocialMediaService;
     private final ExperienceService userExperienceService;
-    private final NotificationMapper notificationMapper;
     private final EmailSender emailSender;
 
     @Async
-    public void processInterviewPrep(PrepareForInterviewRequest prepareForInterviewRequest,
-            InterviewPreparation interviewPrep) {
+    public void processInterviewPrep(
+            InterviewPreparation interviewPrep, Interview interview) {
+        System.out.println("Generating Interview Prep via AI for Interview ID: " + interview.getId());
+        System.out.println("SYED-DEBUG In Queue: " + interview);
         try {
+            AIJob aiJob = new AIJob(interview.getJob());
+            System.out.println("SYED-DEBUG: AI Job created for Interview Prep");
+            AICompany aiCompany = new AICompany(interview.getJob().getCompany());
+            System.out.println("SYED-DEBUG: AI Company created for Interview Prep");
+            AICandidate aiCandidate = new AICandidate(interview.getCandidate());
+            System.out.println("SYED-DEBUG: AI Candidate created for Interview Prep");
+            AIInterview aiInterview = new AIInterview(interview);
+            System.out.println("SYED-DEBUG: AI Interview created for Interview Prep");
+            PrepareForInterviewRequest prepareForInterviewRequest = new PrepareForInterviewRequest(aiJob, aiCompany,
+                    aiCandidate, aiInterview);
+            System.out.println("SYED-DEBUG: PrepareForInterviewRequest created for Interview Prep");
             PrepareForInterviewResponse response = aiService.generateInterviewPrep(prepareForInterviewRequest);
             interviewPrep.updateViaAIResponse(response);
-            var savedInterview = interviewPreparationRepository.save(interviewPrep);
-            notificationService.sendNotification("user-device-token", "Interview Prep Ready",
-                    "Your interview preparation materials are ready for interview");
-            var interviewerId = savedInterview.getInterview().getCandidate().getId();
-            String recepientDest = "/topic/notifications/user/" + interviewerId;
-            Notification savedNotification = userNotificationService
-                    .createInterviewPrepNotificationAndSend(interviewPrep);
-            var notificationDto = notificationMapper.toNotificationDto(savedNotification);
-            messagingTemplate.convertAndSend(recepientDest, notificationDto);
+            interviewPrep.setStatus(PreparationStatus.IN_PROGRESS);
+            var savedInterviewPrep = interviewPreparationRepository.save(interviewPrep);
+            userNotificationService.createInterviewPrepNotificationAndSend(savedInterviewPrep, interview);
             emailSender.sendInterviewPrepEmail(interviewPrep);
         } catch (Exception e) {
             // TODO: Handle the exception properly
             System.out.println("Interview prep processing was interrupted");
             System.out.println(e.getMessage());
+            // Then we sent out a failure notification to the user and they can retry
+            interviewPrep.setStatus(PreparationStatus.NOT_STARTED);
+            interviewPreparationRepository.save(interviewPrep);
         }
     }
 

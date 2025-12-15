@@ -13,7 +13,6 @@ import com.rizvi.jobee.entities.Conversation;
 import com.rizvi.jobee.entities.Message;
 import com.rizvi.jobee.enums.MessageType;
 import com.rizvi.jobee.enums.MessagerUserType;
-import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.mappers.MessageMapper;
 import com.rizvi.jobee.repositories.ConversationRepository;
 
@@ -23,7 +22,6 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class MessageFileService {
     private final RequestQueue requestQueue;
-    private final UserProfileService userProfileService;
     private final S3Service s3Service;
     private final ConversationRepository conversationRepository;
     private final MessageMapper messageMapper;

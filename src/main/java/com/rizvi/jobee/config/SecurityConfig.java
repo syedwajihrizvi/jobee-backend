@@ -114,6 +114,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/api/profiles/update-primary-resume").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/jobs/companies/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/jobs").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/jobs").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/jobs/generate-ai-description").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/api/jobs/*/views").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/jobs/**").permitAll()
