@@ -18,6 +18,7 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.rizvi.jobee.enums.Role;
+import com.rizvi.jobee.enums.Roles;
 import com.rizvi.jobee.filters.JwtFilter;
 import com.rizvi.jobee.services.AccountService;
 
@@ -131,9 +132,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/jobs/**").hasAuthority(Role.BUSINESS.name())
                         .requestMatchers(HttpMethod.POST, "/api/applications/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/interviews").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/interviews/**").permitAll())
-                // .requestMatchers(HttpMethod.POST,
-                // "/interviews").hasAuthority(Roles.BUSINESS.name()))
+                        .requestMatchers(HttpMethod.GET, "/interviews/**").permitAll()
+                        .requestMatchers(HttpMethod.POST,
+                                "/interviews")
+                        .hasAuthority(Roles.BUSINESS.name()))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(c -> {
                     c.authenticationEntryPoint(

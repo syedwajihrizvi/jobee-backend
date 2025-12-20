@@ -256,6 +256,14 @@ public class InterviewController {
         return ResponseEntity.ok(interviewMapper.toInterviewPrepQuestionDto(interviewQuestion));
     }
 
+    @PostMapping("{id}/prepare/email-resources")
+    @Operation(summary = "Send email resources for interview preparation")
+    public ResponseEntity<Void> sendInterviewPreparationResourcesViaEmail(
+            @PathVariable Long id) {
+        interviewService.sendInterviewPreparationResourcesViaEmail(id);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("{id}/reject-candidate")
     @Operation(summary = "Business can reject an interview")
     public ResponseEntity<InterviewDto> rejectInterview(

@@ -56,7 +56,6 @@ public class AIService {
         }
         String prompt = Prompts.RESUME_ANALYSIS.replace("{resumeText}", resumeText)
                 .replace("{existingCandidateInfoJSON}", candidate.toJsonString());
-        System.out.println("SYED-DEBUG: Resume Analysis Prompt: " + prompt);
         StructuredChatCompletionCreateParams<ResumeExtract> params = ChatCompletionCreateParams.builder()
                 .model(ChatModel.GPT_5_NANO)
                 .addSystemMessage("You are a helpful assistant that extracts structured information from resumes.")

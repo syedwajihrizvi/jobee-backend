@@ -15,48 +15,55 @@ import com.rizvi.jobee.entities.Interview;
 
 public interface InterviewRepository extends JpaRepository<Interview, Long> {
 
-    Page<Interview> findAll(Specification<Interview> specification, Pageable pageable);
+        Page<Interview> findAll(Specification<Interview> specification, Pageable pageable);
 
-    @EntityGraph(attributePaths = { "interviewers.profile", "rejection", "candidate", "candidate.account", "createdBy",
-            "job.company",
-            "application", "interviewers", "rescheduleRequest" })
-    @Query("select i from Interview i where i.id = :id")
-    Optional<Interview> findById(Long id);
+        @EntityGraph(attributePaths = { "interviewers.profile", "rejection", "candidate", "candidate.account",
+                        "createdBy",
+                        "job.company",
+                        "application", "interviewers", "rescheduleRequest" })
+        @Query("select i from Interview i where i.id = :id")
+        Optional<Interview> findById(Long id);
 
-    // Additional query methods can be defined here if needed
-    @Query("select i from Interview i where i.candidate.id = :candidateId")
-    List<Interview> findByCandidateId(Long candidateId, Sort sort);
+        // Additional query methods can be defined here if needed
+        @Query("select i from Interview i where i.candidate.id = :candidateId")
+        List<Interview> findByCandidateId(Long candidateId, Sort sort);
 
-    @Query("select i from Interview i where i.job.id = :jobId and i.candidate.id = :candidateId")
-    Interview findByJobIdAndCandidateId(Long jobId, Long candidateId);
+        @Query("select i from Interview i where i.job.id = :jobId and i.candidate.id = :candidateId")
+        Interview findByJobIdAndCandidateId(Long jobId, Long candidateId);
 
-    @EntityGraph(attributePaths = { "candidate" })
-    @Query("select i from Interview i where i.job.id = :jobId")
-    List<Interview> findByJobId(Long jobId, Sort sort);
+        @EntityGraph(attributePaths = { "candidate" })
+        @Query("select i from Interview i where i.job.id = :jobId")
+        List<Interview> findByJobId(Long jobId, Sort sort);
 
-    @Query(value = "SELECT * FROM INTERVIEWS WHERE JOB_ID = :jobId ORDER BY created_at LIMIT :limit", nativeQuery = true)
-    List<Interview> findByJobIdWithLimit(Long jobId, Number limit, Sort sort);
+        @Query(value = "SELECT * FROM INTERVIEWS WHERE JOB_ID = :jobId ORDER BY created_at LIMIT :limit", nativeQuery = true)
+        List<Interview> findByJobIdWithLimit(Long jobId, Number limit, Sort sort);
 
-    @EntityGraph(attributePaths = {
-            "job", "candidate", "job.tags", "job.company",
-            "interviewTips", "candidate.company", "candidate.skills", "candidate.skills.skill", "candidate.experiences",
-            "candidate.projects", "candidate.education" })
-    @Query("select i from Interview i where i.id = :interviewId")
-    Interview findInterviewForPreparation(Long interviewId);
+        @EntityGraph(attributePaths = {
+                        "job", "candidate", "job.tags", "job.company",
+                        "interviewTips", "candidate.company", "candidate.skills", "candidate.skills.skill",
+                        "candidate.experiences",
+                        "candidate.projects", "candidate.education" })
+        @Query("select i from Interview i where i.id = :interviewId")
+        Interview findInterviewForPreparation(Long interviewId);
 
-    @EntityGraph(attributePaths = { "job", "candidate", "createdBy", "createdBy.company", "interviewers.profile" })
-    @Query("select i from Interview i where i.job.company.id = :companyId")
-    List<Interview> findByCompanyId(Long companyId, Sort sort);
+        @EntityGraph(attributePaths = { "job", "candidate", "createdBy", "createdBy.company", "interviewers.profile" })
+        @Query("select i from Interview i where i.job.company.id = :companyId")
+        List<Interview> findByCompanyId(Long companyId, Sort sort);
 
-    @EntityGraph(attributePaths = { "job", "job.businessAccount" })
-    @Query("select i from Interview i where i.job.businessAccount.id = :businessAccountId")
-    List<Interview> findByCreatedAccountId(Long businessAccountId, Sort sort);
+        @EntityGraph(attributePaths = { "job", "job.businessAccount" })
+        @Query("select i from Interview i where i.job.businessAccount.id = :businessAccountId")
+        List<Interview> findByCreatedAccountId(Long businessAccountId, Sort sort);
 
-    @EntityGraph(attributePaths = { "job" })
-    List<Interview> findByInterviewersId(Long interviewerId, Sort sort);
+        @EntityGraph(attributePaths = { "job" })
+        List<Interview> findByInterviewersId(Long interviewerId, Sort sort);
 
-    @EntityGraph(attributePaths = { "application", "candidate" })
-    @Query("select i from Interview i where i.id = :interviewId")
-    Optional<Interview> findByInterviewWithApplication(Long interviewId);
+        @EntityGraph(attributePaths = { "application", "candidate" })
+        @Query("select i from Interview i where i.id = :interviewId")
+        Optional<Interview> findByInterviewWithApplication(Long interviewId);
+
+        @EntityGraph(attributePaths = { "preparation", "preparation.resources", "job", "job.company", "candidate",
+                        "candidate.account" })
+        @Query("select i from Interview i where i.id = :interviewId")
+        Optional<Interview> findByInterviewWithInterviewPrep(Long interviewId);
 
 }

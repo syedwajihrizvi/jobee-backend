@@ -1,5 +1,6 @@
 package com.rizvi.jobee.services;
 
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.scheduling.annotation.Async;
@@ -10,6 +11,7 @@ import com.rizvi.jobee.dtos.interview.ConductorDto;
 import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.Interview;
 import com.rizvi.jobee.entities.InterviewPreparation;
+import com.rizvi.jobee.entities.InterviewPreparationResource;
 import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.enums.PreparationStatus;
 import com.rizvi.jobee.helpers.AISchemas.AICandidate;
@@ -38,20 +40,13 @@ public class RequestQueue {
     @Async
     public void processInterviewPrep(
             InterviewPreparation interviewPrep, Interview interview) {
-        System.out.println("Generating Interview Prep via AI for Interview ID: " + interview.getId());
-        System.out.println("SYED-DEBUG In Queue: " + interview);
         try {
             AIJob aiJob = new AIJob(interview.getJob());
-            System.out.println("SYED-DEBUG: AI Job created for Interview Prep");
             AICompany aiCompany = new AICompany(interview.getJob().getCompany());
-            System.out.println("SYED-DEBUG: AI Company created for Interview Prep");
             AICandidate aiCandidate = new AICandidate(interview.getCandidate());
-            System.out.println("SYED-DEBUG: AI Candidate created for Interview Prep");
             AIInterview aiInterview = new AIInterview(interview);
-            System.out.println("SYED-DEBUG: AI Interview created for Interview Prep");
             PrepareForInterviewRequest prepareForInterviewRequest = new PrepareForInterviewRequest(aiJob, aiCompany,
                     aiCandidate, aiInterview);
-            System.out.println("SYED-DEBUG: PrepareForInterviewRequest created for Interview Prep");
             PrepareForInterviewResponse response = aiService.generateInterviewPrep(prepareForInterviewRequest);
             interviewPrep.updateViaAIResponse(response);
             interviewPrep.setStatus(PreparationStatus.IN_PROGRESS);
@@ -59,13 +54,18 @@ public class RequestQueue {
             userNotificationService.createInterviewPrepNotificationAndSend(savedInterviewPrep, interview);
             emailSender.sendInterviewPrepEmail(interviewPrep);
         } catch (Exception e) {
-            // TODO: Handle the exception properly
-            System.out.println("Interview prep processing was interrupted");
-            System.out.println(e.getMessage());
             // Then we sent out a failure notification to the user and they can retry
             interviewPrep.setStatus(PreparationStatus.NOT_STARTED);
             interviewPreparationRepository.save(interviewPrep);
         }
+    }
+
+    @Async
+    public void sendInterviewPrepResourcesViaEmail(
+            Set<InterviewPreparationResource> resources, String companyName, String jobTitle, String candidateName,
+            String candidateEmail) {
+        emailSender.sendInterviewPrepResourcesEmail(
+                resources, companyName, jobTitle, candidateName, candidateEmail);
     }
 
     @Async

@@ -50,6 +50,7 @@ import com.rizvi.jobee.repositories.ApplicationRepository;
 import com.rizvi.jobee.repositories.BusinessAccountRepository;
 import com.rizvi.jobee.repositories.InterviewPreparationQuestionRepository;
 import com.rizvi.jobee.repositories.InterviewPreparationRepository;
+import com.rizvi.jobee.repositories.InterviewPreparationResourceRepository;
 import com.rizvi.jobee.repositories.InterviewRepository;
 import com.rizvi.jobee.specifications.InterviewSpecifications;
 
@@ -62,6 +63,7 @@ public class InterviewService {
     private final InterviewRepository interviewRepository;
     private final InterviewPreparationRepository interviewPreparationRepository;
     private final InterviewPreparationQuestionRepository interviewPreparationQuestionRepository;
+    private final InterviewPreparationResourceRepository interviewPreparationResourceRepository;
     private final ApplicationRepository applicationRepository;
     private final AIService aiService;
     private final S3Service s3Service;
@@ -529,5 +531,28 @@ public class InterviewService {
         }
         interviewRepository.save(interview);
         requestQueue.sendInterviewRescheduleRequestEmailsAndNotifications(interview);
+    }
+
+    public void sendInterviewPreparationResourcesViaEmail(Long interviewId) {
+        // Get the intervie prep
+        var interview = interviewRepository.findById(interviewId).orElse(null);
+        if (interview == null) {
+            throw new InterviewNotFoundException("Interview not found with id: " + interviewId);
+        }
+        var interviewPrep = interview.getPreparation();
+        if (interviewPrep == null) {
+            throw new InterviewNotFoundException("Interview preparation not found for interview id: " + interviewId);
+        }
+        var resources = interviewPrep.getResources();
+        if (resources == null || resources.isEmpty()) {
+            throw new InterviewNotFoundException("No preparation resources found for interview id: " + interviewId);
+        }
+        var jobTitle = interview.getJob().getTitle();
+        var companyName = interview.getJob().getCompany().getName();
+        var candidate = interview.getCandidate();
+        var candidateEmail = candidate.getAccount().getEmail();
+        var candidateFullName = candidate.getFullName();
+        requestQueue.sendInterviewPrepResourcesViaEmail(resources, companyName, jobTitle, candidateFullName,
+                candidateEmail);
     }
 }

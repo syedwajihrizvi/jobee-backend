@@ -9,6 +9,7 @@ import com.rizvi.jobee.dtos.interview.ConductorDto;
 import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.Interview;
 import com.rizvi.jobee.entities.InterviewPreparation;
+import com.rizvi.jobee.entities.InterviewPreparationResource;
 import com.rizvi.jobee.entities.Job;
 
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,18 @@ public class EmailSender {
 
   @Value("${email.from}")
   private String senderEmail;
+
+  public void sendInterviewPrepResourcesEmail(Set<InterviewPreparationResource> resources, String companyName,
+      String jobTitle, String candidateName,
+      String candidateEmail) {
+    try {
+      String subject = "Your Interview Preparation Resources for " + jobTitle + " at " + companyName;
+      String htmlString = generateInterviewPrepResourcesEmailHtml(candidateName, jobTitle, companyName, resources);
+      resendService.sendEmail(candidateEmail, subject, htmlString);
+    } catch (Exception e) {
+      System.out.println("Failed to send rejection email: " + e.getMessage());
+    }
+  }
 
   public void sendRejectionEmail(Interview interview) {
     String to = interview.getCandidateEmail();
@@ -902,6 +915,102 @@ public class EmailSender {
         """
         .formatted(fullName, otherPartyName);
     return htmlString;
+  }
+
+  private String generateInterviewPrepResourcesEmailHtml(
+      String candidateName,
+      String jobTitle,
+      String companyName,
+      Set<InterviewPreparationResource> resources) {
+
+    StringBuilder resourcesListBuilder = new StringBuilder();
+
+    for (InterviewPreparationResource resource : resources) {
+      resourcesListBuilder.append("""
+            <tr>
+              <td style="padding: 16px 0;">
+                <table width="100%%" cellpadding="0" cellspacing="0"
+                       style="border: 1px solid #e5e7eb; border-radius: 8px; background-color: #f9fafb;">
+                  <tr>
+                    <td style="padding: 16px;">
+                      <a href="%s"
+                         style="color: #2563eb; text-decoration: none; font-size: 16px; font-weight: 600;">
+                        %s
+                      </a>
+                      <p style="margin: 8px 0 0 0; color: #4b5563; font-size: 14px; line-height: 1.5;">
+                        %s
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          """.formatted(
+          resource.getLink(),
+          resource.getTitle(),
+          resource.getDescription()));
+    }
+
+    return """
+          <html>
+            <body style="margin: 0; padding: 0; background-color: #f3f4f6; font-family: Arial, sans-serif;">
+              <table width="100%%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="padding: 40px 16px;">
+                    <table width="600" cellpadding="0" cellspacing="0"
+                           style="background-color: #ffffff; border-radius: 12px; overflow: hidden;">
+
+                      <!-- Header -->
+                      <tr>
+                        <td style="background-color: #2563eb; padding: 24px;">
+                          <h1 style="margin: 0; color: #ffffff; font-size: 22px;">
+                            Interview Prep Resources
+                          </h1>
+                        </td>
+                      </tr>
+
+                      <!-- Content -->
+                      <tr>
+                        <td style="padding: 32px;">
+                          <p style="margin: 0 0 12px 0; color: #374151; font-size: 16px;">
+                            Hi %s,
+                          </p>
+
+                          <p style="margin: 0 0 16px 0; color: #4b5563; font-size: 15px; line-height: 1.6;">
+                            <strong>Jobee</strong> has prepared interview preparation materials
+                            for your upcoming interview at <strong>%s</strong>
+                            for the <strong>%s</strong> role.
+                          </p>
+
+                          <p style="margin: 24px 0 12px 0; color: #374151; font-size: 16px; font-weight: 600;">
+                            Recommended Resources
+                          </p>
+
+                          <table width="100%%" cellpadding="0" cellspacing="0">
+                            %s
+                          </table>
+
+                          <p style="margin: 32px 0 0 0; color: #6b7280; font-size: 13px; line-height: 1.5;">
+                            Best of luck — we’re rooting for you! 🚀
+                          </p>
+
+                          <p style="margin: 8px 0 0 0; color: #6b7280; font-size: 13px;">
+                            — The Jobee Team
+                          </p>
+                        </td>
+                      </tr>
+
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </body>
+          </html>
+        """.formatted(
+        candidateName,
+        companyName,
+        jobTitle,
+        resourcesListBuilder.toString());
   }
 
 }

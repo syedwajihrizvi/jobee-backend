@@ -10,4 +10,5 @@ public interface InterviewPreparationRepository extends JpaRepository<InterviewP
     @EntityGraph(attributePaths = { "questions", "resources" })
     @Query("select ip from InterviewPreparation ip where ip.interview.id = :interviewId")
     InterviewPreparation findByInterviewId(Long interviewId);
+
 }
