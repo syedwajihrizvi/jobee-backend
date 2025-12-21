@@ -15,6 +15,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -44,6 +45,10 @@ public class InterviewPreparation {
     @Column(name = "created_at", nullable = true, insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "help_me_remember", nullable = false)
+    @Builder.Default
+    private Boolean helpMeRemember = false;
+
     @OneToMany(mappedBy = "interviewPreparation", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private Set<InterviewPreparationStrength> strengths = new HashSet<>();
@@ -70,6 +75,9 @@ public class InterviewPreparation {
     @OneToOne(optional = false)
     @JoinColumn(name = "interview_id", nullable = false, unique = true)
     private Interview interview;
+
+    @OneToOne(mappedBy = "interviewPreparation", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    private InterviewPreparationFeedback feedback;
 
     public List<String> getNotesFromInterviewerAsList() {
         return interview.getPreparationTipsAsList();

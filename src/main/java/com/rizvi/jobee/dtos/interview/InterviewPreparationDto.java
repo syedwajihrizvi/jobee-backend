@@ -11,6 +11,7 @@ public class InterviewPreparationDto {
     private List<String> weaknesses;
     private List<InterviewPrepQuestionDto> questions;
     private List<InterviewPrepResourcesDto> resources;
+    private Boolean helpMeRemember;
     private String overallAdvice;
     private List<String> notesFromInterviewer;
 }

@@ -122,6 +122,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/jobs/favorites").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/interviews").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/interviews/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/interviews/prepare/submit-feedback").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/interviews/**").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/api/interviews/**").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/api/interviews/**").permitAll()

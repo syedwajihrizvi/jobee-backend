@@ -26,6 +26,7 @@ import com.rizvi.jobee.dtos.interview.InterviewDto;
 import com.rizvi.jobee.dtos.interview.InterviewPrepQuestionDto;
 import com.rizvi.jobee.dtos.interview.InterviewPreparationDto;
 import com.rizvi.jobee.dtos.interview.InterviewSummaryDto;
+import com.rizvi.jobee.dtos.interview.InterviewPrepFeedbackDto;
 import com.rizvi.jobee.dtos.job.PaginatedResponse;
 import com.rizvi.jobee.entities.Interview;
 import com.rizvi.jobee.enums.BusinessType;
@@ -171,6 +172,36 @@ public class InterviewController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/{id}/prepare/submit-feedback")
+    @Operation(summary = "Get interview preparation feedback details")
+    public ResponseEntity<InterviewPrepFeedbackDto> getInterviewPreparationFeedback(
+            @PathVariable Long id) {
+        var interviewPreparationFeedback = interviewService.getInterviewPrepFeedback(id);
+        if (interviewPreparationFeedback == null) {
+            return ResponseEntity.notFound().build();
+        }
+        var rating = interviewPreparationFeedback.getReviewRating();
+        var reviewText = interviewPreparationFeedback.getReviewText();
+        var feedbackDto = new InterviewPrepFeedbackDto(rating, reviewText);
+        return ResponseEntity.ok(feedbackDto);
+    }
+
+    @PostMapping("{id}/prepare/submit-feedback")
+    @Operation(summary = "Candidate submits feedback on interview preparation")
+    public ResponseEntity<Void> submitInterviewPreparationFeedback(
+            @PathVariable Long id, @RequestBody @Valid InterviewPrepFeedbackDto feedback,
+            @AuthenticationPrincipal CustomPrincipal principal) {
+        interviewService.submitFeedbackForInterviewPrep(id, feedback.getReviewRating(), feedback.getReviewText());
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{id}/prepare/set-reminders-true")
+    @Operation(summary = "Update interview preparation reminder")
+    public ResponseEntity<Void> updateInterviewPreparationReminder(@PathVariable Long id) {
+        interviewService.setHelpMeRememberTrue(id);
+        return ResponseEntity.ok().build();
+    }
+
     @PatchMapping("/{id}/mark-as-completed")
     @Operation(summary = "Mark the interview as completed")
     public ResponseEntity<Void> markInterviewAsCompleted(
@@ -295,4 +326,5 @@ public class InterviewController {
         var updatedInterview = interviewService.updateInterview(id, request);
         return ResponseEntity.ok(interviewMapper.toDto(updatedInterview));
     }
+
 }

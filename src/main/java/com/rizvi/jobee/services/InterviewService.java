@@ -25,6 +25,7 @@ import com.rizvi.jobee.entities.Application;
 import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.Interview;
 import com.rizvi.jobee.entities.InterviewPreparation;
+import com.rizvi.jobee.entities.InterviewPreparationFeedback;
 import com.rizvi.jobee.entities.InterviewPreparationQuestion;
 import com.rizvi.jobee.entities.InterviewRejection;
 import com.rizvi.jobee.entities.InterviewRescheduleRequest;
@@ -48,9 +49,9 @@ import com.rizvi.jobee.helpers.AISchemas.ReferenceToPreviousAnswer;
 import com.rizvi.jobee.queries.InterviewQuery;
 import com.rizvi.jobee.repositories.ApplicationRepository;
 import com.rizvi.jobee.repositories.BusinessAccountRepository;
+import com.rizvi.jobee.repositories.InterviewPreparationFeedbackRepository;
 import com.rizvi.jobee.repositories.InterviewPreparationQuestionRepository;
 import com.rizvi.jobee.repositories.InterviewPreparationRepository;
-import com.rizvi.jobee.repositories.InterviewPreparationResourceRepository;
 import com.rizvi.jobee.repositories.InterviewRepository;
 import com.rizvi.jobee.specifications.InterviewSpecifications;
 
@@ -63,7 +64,7 @@ public class InterviewService {
     private final InterviewRepository interviewRepository;
     private final InterviewPreparationRepository interviewPreparationRepository;
     private final InterviewPreparationQuestionRepository interviewPreparationQuestionRepository;
-    private final InterviewPreparationResourceRepository interviewPreparationResourceRepository;
+    private final InterviewPreparationFeedbackRepository interviewPreparationFeedbackRepository;
     private final ApplicationRepository applicationRepository;
     private final AIService aiService;
     private final S3Service s3Service;
@@ -554,5 +555,30 @@ public class InterviewService {
         var candidateFullName = candidate.getFullName();
         requestQueue.sendInterviewPrepResourcesViaEmail(resources, companyName, jobTitle, candidateFullName,
                 candidateEmail);
+    }
+
+    public void setHelpMeRememberTrue(Long interviewId) {
+        var interviewPrep = interviewPreparationRepository.findByInterviewId(interviewId);
+        if (interviewPrep == null) {
+            throw new InterviewNotFoundException("Interview preparation not found for interview id: " + interviewId);
+        }
+        interviewPrep.setHelpMeRemember(true);
+        interviewPreparationRepository.save(interviewPrep);
+    }
+
+    public void submitFeedbackForInterviewPrep(Long interviewId, Integer rating, String comments) {
+        var interviewPrep = interviewPreparationRepository.findByInterviewId(interviewId);
+        if (interviewPrep == null) {
+            throw new InterviewNotFoundException("Interview preparation not found for interview id: " + interviewId);
+        }
+        var interviewFeedback = InterviewPreparationFeedback.builder().reviewRating(rating).reviewText(comments)
+                .interviewPreparation(interviewPrep).build();
+        interviewPrep.setFeedback(interviewFeedback);
+        interviewPreparationRepository.save(interviewPrep);
+    }
+
+    public InterviewPreparationFeedback getInterviewPrepFeedback(Long interviewId) {
+        var interviewPrep = interviewPreparationFeedbackRepository.findByInterviewPreparationId(interviewId);
+        return interviewPrep;
     }
 }
