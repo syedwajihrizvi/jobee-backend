@@ -80,6 +80,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/user-documents/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/profile/experiences/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/business-accounts/invite-member").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/business-accounts/company/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/business-accounts/me").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/business-profiles").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/business-profiles/socialMedia/**").permitAll()

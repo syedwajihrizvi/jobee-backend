@@ -51,7 +51,7 @@ public class Invitation {
     @Column(name = "email")
     private String email;
 
-    @Column(name = "phone_number")
+    @Column(name = "phone_number", nullable = true)
     private String phoneNumber;
 
     @Column(name = "role")

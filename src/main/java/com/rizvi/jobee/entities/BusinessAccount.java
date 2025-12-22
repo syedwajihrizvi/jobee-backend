@@ -1,5 +1,6 @@
 package com.rizvi.jobee.entities;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -50,6 +51,9 @@ public class BusinessAccount {
 
     @Column(name = "last_name", nullable = false)
     private String lastName;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "account_type", nullable = false)

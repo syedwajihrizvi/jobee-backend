@@ -7,6 +7,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Base64;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,6 +34,22 @@ public class S3Service {
 
         public static String generateMessageAttachmentUrl(String fileUrl) {
                 return "https://" + "your-bucket-name" + ".s3.amazonaws.com/message-files/" + fileUrl;
+        }
+
+        public String uploadQRCodeViaURL(Long invitationId, String qrCodeUrl) {
+                final String key = "invitation-qrcodes/" + "invitation_" + invitationId + ".png";
+                String base64Data = qrCodeUrl.replace(" ", "").replace("data:image/png;base64,", "");
+                byte[] imageBytes = Base64.getDecoder().decode(base64Data);
+
+                s3Client.putObject(
+                                PutObjectRequest.builder()
+                                                .bucket(awsProperties.getBucket())
+                                                .key(key)
+                                                .contentType("image/png")
+                                                .contentLength((long) imageBytes.length)
+                                                .build(),
+                                RequestBody.fromBytes(imageBytes));
+                return "https://" + awsProperties.getBucket() + ".s3.amazonaws.com/" + key;
         }
 
         public String uploadDocument(

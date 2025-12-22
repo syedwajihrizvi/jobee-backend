@@ -19,10 +19,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class InvitationService {
     private final InvitationRepository invitationRepository;
+    private final S3Service s3Service;
     @Autowired
     private EmailSender emailSender;
-    @Autowired
-    private SMSService smsService;
 
     private String generateCompanyCode(String companyName) {
         // Implement your company code generation logic here
@@ -48,7 +47,6 @@ public class InvitationService {
     public Invitation createInvitation(String email, String phoneNumber, String selectedUserType,
             BusinessAccount invitedBy) {
         var companyName = invitedBy.getCompany().getName();
-        // Create the invitation and the fields
         Invitation invitation = new Invitation();
         invitation.setEmail(email);
         invitation.setPhoneNumber(phoneNumber);
@@ -56,32 +54,27 @@ public class InvitationService {
         invitation.setInvitedBy(invitedBy);
         invitation.setCompany(invitedBy.getCompany());
 
-        // Generate a company code
         String companyCode = generateCompanyCode(companyName);
         invitation.setCompanyCode(companyCode);
-        // Generate a invite link
+        var savedInvitation = invitationRepository.save(invitation);
         String inviteLink = generateInviteLink(companyCode);
-        // Generate QR code URL
         String qrCodeUrl = null;
+        String s3Url = null;
         try {
             qrCodeUrl = generateQRCodeUrl(inviteLink);
+            s3Url = s3Service.uploadQRCodeViaURL(savedInvitation.getId(), qrCodeUrl);
         } catch (Exception e) {
             // Handle exception
             System.out.println("Failed to generate QR code: " + e.getMessage());
         }
         if (email != null && !email.isEmpty()) {
-            emailSender.sendInvitationEmail(email, companyName, invitedBy,
-                    selectedUserType, companyCode, inviteLink, qrCodeUrl);
+            emailSender.sendInvitationEmail(email, companyName, invitedBy.getFullName(),
+                    selectedUserType, companyCode, inviteLink, s3Url);
         }
-        if (phoneNumber != null && !phoneNumber.isEmpty()) {
-            smsService.sendInviteSMS(phoneNumber, companyName, invitedBy, selectedUserType);
-        }
-        var savedInvitation = invitationRepository.save(invitation);
         return savedInvitation;
     }
 
     public Invitation getInvitationByCompanyCode(String companyCode) {
-        System.out.println("Fetching invitation for company code: " + companyCode);
         return invitationRepository.findByCompanyCode(companyCode);
     }
 

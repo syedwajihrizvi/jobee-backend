@@ -5,6 +5,7 @@ import org.mapstruct.Mapping;
 
 import com.rizvi.jobee.dtos.user.BusinessAccountDto;
 import com.rizvi.jobee.dtos.user.BusinessProfileSummaryForInterviewDto;
+import com.rizvi.jobee.dtos.user.CompanyMemberDto;
 import com.rizvi.jobee.dtos.user.HiringTeamMemberResponseDto;
 import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.BusinessProfile;
@@ -26,6 +27,15 @@ public interface BusinessMapper {
     @Mapping(target = "country", source = "profile.country")
     @Mapping(target = "socialMedias", source = "profile.socials")
     BusinessAccountDto toDto(BusinessAccount businessAccount);
+
+    @Mapping(target = "id", source = "businessAccount.id")
+    @Mapping(target = "firstName", source = "businessAccount.firstName")
+    @Mapping(target = "lastName", source = "businessAccount.lastName")
+    @Mapping(target = "email", source = "businessAccount.email")
+    @Mapping(target = "userType", source = "businessAccount.accountType")
+    @Mapping(target = "joinedDate", source = "businessAccount.createdAt")
+    @Mapping(target = "profileImageUrl", source = "businessAccount.profile.profileImageUrl")
+    CompanyMemberDto toCompanyMemberDto(BusinessAccount businessAccount);
 
     @Mapping(target = "email", source = "businessAccount.email")
     @Mapping(target = "title", source = "title")

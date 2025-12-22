@@ -297,7 +297,6 @@ public class InterviewService {
                 .status(PreparationStatus.GENERATING_PREP)
                 .build();
         var savedInterviewPreparation = interviewPreparationRepository.save(interviewPreparation);
-        System.out.println("SYED-DEBUG: Interview Service prepareForInterview - before requestQueue: " + interview);
         requestQueue.processInterviewPrep(savedInterviewPreparation, interview);
         return true;
     }

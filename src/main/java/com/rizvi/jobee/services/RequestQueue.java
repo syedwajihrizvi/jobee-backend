@@ -1,6 +1,5 @@
 package com.rizvi.jobee.services;
 
-import java.util.List;
 import java.util.Set;
 
 import org.springframework.scheduling.annotation.Async;
@@ -40,6 +39,7 @@ public class RequestQueue {
     @Async
     public void processInterviewPrep(
             InterviewPreparation interviewPrep, Interview interview) {
+        Boolean successfullyGeneratedPrep = false;
         try {
             AIJob aiJob = new AIJob(interview.getJob());
             AICompany aiCompany = new AICompany(interview.getJob().getCompany());
@@ -51,12 +51,21 @@ public class RequestQueue {
             interviewPrep.updateViaAIResponse(response);
             interviewPrep.setStatus(PreparationStatus.IN_PROGRESS);
             var savedInterviewPrep = interviewPreparationRepository.save(interviewPrep);
+            successfullyGeneratedPrep = true;
             userNotificationService.createInterviewPrepNotificationAndSend(savedInterviewPrep, interview);
-            emailSender.sendInterviewPrepEmail(interviewPrep);
+            System.out.println("SYED-DEBUG: Sending interview prep email");
+            emailSender.sendInterviewPrepEmail(interview);
         } catch (Exception e) {
             // Then we sent out a failure notification to the user and they can retry
-            interviewPrep.setStatus(PreparationStatus.NOT_STARTED);
-            interviewPreparationRepository.save(interviewPrep);
+            System.out.println("SYED-DEBUG: Failed to generate interview prep: " + e.getMessage());
+            if (!successfullyGeneratedPrep) {
+                interviewPrep.setStatus(PreparationStatus.NOT_STARTED);
+                var savedInterviewPrep = interviewPreparationRepository.save(interviewPrep);
+                userNotificationService.createInterviewPrepNotificationAndSend(savedInterviewPrep, interview);
+            } else {
+                userNotificationService.createInterviewPrepNotificationAndSend(interviewPrep, interview);
+            }
+
         }
     }
 
@@ -137,5 +146,11 @@ public class RequestQueue {
     public void sendDocumentViaEmail(String fullName, String email, String fileUrl, String otherPartyName,
             boolean isDocument) {
         emailSender.sendDocumentViaEmail(fullName, email, fileUrl, otherPartyName, isDocument);
+    }
+
+    public void sendJobeeInvitationEmail(String email, String companyName, String invitedBy, String selectedUserType,
+            String companyCode, String inviteLink, String s3Url) {
+        emailSender.sendInvitationEmail(email, companyName, invitedBy,
+                selectedUserType, companyCode, inviteLink, s3Url);
     }
 }

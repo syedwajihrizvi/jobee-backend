@@ -5,20 +5,26 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.rizvi.jobee.dtos.invitations.CreateInvitationDto;
+import com.rizvi.jobee.dtos.job.PaginatedResponse;
 import com.rizvi.jobee.dtos.user.BusinessAccountDto;
+import com.rizvi.jobee.dtos.user.CompanyMemberDto;
 import com.rizvi.jobee.dtos.user.CreateBusinessAccountDto;
 import com.rizvi.jobee.dtos.user.CreateBusinessAccountViaCodeDto;
 import com.rizvi.jobee.dtos.user.JwtDto;
 import com.rizvi.jobee.dtos.user.LoginDto;
 import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.BusinessProfile;
+import com.rizvi.jobee.enums.BusinessType;
 import com.rizvi.jobee.enums.InvitationStatus;
 import com.rizvi.jobee.enums.Role;
 import com.rizvi.jobee.exceptions.AlreadyRegisteredException;
@@ -26,11 +32,13 @@ import com.rizvi.jobee.exceptions.IncorrectEmailOrPasswordException;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.mappers.BusinessMapper;
 import com.rizvi.jobee.principals.CustomPrincipal;
+import com.rizvi.jobee.queries.CompanyMemberQuery;
 import com.rizvi.jobee.repositories.BusinessAccountRepository;
 import com.rizvi.jobee.services.BusinessAccountService;
 import com.rizvi.jobee.services.InvitationService;
 import com.rizvi.jobee.services.JwtService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
@@ -44,6 +52,30 @@ public class BusinessAccountController {
     private final JwtService jwtService;
     private final BusinessMapper businessMapper;
     private final InvitationService invitationService;
+
+    @GetMapping("/company/{companyId}/members")
+    @Operation(summary = "Get all members of a company by company ID")
+    public ResponseEntity<PaginatedResponse<CompanyMemberDto>> getCompanyMembersOnJobee(
+            @RequestParam(defaultValue = "0") Integer pageNumber,
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @PathVariable Long companyId,
+            @ModelAttribute CompanyMemberQuery companyMemberQuery,
+            @AuthenticationPrincipal CustomPrincipal principal) {
+        companyMemberQuery.setCompanyId(companyId);
+        var paginatedResponse = accountService.getAllCompanyMembers(companyMemberQuery, pageNumber, pageSize);
+        var companyMembers = paginatedResponse.getContent();
+        var hasMore = paginatedResponse.isHasMore();
+        var totalElements = paginatedResponse.getTotalElements();
+        var companyMemberDtos = companyMembers.stream().map(member -> {
+            var dto = businessMapper.toCompanyMemberDto(member);
+            dto.setIsMe(member.getId().equals(principal.getId()));
+            return dto;
+        }).toList();
+        PaginatedResponse<CompanyMemberDto> response = new PaginatedResponse<CompanyMemberDto>(hasMore,
+                companyMemberDtos, totalElements);
+        return ResponseEntity.ok(response);
+
+    }
 
     @PostMapping("/register")
     @Transactional
@@ -86,7 +118,8 @@ public class BusinessAccountController {
                 .build();
         var company = invitation.getCompany();
         businessAccount.setCompany(company);
-        var businesProfile = BusinessProfile.builder().title("Employee").businessAccount(businessAccount).build();
+        var title = invitation.getInvitationType() == BusinessType.RECRUITER ? "Recruiter" : "Employee";
+        var businesProfile = BusinessProfile.builder().title(title).businessAccount(businessAccount).build();
         businessAccount.setProfile(businesProfile);
         var savedBusinessAccount = businessAccountRepository.save(businessAccount);
         invitationService.updateInvitationStatus(invitation, InvitationStatus.ACCEPTED);
@@ -133,8 +166,6 @@ public class BusinessAccountController {
             @RequestBody CreateInvitationDto request,
             @AuthenticationPrincipal CustomPrincipal principal) {
         var userId = principal.getId();
-        var accountType = principal.getAccountType();
-        // TODO: Ensure user has permissions to invite members
         var businessAccount = businessAccountRepository.findById(userId).orElseThrow(
                 () -> new AccountNotFoundException("Business account not found with id: " + userId));
         var email = request.getEmail();

@@ -186,12 +186,12 @@ public class EmailSender {
 
   }
 
-  public void sendInterviewPrepEmail(InterviewPreparation interviewPrep) {
-    String to = interviewPrep.getInterview().getCandidateEmail();
-    String fullName = interviewPrep.getInterview().getCandidate().getFullName();
-    String jobTitle = interviewPrep.getInterview().getJob().getTitle();
-    String companyName = interviewPrep.getInterview().getCreatedBy().getCompany().getName();
-    String interviewDate = interviewPrep.getInterview().getInterviewDate().toString();
+  public void sendInterviewPrepEmail(Interview interview) {
+    String to = interview.getCandidateEmail();
+    String fullName = interview.getCandidate().getFullName();
+    String jobTitle = interview.getJob().getTitle();
+    String companyName = interview.getJob().getCompany().getName();
+    String interviewDate = interview.getInterviewDate().toString();
 
     try {
       String subject = "Your Interview Preparation Materials are Ready for " + jobTitle;
@@ -230,50 +230,27 @@ public class EmailSender {
   public void sendHiringTeamInvitationAndJoinJobeeEmail(
       String to, String companyName, BusinessAccount sender, String companyCode, String jobTitle,
       String inviteUrl, String qrCode) {
+
     try {
-      Destination destination = createEmailDestination(to);
       String inviteeFullName = sender.getFullName();
-      System.out.println("Destination created for: " + to);
       String subject = "You're invited to join the hiring team for " + jobTitle + " at " + companyName
           + " on Jobee!";
       String htmlString = generateHiringTeamInvitationAndJoinJobeeHtml(
           companyName, inviteeFullName, jobTitle, inviteUrl, companyCode, qrCode);
-      String textString = inviteeFullName + " has invited you to join the hiring team for " + jobTitle + " at "
-          + companyName + " on Jobee!";
-      Message message = createEmail(subject, htmlString, textString);
-      SendEmailRequest emailRequest = SendEmailRequest.builder()
-          .source("Jobee <" + senderEmail + ">")
-          .destination(destination)
-          .message(message)
-          .replyToAddresses("support@jobee.solutions")
-          .build();
-      sesClient.sendEmail(emailRequest);
+      resendService.sendEmail(to, subject, htmlString);
     } catch (Exception e) {
       // TODO: handle exception
     }
   }
 
   public void sendInvitationEmail(
-      String to, String companyName, BusinessAccount sender, String invitationType,
+      String to, String companyName, String inviteeFullName, String invitationType,
       String companyCode, String inviteUrl, String qrCode) {
     try {
-      Destination destination = createEmailDestination(to);
-      String inviteeFullName = sender.getFullName();
-      System.out.println("Destination created for: " + to);
       String subject = "You're invited to join " + companyName + " on Jobee!";
       String htmlString = generateInvitationHtml(companyName, inviteeFullName, inviteUrl, qrCode, companyCode);
-      String textString = inviteeFullName + "has invited you to join " + companyName + " on Jobee as an "
-          + invitationType + "!";
-      Message message = createEmail(subject, htmlString, textString);
-      SendEmailRequest emailRequest = SendEmailRequest.builder()
-          .source("Jobee <" + senderEmail + ">")
-          .destination(destination)
-          .message(message)
-          .replyToAddresses("support@jobee.solutions")
-          .build();
-      sesClient.sendEmail(emailRequest);
+      resendService.sendEmail(to, subject, htmlString);
     } catch (Exception e) {
-      // TODO: handle exception
       System.out.println("Failed to send email: " + e.getMessage());
     }
   }

@@ -42,6 +42,7 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
                         "job", "candidate", "job.tags", "job.company",
                         "interviewTips", "candidate.company", "candidate.skills", "candidate.skills.skill",
                         "candidate.experiences",
+                        "candidate.account",
                         "candidate.projects", "candidate.education" })
         @Query("select i from Interview i where i.id = :interviewId")
         Interview findInterviewForPreparation(Long interviewId);
