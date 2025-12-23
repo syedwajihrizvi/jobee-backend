@@ -144,6 +144,13 @@ public class Job {
         return applications.stream().filter(application -> application.getShortlisted() == true).toList();
     }
 
+    public void clearTags() {
+        for (Tag tag : this.tags) {
+            tag.getJobs().remove(this);
+        }
+        this.tags.clear();
+    }
+
     public void addTag(Tag tag) {
         this.tags.add(tag);
         tag.getJobs().add(this);
@@ -208,6 +215,13 @@ public class Job {
     public void addHiringTeamMember(HiringTeam member) {
         this.hiringTeamMembers.add(member);
         member.setJob(this);
+    }
+
+    public void clearHiringTeamMembers() {
+        for (HiringTeam member : this.hiringTeamMembers) {
+            member.setJob(null);
+        }
+        this.hiringTeamMembers.clear();
     }
 
     public String getJobLocation() {

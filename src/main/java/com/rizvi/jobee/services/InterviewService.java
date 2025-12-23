@@ -125,6 +125,15 @@ public class InterviewService {
         return interviewRepository.findByInterviewersId(businessAccountId, sort);
     }
 
+    public List<Interview> getInterviewsForBusinessUser(Long businessAccountId) {
+        Set<Interview> interviews = new HashSet<>();
+        var recruiterInterviews = getInterviewsForRecruiter(businessAccountId);
+        var employeeInterviews = getInterviewsForEmployee(businessAccountId);
+        interviews.addAll(recruiterInterviews);
+        interviews.addAll(employeeInterviews);
+        return interviews.stream().toList();
+    }
+
     public List<Interview> getInterviewsByCompanyId(Long businessAccountId) {
         var businessAccount = businessAccountRepository.findById(businessAccountId).orElseThrow(
                 () -> new AccountNotFoundException("Business account not found with id: " + businessAccountId));
@@ -203,7 +212,7 @@ public class InterviewService {
         return savedInterview;
     }
 
-    public Interview updateInterview(Long interviewId, CreateInterviewDto request) {
+    public Interview updateInterview(Long interviewId, CreateInterviewDto request, Long businessAccountId) {
         var interview = interviewRepository.findById(interviewId)
                 .orElseThrow(() -> new InterviewNotFoundException("Interview not found with id: " + interviewId));
         interview.setTitle(request.getTitle());
@@ -242,8 +251,8 @@ public class InterviewService {
         }
 
         // Get current interviewers and other interviewers
-        var originalInterviewers = interview.getInterviewers();
-        var originalOtherInterviewers = interview.getOtherInterviewers();
+        Set<BusinessAccount> originalInterviewers = new HashSet<>(interview.getInterviewers());
+        Set<ConductorDto> originalOtherInterviewers = new HashSet<>(interview.getOtherInterviewers());
         interview.clearAllInterviewersAndOtherInterviewers();
         Set<BusinessAccount> newInterviewers = new HashSet<>();
         Set<ConductorDto> newOtherInterviewers = new HashSet<>();
@@ -258,7 +267,9 @@ public class InterviewService {
                 }
             } else {
                 interview.addInterviewer(interviewer);
-                if (!originalInterviewers.contains(interviewer)) {
+                if (!originalInterviewers.contains(interviewer) && !interviewer.getId().equals(businessAccountId)) {
+                    System.out.println("ADDING INTERVIEWER TO NOTIFY: " + interviewer.getId() + " for interview "
+                            + businessAccountId);
                     newInterviewers.add(interviewer);
                 }
             }
@@ -266,19 +277,38 @@ public class InterviewService {
         Set<BusinessAccount> removedInterviewers = new HashSet<>();
         Set<ConductorDto> removedOtherInterviewers = new HashSet<>();
         for (BusinessAccount interviewer : originalInterviewers) {
-            if (!interview.getInterviewers().contains(interviewer)) {
-                removedInterviewers.add(interviewer);
+            if (!interview.getInterviewers().stream().anyMatch(i -> i.getId().equals(interviewer.getId()))) {
+                if (!interviewer.getId().equals(businessAccountId)) {
+                    removedInterviewers.add(interviewer);
+                }
             }
         }
         for (ConductorDto otherInterviewer : originalOtherInterviewers) {
-            if (!interview.getOtherInterviewers().contains(otherInterviewer)) {
+            if (!originalOtherInterviewers.contains(otherInterviewer)) {
                 removedOtherInterviewers.add(otherInterviewer);
             }
         }
         interview.setRescheduleRequest(null);
         var updatedInterview = interviewRepository.save(interview);
+        // Get the intviewers that did not change
+        Set<BusinessAccount> unchangedInterviewers = new HashSet<>();
+        Set<ConductorDto> unchangedOtherInterviewers = new HashSet<>();
+        for (BusinessAccount interviewer : originalInterviewers) {
+            System.out.println("CHECKING UNCHANGED INTERVIEWER: " + interviewer.getId() + " for interview "
+                    + businessAccountId + ": RESULT=" + !interviewer.getId().equals(businessAccountId));
+            if (updatedInterview.getInterviewers().stream().anyMatch(i -> i.getId().equals(interviewer.getId()))
+                    && !interviewer.getId().equals(businessAccountId)) {
+                unchangedInterviewers.add(interviewer);
+            }
+        }
+        for (ConductorDto otherInterviewer : originalOtherInterviewers) {
+            if (updatedInterview.getOtherInterviewers().stream()
+                    .anyMatch(i -> i.getEmail().equals(otherInterviewer.getEmail()))) {
+                unchangedOtherInterviewers.add(otherInterviewer);
+            }
+        }
         requestQueue.sendInterviewUpdatedEmailsAndNotifications(updatedInterview, newInterviewers, newOtherInterviewers,
-                removedInterviewers, removedOtherInterviewers);
+                removedInterviewers, removedOtherInterviewers, unchangedInterviewers, unchangedOtherInterviewers);
         return updatedInterview;
     }
 

@@ -2,15 +2,18 @@ package com.rizvi.jobee.services;
 
 import java.util.Set;
 
+import org.checkerframework.checker.units.qual.m;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.rizvi.jobee.dtos.interview.ConductorDto;
 import com.rizvi.jobee.entities.BusinessAccount;
+import com.rizvi.jobee.entities.HiringTeam;
 import com.rizvi.jobee.entities.Interview;
 import com.rizvi.jobee.entities.InterviewPreparation;
 import com.rizvi.jobee.entities.InterviewPreparationResource;
+import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.enums.PreparationStatus;
 import com.rizvi.jobee.helpers.AISchemas.AICandidate;
@@ -35,6 +38,7 @@ public class RequestQueue {
     private final SocialMediaService userSocialMediaService;
     private final ExperienceService userExperienceService;
     private final EmailSender emailSender;
+    private final InvitationService invitationService;
 
     @Async
     public void processInterviewPrep(
@@ -127,12 +131,14 @@ public class RequestQueue {
     @Async
     public void sendInterviewUpdatedEmailsAndNotifications(
             Interview interview, Set<BusinessAccount> newInterviewers, Set<ConductorDto> newOtherInterviewers,
-            Set<BusinessAccount> removedInterviewers, Set<ConductorDto> removedOtherInterviewers) {
+            Set<BusinessAccount> removedInterviewers, Set<ConductorDto> removedOtherInterviewers,
+            Set<BusinessAccount> unchangedInterviewers, Set<ConductorDto> unchangedOtherInterviewers) {
         userNotificationService.createInterviewUpdatedNotificationAndSend(interview, newInterviewers,
-                removedInterviewers);
+                removedInterviewers, unchangedInterviewers);
         emailSender.sendUpdatedInterviewEmail(interview, newInterviewers,
                 newOtherInterviewers,
-                removedInterviewers, removedOtherInterviewers);
+                removedInterviewers, removedOtherInterviewers, unchangedInterviewers,
+                unchangedOtherInterviewers);
     }
 
     @Async
@@ -148,9 +154,19 @@ public class RequestQueue {
         emailSender.sendDocumentViaEmail(fullName, email, fileUrl, otherPartyName, isDocument);
     }
 
-    public void sendJobeeInvitationEmail(String email, String companyName, String invitedBy, String selectedUserType,
-            String companyCode, String inviteLink, String s3Url) {
-        emailSender.sendInvitationEmail(email, companyName, invitedBy,
-                selectedUserType, companyCode, inviteLink, s3Url);
+    @Async
+    public void sendHiringTeamInvitationsForJob(Job job, Set<HiringTeam> jobeeTeamMembers,
+            Set<HiringTeam> nonJobeeTeamMembers) {
+        for (HiringTeam member : jobeeTeamMembers) {
+            invitationService.sendHiringTeamInvitationEmail(member.getBusinessAccount(),
+                    member.getBusinessAccount(),
+                    job);
+            userNotificationService.createdAddedToHiringTeamNotificationAndSend(member.getBusinessAccount(), job);
+        }
+        for (HiringTeam member : nonJobeeTeamMembers) {
+            invitationService.sendHiringTeamInvitationAndJoinJobeeEmail(member.getEmail(),
+                    job.getBusinessAccount(),
+                    job);
+        }
     }
 }

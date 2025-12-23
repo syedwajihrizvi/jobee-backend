@@ -64,13 +64,9 @@ public class InterviewController {
             @RequestParam(required = false) Number limit,
             @AuthenticationPrincipal CustomPrincipal principal) {
         var accountId = principal.getId();
-        var accountType = principal.getAccountType();
         var companyId = principal.getCompanyId();
-        if (accountType.equals(BusinessType.RECRUITER.name())) {
-            query.setPostedById(accountId);
-        } else if (accountType.equals(BusinessType.EMPLOYEE.name())) {
-            query.setConductorId(accountId);
-        }
+        query.setConductorId(accountId);
+        query.setPostedById(accountId);
         query.setCompanyId(companyId);
         var paginatedInterviews = interviewService.getAllInterviews(query, pageNumber, pageSize);
         var interviews = paginatedInterviews.getContent();
@@ -125,10 +121,8 @@ public class InterviewController {
         List<Interview> interviews = new ArrayList<>();
         if (accountType.equals(BusinessType.ADMIN.name())) {
             interviews = interviewService.getInterviewsByCompanyId(businessId);
-        } else if (accountType.equals(BusinessType.RECRUITER.name())) {
-            interviews = interviewService.getInterviewsForRecruiter(businessId);
-        } else if (accountType.equals(BusinessType.EMPLOYEE.name())) {
-            interviews = interviewService.getInterviewsForEmployee(businessId);
+        } else {
+            interviews = interviewService.getInterviewsForBusinessUser(businessId);
         }
         var interviewSummaryDtos = interviews.stream()
                 .map(interviewMapper::toSummaryDto)
@@ -322,8 +316,8 @@ public class InterviewController {
             @PathVariable Long id,
             @RequestBody @Valid CreateInterviewDto request,
             @AuthenticationPrincipal CustomPrincipal principal) {
-
-        var updatedInterview = interviewService.updateInterview(id, request);
+        var businessId = principal.getId();
+        var updatedInterview = interviewService.updateInterview(id, request, businessId);
         return ResponseEntity.ok(interviewMapper.toDto(updatedInterview));
     }
 

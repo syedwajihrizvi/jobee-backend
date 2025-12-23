@@ -19,14 +19,13 @@ public class InterviewSpecifications {
         return (root, _, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             Join<Interview, Job> jobJoin = root.join("job");
+            Join<Interview, BusinessAccount> interviewersJoin = root.join("interviewers");
             Join<Job, BusinessAccount> businessJoin = jobJoin.join("businessAccount");
             Join<BusinessAccount, Company> companyJoin = businessJoin.join("company");
-            System.out.println("Using Query: " + query);
             predicates.add(cb.equal(companyJoin.get("id"), query.getCompanyId()));
             if (query.getJobId() != null) {
                 predicates.add(cb.equal(jobJoin.get("id"), query.getJobId()));
             }
-
             if (query.getInterviewStatus() != null) {
                 predicates.add(cb.equal(root.get("status"), query.getInterviewStatus()));
             }
@@ -37,9 +36,17 @@ public class InterviewSpecifications {
                                 cb.equal(root.get("decisionResult"), query.getDecisionResult()),
                                 cb.equal(root.get("status"), "COMPLETED")));
             }
-
-            if (query.getPostedById() != null) {
-                predicates.add(cb.equal(businessJoin.get("id"), query.getPostedById()));
+            if (query.getPostedById() != null || query.getConductorId() != null) {
+                List<Predicate> accountPredicates = new ArrayList<>();
+                if (query.getPostedById() != null) {
+                    accountPredicates.add(cb.equal(businessJoin.get("id"), query.getPostedById()));
+                }
+                if (query.getConductorId() != null) {
+                    accountPredicates.add(cb.and(
+                            cb.equal(interviewersJoin.get("id"),
+                                    query.getConductorId())));
+                }
+                predicates.add(cb.or(accountPredicates.toArray(new Predicate[0])));
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));

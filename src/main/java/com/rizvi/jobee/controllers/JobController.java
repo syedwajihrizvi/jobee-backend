@@ -82,14 +82,10 @@ public class JobController {
             @AuthenticationPrincipal CustomPrincipal principal) {
         var userId = principal.getId();
         var accountType = principal.getAccountType();
-        // TODO: Add company id to the principal to avoid extra DB call
-        var businessAccount = accountService.getBusinessAccountById(userId);
-        Long companyId = businessAccount.getCompany().getId();
+        Long companyId = principal.getCompanyId();
         jobQuery.setCompanyId(companyId);
-        if (accountType.equals(BusinessType.RECRUITER.name())) {
+        if (!accountType.equals(BusinessType.ADMIN.name())) {
             jobQuery.setPostedByAccountId(userId);
-
-        } else if (accountType.equals(BusinessType.EMPLOYEE.name())) {
             jobQuery.setHiringTeamMemberAccountId(userId);
         }
         var paginatedJobData = jobService.getJobsByCompany(jobQuery, pageNumber, pageSize);
@@ -130,12 +126,10 @@ public class JobController {
         List<Job> jobs = null;
         if (accountType.equals(BusinessType.ADMIN.name())) {
             jobs = jobService.getJobsByCompanyId(companyId);
-        } else if (accountType.equals(BusinessType.RECRUITER.name())) {
-            jobs = jobService.getJobsByBusinessAccountIdForRecruiter(accountId, null);
-        } else if (accountType.equals(BusinessType.EMPLOYEE.name())) {
-            // TODO: Get jobs this employee is a part of
-            jobs = jobService.getJobsByBusinessAccountIdForEmployee(accountId, null);
+        } else {
+            jobs = jobService.getJobsForNonAdminUsers(accountId, null);
         }
+
         var mostAppliedJobs = jobs.stream()
                 .sorted((j1, j2) -> Integer.compare(j2.getApplications().size(), j1.getApplications().size()))
                 .limit(3)
@@ -198,7 +192,8 @@ public class JobController {
             @AuthenticationPrincipal CustomPrincipal principal) {
         var userId = principal.getId();
         var accountType = principal.getAccountType();
-        jobQuery.setCompanyId(companyId);
+        jobQuery.setCompanyId(principal.getCompanyId());
+        System.out.println("Company ID in query: " + jobQuery.getCompanyId());
         if (accountType.equals(BusinessType.RECRUITER.name())) {
             jobQuery.setPostedByAccountId(userId);
 
@@ -221,7 +216,6 @@ public class JobController {
             @PathVariable Long jobId) {
         var job = jobService.getCompanyJobById(jobId);
         var jobDto = jobMapper.toDetailedSummaryForBusinessDto(job);
-        System.out.println(jobDto.getHiringTeam().size() + " hiring team members added to job DTO");
         return ResponseEntity.ok(jobDto);
     }
 
@@ -276,6 +270,21 @@ public class JobController {
         var uri = uriComponentsBuilder.path("/jobs/{id}").buildAndExpand(savedJob.getId()).toUri();
         return ResponseEntity.created(uri).body(jobMapper.toSummaryDto(savedJob));
 
+    }
+
+    @PatchMapping("/{id}")
+    @Operation(summary = "Update an existing job posting")
+    public ResponseEntity<JobSummaryDto> updateJob(
+            @RequestBody CreateJobDto request,
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomPrincipal principal) {
+        var accountId = principal.getId();
+        var businessAccount = accountService.getBusinessAccountById(accountId);
+        if (businessAccount == null) {
+            throw new BusinessNotFoundException();
+        }
+        var updatedJob = jobService.updateJob(id, request);
+        return ResponseEntity.ok(jobMapper.toSummaryDto(updatedJob));
     }
 
     @GetMapping("/{id}/shortlisted")

@@ -14,6 +14,7 @@ public class CreateNotificationDto {
     private NotificationType notificationType;
     private Long companyId;
     private Long jobId;
+    private String jobTitle;
     private Long applicationId;
     private Long interviewId;
     private String candidateProfileImageUrl;

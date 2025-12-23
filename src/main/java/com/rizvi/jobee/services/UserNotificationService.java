@@ -13,6 +13,7 @@ import com.rizvi.jobee.entities.Application;
 import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.Interview;
 import com.rizvi.jobee.entities.InterviewPreparation;
+import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.entities.Notification;
 import com.rizvi.jobee.enums.MessagerUserType;
 import com.rizvi.jobee.enums.NotificationType;
@@ -34,7 +35,6 @@ public class UserNotificationService {
     private final InterviewRepository interviewRepository;
     private final ApplicationRepository applicationRepository;
     private final CompanyService companyService;
-    private final JobService jobService;
     private final SimpMessagingTemplate messagingTemplate;
 
     public static String createNotificationDestination(MessagerUserType recipientType, Long recipientId) {
@@ -57,10 +57,9 @@ public class UserNotificationService {
             context.setCompanyName(company.getName());
             context.setCompanyLogoUrl(company.getLogo());
         }
-        if (notificationDto.getJobId() != null) {
-            var job = jobService.getJobById(notificationDto.getJobId());
-            context.setJobId(job.getId());
-            context.setJobTitle(job.getTitle());
+        if (notificationDto.getJobId() != null && notificationDto.getJobTitle() != null) {
+            context.setJobId(notificationDto.getJobId());
+            context.setJobTitle(notificationDto.getJobTitle());
         }
         if (notificationDto.getApplicationId() != null) {
             var application = applicationRepository.findById(notificationDto.getApplicationId()).orElse(null);
@@ -138,12 +137,14 @@ public class UserNotificationService {
     private CreateNotificationDto createDtoForCandidateInterviewSchedule(Interview interview) {
         var message = "You have been scheduled for an interview for the position of "
                 + interview.getJob().getTitle() + " at " + interview.getCreatedBy().getCompany().getName() + ".";
+        var job = interview.getJob();
         CreateNotificationDto notificationDto = new CreateNotificationDto();
         notificationDto.setRecipientType(MessagerUserType.USER);
         notificationDto.setMessage(message);
         notificationDto.setRecipientId(interview.getCandidate().getId());
         notificationDto.setNotificationType(NotificationType.INTERVIEW_SCHEDULED);
-        notificationDto.setJobId(interview.getJob().getId());
+        notificationDto.setJobId(job.getId());
+        notificationDto.setJobTitle(job.getTitle());
         notificationDto.setInterviewId(interview.getId());
         notificationDto.setApplicationId(interview.getApplication().getId());
         notificationDto.setCompanyId(interview.getJob().getCompany().getId());
@@ -154,12 +155,14 @@ public class UserNotificationService {
         var message = "Your interview for the position of "
                 + interview.getJob().getTitle() + " at " + interview.getCreatedBy().getCompany().getName()
                 + " has been cancelled. Click to view more details.";
+        var job = interview.getJob();
         CreateNotificationDto notificationDto = new CreateNotificationDto();
         notificationDto.setRecipientType(MessagerUserType.USER);
         notificationDto.setMessage(message);
         notificationDto.setRecipientId(interview.getCandidate().getId());
         notificationDto.setNotificationType(NotificationType.INTERVIEW_CANCELLED);
-        notificationDto.setJobId(interview.getJob().getId());
+        notificationDto.setJobId(job.getId());
+        notificationDto.setJobTitle(job.getTitle());
         notificationDto.setInterviewId(interview.getId());
         notificationDto.setApplicationId(interview.getApplication().getId());
         notificationDto.setCompanyId(interview.getJob().getCompany().getId());
@@ -179,18 +182,24 @@ public class UserNotificationService {
             notificationDto.setMessage(message);
             notificationDto.setRecipientId(conductor.getId());
             notificationDto.setJobId(interview.getJob().getId());
+            notificationDto.setJobTitle(interview.getJob().getTitle());
             notificationDto.setInterviewId(interview.getId());
             notificationDto.setApplicationId(interview.getApplication().getId());
-            notificationDto.setCompanyId(interview.getJob().getBusinessAccount().getCompany().getId());
+            notificationDto.setCompanyId(interview.getJob().getCompany().getId());
             notificationDto.setNotificationType(NotificationType.INTERVIEW_CREATED_SUCCESSFULLY);
             return notificationDto;
         }
         var message = "You have been scheduled to conduct an interview for the position of "
-                + interview.getJob().getTitle() + " at " + interview.getCreatedBy().getCompany().getName() + ".";
+                + interview.getJob().getTitle() + ".";
         CreateNotificationDto notificationDto = new CreateNotificationDto();
         notificationDto.setRecipientType(MessagerUserType.BUSINESS);
         notificationDto.setMessage(message);
-        // Set recipientId later when creating for each conductor
+        notificationDto.setJobId(interview.getJob().getId());
+        notificationDto.setJobTitle(interview.getJob().getTitle());
+        notificationDto.setInterviewId(interview.getId());
+        notificationDto.setApplicationId(interview.getApplication().getId());
+        notificationDto.setCompanyId(interview.getJob().getCompany().getId());
+        notificationDto.setRecipientId(conductor.getId());
         notificationDto.setNotificationType(NotificationType.INTERVIEW_TO_CONDUCT_SCHEDULED);
         return notificationDto;
     }
@@ -198,14 +207,14 @@ public class UserNotificationService {
     private CreateNotificationDto createDtoForConductorInterviewRemoval(Interview interview,
             BusinessAccount conductor) {
         var message = "You have been removed from conducting the interview for the position of "
-                + interview.getJob().getTitle() + " at " + interview.getCreatedBy().getCompany().getName()
-                + ". Click to view more details.";
+                + interview.getJob().getTitle();
         CreateNotificationDto notificationDto = new CreateNotificationDto();
         notificationDto.setRecipientType(MessagerUserType.BUSINESS);
         notificationDto.setMessage(message);
         notificationDto.setRecipientId(conductor.getId());
         notificationDto.setNotificationType(NotificationType.INTERVIEW_CONDUCTOR_REMOVED);
         notificationDto.setJobId(interview.getJob().getId());
+        notificationDto.setJobTitle(interview.getJob().getTitle());
         notificationDto.setInterviewId(interview.getId());
         notificationDto.setApplicationId(interview.getApplication().getId());
         notificationDto.setCompanyId(interview.getJob().getBusinessAccount().getCompany().getId());
@@ -215,14 +224,15 @@ public class UserNotificationService {
     private CreateNotificationDto createDtoForConductorInterviewCancellation(Interview interview,
             BusinessAccount conductor) {
         var message = "The interview you were scheduled to conduct for the position of "
-                + interview.getJob().getTitle() + " at " + interview.getCreatedBy().getCompany().getName()
-                + " has been cancelled. Click to view more details.";
+                + interview.getJob().getTitle()
+                + " has been cancelled.";
         CreateNotificationDto notificationDto = new CreateNotificationDto();
         notificationDto.setRecipientType(MessagerUserType.BUSINESS);
         notificationDto.setMessage(message);
         notificationDto.setRecipientId(conductor.getId());
         notificationDto.setNotificationType(NotificationType.INTERVIEW_CANCELLED);
         notificationDto.setJobId(interview.getJob().getId());
+        notificationDto.setJobTitle(interview.getJob().getTitle());
         notificationDto.setInterviewId(interview.getId());
         notificationDto.setApplicationId(interview.getApplication().getId());
         notificationDto.setCompanyId(interview.getJob().getBusinessAccount().getCompany().getId());
@@ -232,13 +242,12 @@ public class UserNotificationService {
     private CreateNotificationDto createDtoForConductorInterviewUpdate(Interview interview,
             BusinessAccount conductor) {
         var message = "The interview you were scheduled to conduct for the position of "
-                + interview.getJob().getTitle() + " at " + interview.getCreatedBy().getCompany().getName()
-                + " has been updated. Click to view more details.";
+                + interview.getJob().getTitle() + " has been updated.";
         CreateNotificationDto notificationDto = new CreateNotificationDto();
         notificationDto.setRecipientType(MessagerUserType.BUSINESS);
         notificationDto.setMessage(message);
         notificationDto.setRecipientId(conductor.getId());
-        notificationDto.setNotificationType(NotificationType.INTERVIEW_UPDATED);
+        notificationDto.setNotificationType(NotificationType.INTERVIEW_CONDUCTOR_UPDATED);
         notificationDto.setJobId(interview.getJob().getId());
         notificationDto.setInterviewId(interview.getId());
         notificationDto.setApplicationId(interview.getApplication().getId());
@@ -255,10 +264,12 @@ public class UserNotificationService {
         notificationDto.setMessage(message);
         notificationDto.setRecipientId(interview.getCandidate().getId());
         notificationDto.setNotificationType(NotificationType.INTERVIEW_UPDATED);
-        notificationDto.setJobId(interview.getJob().getId());
+        var job = interview.getJob();
+        notificationDto.setJobId(job.getId());
+        notificationDto.setJobTitle(job.getTitle());
         notificationDto.setInterviewId(interview.getId());
         notificationDto.setApplicationId(interview.getApplication().getId());
-        notificationDto.setCompanyId(interview.getJob().getCompany().getId());
+        notificationDto.setCompanyId(job.getCompany().getId());
         return notificationDto;
     }
 
@@ -298,25 +309,33 @@ public class UserNotificationService {
     }
 
     public void createInterviewUpdatedNotificationAndSend(Interview interview, Set<BusinessAccount> newInterviewers,
-            Set<BusinessAccount> removedInterviewers) {
+            Set<BusinessAccount> removedInterviewers, Set<BusinessAccount> unchangedInterviewers) {
         CreateNotificationDto candidateNotifyDto = createDtoForCandidateInterviewUpdate(interview);
         var savedCandidateNotification = saveNotification(candidateNotifyDto);
         sendInAppNotification(savedCandidateNotification);
         // Send notification to conductors
         Set<BusinessAccount> conductors = interview.getInterviewers();
         conductors.add(interview.getCreatedBy());
-        for (BusinessAccount conductor : conductors) {
-            CreateNotificationDto conductorNotifyDto = null;
-            if (newInterviewers.contains(conductor)) {
-                conductorNotifyDto = createdDtoForConductorInterviewSchedule(interview, conductor);
-            } else if (removedInterviewers.contains(conductor)) {
-                conductorNotifyDto = createDtoForConductorInterviewRemoval(interview, conductor);
-            } else {
-                conductorNotifyDto = createDtoForConductorInterviewUpdate(interview, conductor);
-            }
+        for (BusinessAccount conductor : newInterviewers) {
+            System.out.println("Sending notification to new interviewer: " + conductor.getEmail());
+            CreateNotificationDto conductorNotifyDto = createdDtoForConductorInterviewSchedule(interview, conductor);
             var savedConductorNotification = saveNotification(conductorNotifyDto);
             sendInAppNotification(savedConductorNotification);
         }
+        for (BusinessAccount conductor : unchangedInterviewers) {
+            System.out.println("Sending notification to unchanged interviewer: " + conductor.getEmail());
+            CreateNotificationDto conductorNotifyDto = createDtoForConductorInterviewUpdate(interview, conductor);
+            var savedConductorNotification = saveNotification(conductorNotifyDto);
+            sendInAppNotification(savedConductorNotification);
+        }
+        for (BusinessAccount conductor : removedInterviewers) {
+            System.out.println("Sending notification to removed interviewer: " + conductor.getEmail());
+            CreateNotificationDto conductorNotifyDto = createDtoForConductorInterviewRemoval(interview,
+                    conductor);
+            var savedConductorNotification = saveNotification(conductorNotifyDto);
+            sendInAppNotification(savedConductorNotification);
+        }
+
     }
 
     public void createInterviewCancelledNotificationAndSend(Interview interview) {
@@ -347,8 +366,8 @@ public class UserNotificationService {
 
     public Notification createApplicationRejectionsNotificationAndSend(Application application) {
         var jobTitle = application.getJob().getTitle();
-        var companyName = application.getJob().getBusinessAccount().getCompany().getName();
-        var companyId = application.getJob().getBusinessAccount().getCompany().getId();
+        var companyName = application.getJob().getCompany().getName();
+        var companyId = application.getJob().getCompany().getId();
         var recepientId = application.getUserProfile().getId();
         var message = "We regret to inform you that your application for the position of "
                 + jobTitle + " at " + companyName + " has been rejected.";
@@ -359,7 +378,27 @@ public class UserNotificationService {
         notificationDto.setNotificationType(NotificationType.REJECTION);
         notificationDto.setCompanyId(companyId);
         notificationDto.setJobId(application.getJob().getId());
+        notificationDto.setJobTitle(jobTitle);
         notificationDto.setApplicationId(application.getId());
+        var savedNotification = saveNotification(notificationDto);
+        sendInAppNotification(savedNotification);
+        return savedNotification;
+    }
+
+    public Notification createdAddedToHiringTeamNotificationAndSend(BusinessAccount recepient, Job job) {
+        var jobTitle = job.getTitle();
+        var jobId = job.getId();
+        var recepientId = recepient.getId();
+        var message = "You have been added to the hiring team for the job: "
+                + jobTitle + ". Click to view more details.";
+        CreateNotificationDto notificationDto = new CreateNotificationDto();
+        notificationDto.setRecipientType(MessagerUserType.BUSINESS);
+        notificationDto.setMessage(message);
+        notificationDto.setRecipientId(recepientId);
+        notificationDto.setNotificationType(NotificationType.ADDED_TO_HIRING_TEAM);
+        notificationDto.setJobId(jobId);
+        notificationDto.setJobTitle(jobTitle);
+        notificationDto.setCompanyId(job.getCompany().getId());
         var savedNotification = saveNotification(notificationDto);
         sendInAppNotification(savedNotification);
         return savedNotification;

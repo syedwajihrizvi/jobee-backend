@@ -85,7 +85,6 @@ public class InvitationService {
 
     public void sendHiringTeamInvitationEmail(BusinessAccount to, BusinessAccount from, Job job) {
         emailSender.sendHiringTeamInvitationEmail(to, from, job);
-        System.out.println("Sent hiring team invitation email to " + to.getEmail());
     }
 
     public void sendHiringTeamInvitationAndJoinJobeeEmail(String to, BusinessAccount from,
@@ -103,4 +102,5 @@ public class InvitationService {
         emailSender.sendHiringTeamInvitationAndJoinJobeeEmail(
                 to, companyName, from, companyCode, jobTitle, inviteLink, qrCode);
     }
+
 }

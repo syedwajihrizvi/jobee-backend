@@ -2,9 +2,11 @@ package com.rizvi.jobee.services;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.Set;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Page;
@@ -12,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.rizvi.jobee.dtos.job.CreateJobDto;
+import com.rizvi.jobee.dtos.job.HiringTeamMemberDto;
 import com.rizvi.jobee.dtos.job.PaginatedResponse;
 import com.rizvi.jobee.entities.AIJobInsight;
 import com.rizvi.jobee.entities.BusinessAccount;
@@ -20,7 +23,6 @@ import com.rizvi.jobee.entities.HiringTeam;
 import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.entities.Tag;
 import com.rizvi.jobee.entities.UserProfile;
-import com.rizvi.jobee.enums.BusinessType;
 import com.rizvi.jobee.exceptions.JobNotFoundException;
 import com.rizvi.jobee.helpers.AISchemas.AIJobDescriptionAnswer;
 import com.rizvi.jobee.helpers.AISchemas.AIJobInsightAnswer;
@@ -48,6 +50,7 @@ public class JobService {
     private final BusinessAccountRepository businessAccountRepository;
     private final AIJobInsightsRepository aiJobInsightsRepository;
     private final AIService aiService;
+    private final RequestQueue requestQueue;
     private static final int MAX_CANDIDATES_FOR_JOB = 5;
 
     public PaginatedResponse<Job> getAllJobs(JobQuery jobQuery, int pageNumber, int pageSize) {
@@ -121,7 +124,8 @@ public class JobService {
         for (Tag tag : tagEntities) {
             job.addTag(tag);
         }
-        // Add the hiring team members
+        Set<HiringTeam> jobeeMembers = new HashSet<>();
+        Set<HiringTeam> nonJobeeMembers = new HashSet<>();
         for (var memberDto : request.getHiringTeam()) {
             var email = memberDto.getEmail();
             var firstName = memberDto.getFirstName();
@@ -133,17 +137,85 @@ public class JobService {
             if (hiringTeamMemberAccount != null) {
                 hiringTeamMember.setBusinessAccount(hiringTeamMemberAccount);
                 hiringTeamMember.setInvited(false);
-                invitationService.sendHiringTeamInvitationEmail(hiringTeamMemberAccount, businessAccount, job);
-                // TODO: Send notification Email (TODO)
+                jobeeMembers.add(hiringTeamMember);
             } else {
                 hiringTeamMember.setInvited(true);
-                invitationService.sendHiringTeamInvitationAndJoinJobeeEmail(email, businessAccount, job);
-                // Send invite Email (TODO)
+                nonJobeeMembers.add(hiringTeamMember);
             }
             job.addHiringTeamMember(hiringTeamMember);
         }
 
         var savedJob = jobRepository.save(job);
+        requestQueue.sendHiringTeamInvitationsForJob(job, jobeeMembers,
+                nonJobeeMembers);
+        return savedJob;
+
+    }
+
+    public Job updateJob(Long jobId, CreateJobDto request) {
+        var job = jobRepository.findDetailedJobById(jobId).orElseThrow(() -> new JobNotFoundException("Job not found"));
+        var tagEntities = new ArrayList<Tag>();
+        for (String tagName : request.getTags()) {
+            var slugName = tagName.trim().replaceAll("[^a-zA-Z0-9 ]", "");
+            var tag = tagRepository.findBySlug(slugName);
+            if (tag == null) {
+                tag = Tag.builder().name(tagName).slug(slugName).build();
+                tag = tagRepository.save(tag);
+            }
+            tagEntities.add(tag);
+        }
+        job.clearTags();
+        for (Tag tag : tagEntities) {
+            job.addTag(tag);
+        }
+        // Update the hiring team
+        Set<HiringTeam> existingMembers = new HashSet<>(job.getHiringTeamMembers());
+        Set<HiringTeam> brandNewJobeeMembersToSendInvites = new HashSet<>();
+        Set<HiringTeam> brandNewNonJobeeMemebersToSendInvites = new HashSet<>();
+        job.clearHiringTeamMembers();
+        for (var memberDto : request.getHiringTeam()) {
+            var email = memberDto.getEmail();
+            var firstName = memberDto.getFirstName();
+            var lastName = memberDto.getLastName();
+            var hiringTeamMember = HiringTeam.builder().email(email).firstName(firstName).lastName(lastName).job(job)
+                    .build();
+            var hiringTeamMemberAccount = businessAccountRepository.findByEmail(email).orElse(null);
+            if (hiringTeamMemberAccount != null) {
+                hiringTeamMember.setBusinessAccount(hiringTeamMemberAccount);
+                hiringTeamMember.setInvited(false);
+                if (!existingMembers.stream()
+                        .anyMatch(member -> member.getEmail().equalsIgnoreCase(email))) {
+                    brandNewJobeeMembersToSendInvites.add(hiringTeamMember);
+                }
+            } else {
+                hiringTeamMember.setInvited(true);
+                if (!existingMembers.stream()
+                        .anyMatch(member -> member.getEmail().equalsIgnoreCase(email))) {
+                    brandNewNonJobeeMemebersToSendInvites.add(hiringTeamMember);
+                }
+            }
+            job.addHiringTeamMember(hiringTeamMember);
+        }
+
+        job.setTitle(request.getTitle());
+        job.setDescription(request.getDescription());
+        job.setLocation(request.getLocation());
+        job.setState(request.getState());
+        job.setStreetAddress(request.getStreetAddress());
+        job.setCity(request.getCity());
+        job.setCountry(request.getCountry());
+        job.setPostalCode(request.getPostalCode());
+        job.setDepartment(request.getDepartment());
+        job.setEmploymentType(request.getEmploymentType());
+        job.setSetting(request.getSetting());
+        job.setAppDeadline(request.getAppDeadline());
+        job.setMinSalary(request.getMinSalary());
+        job.setMaxSalary(request.getMaxSalary());
+        job.setLevel(request.getExperience());
+        var savedJob = jobRepository.save(job);
+        // Send invitations to members
+        requestQueue.sendHiringTeamInvitationsForJob(job, brandNewJobeeMembersToSendInvites,
+                brandNewNonJobeeMemebersToSendInvites);
         return savedJob;
 
     }
@@ -172,6 +244,15 @@ public class JobService {
         return teamsUserIsPartOf.stream()
                 .map(team -> team.getJob())
                 .toList();
+    }
+
+    public List<Job> getJobsForNonAdminUsers(Long accountId, String search) {
+        var postedJobs = getJobsByBusinessAccountIdForRecruiter(accountId, search);
+        var teamJobs = getJobsByBusinessAccountIdForEmployee(accountId, search);
+        Set<Job> allJobs = new HashSet<>();
+        allJobs.addAll(postedJobs);
+        allJobs.addAll(teamJobs);
+        return new ArrayList<>(allJobs);
     }
 
     public List<Job> getJobsByCompanyId(Long companyId) {

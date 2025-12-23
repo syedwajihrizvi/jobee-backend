@@ -34,6 +34,8 @@ public interface JobMapper {
     @Mapping(target = "applicants", expression = "java(job.getApplications().size())")
     @Mapping(target = "interviews", expression = "java(job.getInterviews().size())")
     @Mapping(target = "location", expression = "java(job.getJobLocation())")
+    @Mapping(target = "businessAccountId", source = "businessAccount.id")
+    @Mapping(target = "businessAccountEmail", source = "businessAccount.email")
     @Mapping(target = "totalShortListedCandidates", expression = "java(job.getShortListedApplications().size())")
     @Mapping(target = "pendingApplicationsSize", expression = "java(job.getPendingApplications().size())")
     @Mapping(target = "hiringTeam", source = "hiringTeamMembers")

@@ -15,10 +15,13 @@ public class JobDetailedSummaryForBusinessDto {
     private String title;
     private String description;
     private String employmentType;
+    private Long businessAccountId;
+    private String businessAccountEmail;
     private String location;
     private String city;
     private String country;
     private String streetAddress;
+    private String state;
     private String postalCode;
     private String department;
     private Long views;

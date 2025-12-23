@@ -8,22 +8,18 @@ import org.springframework.stereotype.Service;
 import com.rizvi.jobee.dtos.interview.ConductorDto;
 import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.Interview;
-import com.rizvi.jobee.entities.InterviewPreparation;
 import com.rizvi.jobee.entities.InterviewPreparationResource;
 import com.rizvi.jobee.entities.Job;
 
 import lombok.RequiredArgsConstructor;
-import software.amazon.awssdk.services.ses.SesClient;
 import software.amazon.awssdk.services.ses.model.Body;
 import software.amazon.awssdk.services.ses.model.Content;
 import software.amazon.awssdk.services.ses.model.Destination;
 import software.amazon.awssdk.services.ses.model.Message;
-import software.amazon.awssdk.services.ses.model.SendEmailRequest;
 
 @Service
 @RequiredArgsConstructor
 public class EmailSender {
-  private final SesClient sesClient;
   private final ResendService resendService;
 
   @Value("${email.from}")
@@ -73,7 +69,8 @@ public class EmailSender {
 
   public void sendUpdatedInterviewEmail(
       Interview interview, Set<BusinessAccount> newInterviewers, Set<ConductorDto> newOtherInterviewers,
-      Set<BusinessAccount> removedInterviewers, Set<ConductorDto> removedOtherInterviewers) {
+      Set<BusinessAccount> removedInterviewers, Set<ConductorDto> removedOtherInterviewers,
+      Set<BusinessAccount> unchangedInterviewers, Set<ConductorDto> unchangedOtherInterviewers) {
     String to = interview.getCandidateEmail();
     String fullName = interview.getCandidate().getFullName();
     String jobTitle = interview.getJob().getTitle();
@@ -92,31 +89,34 @@ public class EmailSender {
 
     // Send email to conductors who are on Jobee + creator
     String conductorSubject = "Updated regarding the interview for " + jobTitle;
-    Set<BusinessAccount> validConductors = interview.getInterviewers();
-    validConductors.add(interview.getCreatedBy());
-    validConductors.forEach(conductor -> {
+    for (BusinessAccount conductor : newInterviewers) {
+      String conductorHtml = generateScheduledInterviewEmailForConductorWithAccount(
+          interview.getCreatedBy(), jobTitle, interviewDate, companyName, conductor);
       try {
-        if (removedInterviewers.contains(conductor)) {
-          String conductorHtml = generateConductorWithAccountRemovedFromInterviewEmail(
-              interview.getCreatedBy(), jobTitle, companyName, conductor);
-          resendService.sendEmail(conductor.getEmail(), conductorSubject, conductorHtml);
-          return;
-        } else if (newInterviewers.contains(conductor)) {
-          String conductorHtml = generateScheduledInterviewEmailForConductorWithAccount(
-              interview.getCreatedBy(), jobTitle, interviewDate, companyName, conductor);
-          resendService.sendEmail(conductor.getEmail(), conductorSubject, conductorHtml);
-          return;
-        } else {
-          String conductorHtml = generateUpdatedInterviewEmailForConductorWithAccount(
-              interview.getCreatedBy(), jobTitle, companyName, conductor);
-          resendService.sendEmail(conductor.getEmail(), conductorSubject, conductorHtml);
-        }
+        resendService.sendEmail(conductor.getEmail(), conductorSubject, conductorHtml);
       } catch (Exception e) {
         System.out.println("Failed to send scheduled interview email to conductor: " + e.getMessage());
       }
-    });
+    }
+    for (BusinessAccount conductor : removedInterviewers) {
+      try {
+        String conductorHtml = generateConductorWithAccountRemovedFromInterviewEmail(
+            interview.getCreatedBy(), jobTitle, companyName, conductor);
+        resendService.sendEmail(conductor.getEmail(), conductorSubject, conductorHtml);
+      } catch (Exception e) {
+        System.out.println("Failed to send scheduled interview email to conductor: " + e.getMessage());
+      }
 
-    // TODO: Send email to conductors who are not on Jobee
+    }
+    for (BusinessAccount conductor : unchangedInterviewers) {
+      try {
+        String conductorHtml = generateUpdatedInterviewEmailForConductorWithAccount(
+            interview.getCreatedBy(), jobTitle, companyName, conductor);
+        resendService.sendEmail(conductor.getEmail(), conductorSubject, conductorHtml);
+      } catch (Exception e) {
+        System.out.println("Failed to send scheduled interview email to conductor: " + e.getMessage());
+      }
+    }
   }
 
   public void sendInterviewCancellationEmail(Interview interview) {
@@ -204,24 +204,15 @@ public class EmailSender {
 
   public void sendHiringTeamInvitationEmail(BusinessAccount to, BusinessAccount from, Job job) {
     try {
-      Destination destination = createEmailDestination(senderEmail);
+      String toEmail = to.getEmail();
       String inviterFullName = from.getFullName();
       String jobTitle = job.getTitle();
-      String companyName = from.getCompany().getName();
+      String companyName = job.getCompany().getName();
 
       String subject = "Invitation to join the hiring team for job: " + jobTitle;
       String jobeeUrl = generateJobeeUrl();
       String htmlString = generateHiringTeamInvitationHtml(companyName, inviterFullName, jobTitle, jobeeUrl);
-      String textString = inviterFullName + " has invited you to join the hiring team for the job: " + jobTitle
-          + " at " + companyName + ". Please log in to your Jobee account to view.";
-      Message message = createEmail(subject, htmlString, textString);
-      SendEmailRequest emailRequest = SendEmailRequest.builder()
-          .source("Jobee <" + senderEmail + ">")
-          .destination(destination)
-          .message(message)
-          .replyToAddresses("support@jobee.solutions")
-          .build();
-      sesClient.sendEmail(emailRequest);
+      resendService.sendEmail(toEmail, subject, htmlString);
     } catch (Exception e) {
       System.out.println("Failed to send hiring team invitation email: " + e.getMessage());
     }
