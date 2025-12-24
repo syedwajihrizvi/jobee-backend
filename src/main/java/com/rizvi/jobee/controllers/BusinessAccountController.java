@@ -156,7 +156,6 @@ public class BusinessAccountController {
             return ResponseEntity.notFound().build();
         }
         BusinessAccountDto dto = businessMapper.toDto(businessAccount);
-        System.out.println("Fetched business account for user ID: " + dto);
         dto.setRole(accountType);
         return ResponseEntity.ok(dto);
     }
@@ -172,6 +171,14 @@ public class BusinessAccountController {
         var phoneNumber = request.getPhoneNumber();
         var invitationType = request.getSelectedUserType();
         invitationService.createInvitation(email, phoneNumber, invitationType, businessAccount);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/send-verification-email")
+    public ResponseEntity<Void> sendVerificationEmail(
+            @AuthenticationPrincipal CustomPrincipal principal) {
+        var userId = principal.getId();
+        accountService.sendVerificationEmail(userId);
         return ResponseEntity.ok().build();
     }
 }

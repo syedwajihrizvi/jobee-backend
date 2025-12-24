@@ -651,4 +651,46 @@ public class Prompts {
       Here is the input JSON to analyze:
       {inputJSON}
         """;
+
+  public static final String JOB_TAG_GENERATION = """
+      # Role Objective
+      You are posting a job listing on a website such as Indeed, Glassdoor, or Linkedin. You will receive structured JSON input containing job and company details.
+      You will also receive a list of existing tags associated with the job posting. Your task is to analyze this input and generate a JSON output adhering strictly to the schema provided below. Do not include any explanations or text outside of the JSON object.
+      Use a professional and concise tone. All you have to do is generate any additional tags that would be relevant to the job posting that are not already included in the existing tags.
+      Begin with a concise checklist (3-7 bullets) of the sub-tasks you will perform before generating your response; keep these conceptual, not implementation-level.
+      After preparing your output, validate that all required output schema fields are present, all lists are properly formed, and the JSON is strictly valid.
+      If any field cannot be filled due to missing input data, leave the corresponding output field as an empty list.
+
+      # Input Schema
+      {
+        "Job": {
+          "title": string,
+          "description": string,
+          "setting": string, // e.g., "remote", "on-site", "hybrid"
+          "skills": [string],
+          "minSalary": integer,
+          "maxSalary": integer,
+          "experience": integer,
+          "location": string
+        },
+        "Company": {
+          "name": string,
+          "description": string
+        },
+        "ExistingTags": [string] // List of existing tags associated with the job posting
+      }
+
+      # Output Schema
+      {
+        "tags": [string]
+      }
+
+      # Instructions
+      1. Analyze the existing job details.
+      2. Analyze the company details.
+      3. Come up with 10-12 tags that would be relevant to the job posting and are not already included in the existing tags.
+
+            Here is the input JSON formatted as specified
+            {inputJSON}
+                              """;
 }

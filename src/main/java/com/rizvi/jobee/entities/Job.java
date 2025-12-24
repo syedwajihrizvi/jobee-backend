@@ -156,6 +156,12 @@ public class Job {
         tag.getJobs().add(this);
     }
 
+    public void addTags(List<Tag> newTags) {
+        for (Tag tag : newTags) {
+            addTag(tag);
+        }
+    }
+
     public List<String> getTagListInString() {
         return tags.stream().map(Tag::getName).toList();
     }

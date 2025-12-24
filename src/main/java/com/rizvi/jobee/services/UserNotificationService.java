@@ -118,6 +118,19 @@ public class UserNotificationService {
         notificationRepository.deleteByRecipientIdAndRecipientTypeAndReadIsTrue(userId, type);
     }
 
+    public Notification createJobUpdatedViaAINotificationAndSend(Long jobId, Long recipientId) {
+        var message = "Jobee has add additional tags to your job posting to help with discoverability.";
+        CreateNotificationDto notificationDto = new CreateNotificationDto();
+        notificationDto.setRecipientType(MessagerUserType.BUSINESS);
+        notificationDto.setRecipientId(recipientId);
+        notificationDto.setMessage(message);
+        notificationDto.setJobId(jobId);
+        notificationDto.setNotificationType(NotificationType.JOB_UPDATED_VIA_AI);
+        var savedNotification = saveNotification(notificationDto);
+        sendInAppNotification(savedNotification);
+        return savedNotification;
+    }
+
     public Notification createInterviewPrepNotificationAndSend(InterviewPreparation interviewPrep,
             Interview interview) {
         var message = "Your preparation materials for the position of "

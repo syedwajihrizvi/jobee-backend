@@ -12,10 +12,6 @@ import com.rizvi.jobee.entities.InterviewPreparationResource;
 import com.rizvi.jobee.entities.Job;
 
 import lombok.RequiredArgsConstructor;
-import software.amazon.awssdk.services.ses.model.Body;
-import software.amazon.awssdk.services.ses.model.Content;
-import software.amazon.awssdk.services.ses.model.Destination;
-import software.amazon.awssdk.services.ses.model.Message;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +20,16 @@ public class EmailSender {
 
   @Value("${email.from}")
   private String senderEmail;
+
+  public void sendBusinessAccountVerificationEmail(String email, String verificationCode, String fullName) {
+    try {
+      String subject = "Verify Your Business Account on Jobee";
+      String htmlString = generateBusinessAccountVerificationEmailHtml(fullName, verificationCode);
+      resendService.sendEmail(email, subject, htmlString);
+    } catch (Exception e) {
+      System.out.println("Failed to send business account verification email: " + e.getMessage());
+    }
+  }
 
   public void sendInterviewPrepResourcesEmail(Set<InterviewPreparationResource> resources, String companyName,
       String jobTitle, String candidateName,
@@ -246,29 +252,33 @@ public class EmailSender {
     }
   }
 
-  private Destination createEmailDestination(String to) {
-    // TODO: use temp email until verified
-    return Destination.builder().toAddresses("wajih@jobee.solutions").build();
-  }
-
-  private Message createEmail(String subject, String htmlString, String textString) {
-    Content subjectContent = createContent(subject);
-    Content htmlContent = createContent(htmlString);
-    Content textContent = createContent(textString);
-    Body bodyContent = createEmailBody(htmlContent, textContent);
-    return Message.builder().subject(subjectContent).body(bodyContent).build();
-  }
-
-  private Content createContent(String data) {
-    return Content.builder().charset("UTF-8").data(data).build();
-  }
-
-  private Body createEmailBody(Content htmlContent, Content textContent) {
-    return Body.builder().html(htmlContent).text(textContent).build();
-  }
-
   private String generateJobeeUrl() {
     return "https://jobee.com";
+  }
+
+  private String generateBusinessAccountVerificationEmailHtml(String fullName, String verificationCode) {
+    String htmlString = """
+        <html>
+          <body style="font-family: Arial, sans-serif; background-color: #f6f9fc; padding: 40px; text-align: center;">
+            <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 40px;">
+              <h2 style="color: #2d3748;">Verify Your Business Account on Jobee</h2>
+              <p style="color: #4a5568;">Hello %s,</p>
+              <p style="color: #4a5568;">
+                Thank you for creating a business account on <strong>Jobee</strong>. Please use the verification code below to verify your account.
+              </p>
+              <p style="margin-top: 20px; color: #4a5568; font-size: 24px">
+                Verification Code: <strong>%s</strong>
+              </p>
+              <p style="margin-top: 40px; font-size: 12px; color: #a0aec0;">
+                If you didn't expect this email, you can safely ignore it.
+              </p>
+            </div>
+          </body>
+        </html>
+        """
+        .formatted(fullName, verificationCode);
+
+    return htmlString;
   }
 
   private String generateInvitationHtml(
@@ -285,7 +295,7 @@ public class EmailSender {
               <p style="color: #4a5568;">
                 Use the button below to join and enter the company code or scan the QR code.
               </p>
-              <p style="margin-top: 20px; color: #4a5568;">
+              <p style="margin-top: 20px; color: #4a5568; font-size: 24px">
                 Company Code: <strong>%s</strong>
               </p>
             <div>

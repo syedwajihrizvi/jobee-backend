@@ -102,9 +102,10 @@ public class JobService {
             }
             tagEntities.add(tag);
         }
-
+        var company = businessAccount.getCompany();
         var job = Job.builder()
                 .title(request.getTitle())
+                .company(company)
                 .description(request.getDescription())
                 .location(request.getLocation())
                 .state(request.getState())
@@ -146,6 +147,7 @@ public class JobService {
         }
 
         var savedJob = jobRepository.save(job);
+        requestQueue.addMoreTagsToJob(savedJob, company, request.getTags());
         requestQueue.sendHiringTeamInvitationsForJob(job, jobeeMembers,
                 nonJobeeMembers);
         return savedJob;

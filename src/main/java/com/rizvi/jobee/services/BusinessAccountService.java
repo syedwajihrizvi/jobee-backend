@@ -9,12 +9,15 @@ import org.springframework.stereotype.Service;
 import com.rizvi.jobee.dtos.job.PaginatedResponse;
 import com.rizvi.jobee.dtos.user.CreateBusinessAccountDto;
 import com.rizvi.jobee.entities.BusinessAccount;
+import com.rizvi.jobee.entities.BusinessAccountVerification;
 import com.rizvi.jobee.entities.BusinessProfile;
 import com.rizvi.jobee.entities.Company;
 import com.rizvi.jobee.enums.BusinessType;
+import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.AlreadyRegisteredException;
 import com.rizvi.jobee.queries.CompanyMemberQuery;
 import com.rizvi.jobee.repositories.BusinessAccountRepository;
+import com.rizvi.jobee.repositories.BusinessAccountVerificationRepository;
 import com.rizvi.jobee.repositories.CompanyRepository;
 import com.rizvi.jobee.specifications.CompanyMemberSpecification;
 
@@ -24,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class BusinessAccountService {
     private final BusinessAccountRepository businessAccountRepository;
+    private final BusinessAccountVerificationRepository businessAccountVerificationRepository;
     private final CompanyRepository companyRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -62,5 +66,20 @@ public class BusinessAccountService {
         var hasMore = pageNumber < page.getTotalPages() - 1;
         var totalElements = page.getTotalElements();
         return new PaginatedResponse<>(hasMore, companyMembers, totalElements);
+    }
+
+    public void sendVerificationEmail(Long businessAccountId) {
+        var businessAccount = businessAccountRepository.findById(businessAccountId).orElse(null);
+        if (businessAccount == null) {
+            throw new AccountNotFoundException("Account not found");
+        }
+        var verificationCode = BusinessAccountVerification.generateVerificationCode();
+        var verification = BusinessAccountVerification.builder()
+                .businessAccount(businessAccount)
+                .verificationCode(verificationCode)
+                .isVerified(false)
+                .build();
+        businessAccountVerificationRepository.save(verification);
+        // TODO: Send email with verification code
     }
 }

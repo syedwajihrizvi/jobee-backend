@@ -28,15 +28,15 @@ public class InvitationService {
         String charPool = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         SecureRandom random = new SecureRandom();
         StringBuilder code = new StringBuilder();
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 4; i++) {
             code.append(charPool.charAt(random.nextInt(charPool.length())));
         }
-        return companyName.substring(0, 1) + "-" + code.toString().toLowerCase();
+        return companyName.substring(0, 1) + "-" + code.toString().toUpperCase();
     }
 
     private String generateInviteLink(String companyCode) {
         // Implement your invite link generation logic here
-        return "https://jobee.com/invite?code=" + companyCode.replace(" ", "-").toLowerCase();
+        return "https://jobee.com/invite?code=" + companyCode.replace(" ", "-").toUpperCase();
     }
 
     private String generateQRCodeUrl(String inviteLink) throws Exception {

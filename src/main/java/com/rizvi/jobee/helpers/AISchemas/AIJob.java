@@ -15,6 +15,8 @@ public class AIJob {
     private String title;
     @JsonPropertyDescription("Job Description")
     private String description;
+    @JsonPropertyDescription("Job Setting such as Remote, Hybrid, On-site")
+    private String setting;
     @JsonPropertyDescription("Required Skills")
     private List<String> skills;
     @JsonPropertyDescription("Minimum Salary")
@@ -37,8 +39,9 @@ public class AIJob {
 
     public String toJsonString() {
         return """
-                {"title": "%s", "description": "%s", "skills": [%s], "minSalary": %d, "maxSalary": %d, "location": "%s"}
+                {"title": "%s", "description": "%s", "setting": "%s", "skills": [%s], "minSalary": %d, "maxSalary": %d, "location": "%s"}
                 """
-                .formatted(title, description, ListUtils.listToJsonArrayString(skills), minSalary, maxSalary, location);
+                .formatted(title, description, setting, ListUtils.listToJsonArrayString(skills), minSalary, maxSalary,
+                        location);
     }
 }

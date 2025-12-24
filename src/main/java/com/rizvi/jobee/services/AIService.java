@@ -27,12 +27,14 @@ import com.rizvi.jobee.helpers.Prompts;
 import com.rizvi.jobee.helpers.AISchemas.AICandidate;
 import com.rizvi.jobee.helpers.AISchemas.AIJobDescriptionAnswer;
 import com.rizvi.jobee.helpers.AISchemas.AIJobInsightAnswer;
+import com.rizvi.jobee.helpers.AISchemas.AIJobTagsResponse;
 import com.rizvi.jobee.helpers.AISchemas.AIProfessionalSummaryAnswer;
 import com.rizvi.jobee.helpers.AISchemas.AnswerInterviewQuestionRequest;
 import com.rizvi.jobee.helpers.AISchemas.AnswerInterviewQuestionResponse;
 import com.rizvi.jobee.helpers.AISchemas.GenerateAIInsightRequest;
 import com.rizvi.jobee.helpers.AISchemas.GenerateAIJobDescriptionRequest;
 import com.rizvi.jobee.helpers.AISchemas.GenerateAIProfessionalSummaryRequest;
+import com.rizvi.jobee.helpers.AISchemas.PostedJobInformationRequest;
 import com.rizvi.jobee.helpers.AISchemas.PrepareForInterviewRequest;
 import com.rizvi.jobee.helpers.AISchemas.PrepareForInterviewResponse;
 import com.rizvi.jobee.helpers.AISchemas.ReferenceToPreviousAnswer;
@@ -244,5 +246,20 @@ public class AIService {
             System.out.println("Error during generating professional summary: " + e.getMessage());
             return null;
         }
+    }
+
+    public AIJobTagsResponse generateMoreTagsForJob(PostedJobInformationRequest request) throws IOException {
+        String inputJson = request.toJsonString();
+        String prompt = Prompts.JOB_TAG_GENERATION.replace("{inputJSON}", inputJson);
+        System.out.println("SYED-DEBUG: Generating more tags for job with input JSON: " + inputJson);
+        StructuredChatCompletionCreateParams<AIJobTagsResponse> params = ChatCompletionCreateParams.builder()
+                .model(ChatModel.GPT_5)
+                .addSystemMessage("You are a person working for a company that is posting a job listing.")
+                .addUserMessage(prompt).responseFormat(AIJobTagsResponse.class).build();
+        Optional<AIJobTagsResponse> result = openAIClient.chat().completions().create(params).choices()
+                .stream()
+                .flatMap(choice -> choice.message().content().stream()).findFirst();
+        System.out.println("SYED-DEBUG: Received tags from OpenAI: " + result);
+        return result.orElse(null);
     }
 }
