@@ -52,8 +52,9 @@ public class BusinessAccount {
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
+    @Builder.Default
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @Enumerated(EnumType.STRING)
     @Column(name = "account_type", nullable = false)

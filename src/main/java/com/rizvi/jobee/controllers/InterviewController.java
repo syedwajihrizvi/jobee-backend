@@ -65,14 +65,19 @@ public class InterviewController {
             @AuthenticationPrincipal CustomPrincipal principal) {
         var accountId = principal.getId();
         var companyId = principal.getCompanyId();
-        query.setConductorId(accountId);
-        query.setPostedById(accountId);
+        var accountType = principal.getAccountType();
+        if (!accountType.equals(BusinessType.ADMIN.toString())) {
+            query.setConductorId(accountId);
+            query.setPostedById(accountId);
+        }
         query.setCompanyId(companyId);
+        System.out.println("SYED-DEBUG: Interview Query - " + query);
         var paginatedInterviews = interviewService.getAllInterviews(query, pageNumber, pageSize);
         var interviews = paginatedInterviews.getContent();
         var hasMore = paginatedInterviews.isHasMore();
         var totalInterviews = paginatedInterviews.getTotalElements();
         var interviewDtos = interviews.stream().map(interviewMapper::toSummaryDto).toList();
+        System.out.println("Total interviews: " + interviewDtos.size());
         PaginatedResponse<InterviewSummaryDto> response = new PaginatedResponse<>(hasMore, interviewDtos,
                 totalInterviews);
         return ResponseEntity.ok(response);

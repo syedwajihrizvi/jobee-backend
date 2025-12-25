@@ -55,6 +55,7 @@ import com.rizvi.jobee.repositories.InterviewPreparationRepository;
 import com.rizvi.jobee.repositories.InterviewRepository;
 import com.rizvi.jobee.specifications.InterviewSpecifications;
 
+import io.swagger.v3.oas.models.security.SecurityScheme.In;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -105,10 +106,7 @@ public class InterviewService {
     }
 
     public List<Interview> getInterviewsByCandidate(Long candidateId) {
-        var sort = Sort.by(
-                Sort.Order.asc("interviewDate"),
-                Sort.Order.desc("createdAt"));
-        return interviewRepository.findByCandidateId(candidateId, sort);
+        return interviewRepository.findByCandidateId(candidateId);
     }
 
     public List<Interview> getInterviewsForRecruiter(Long businessAccountId) {
@@ -203,6 +201,7 @@ public class InterviewService {
                     .orElseThrow(() -> new InterviewNotFoundException(
                             "Previous interview not found with id: " + previousInterviewId));
             previousInterview.setStatus(InterviewStatus.COMPLETED);
+            previousInterview.setDecisionResult(InterviewDecisionResult.NEXT_ROUND);
             interviewRepository.save(previousInterview);
 
         }

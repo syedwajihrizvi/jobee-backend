@@ -19,9 +19,8 @@ public class InterviewSpecifications {
         return (root, _, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             Join<Interview, Job> jobJoin = root.join("job");
-            Join<Interview, BusinessAccount> interviewersJoin = root.join("interviewers");
-            Join<Job, BusinessAccount> businessJoin = jobJoin.join("businessAccount");
-            Join<BusinessAccount, Company> companyJoin = businessJoin.join("company");
+            Join<Job, Company> companyJoin = jobJoin.join("company");
+            Join<Interview, BusinessAccount> businessJoin = root.join("createdBy");
             predicates.add(cb.equal(companyJoin.get("id"), query.getCompanyId()));
             if (query.getJobId() != null) {
                 predicates.add(cb.equal(jobJoin.get("id"), query.getJobId()));
@@ -42,9 +41,8 @@ public class InterviewSpecifications {
                     accountPredicates.add(cb.equal(businessJoin.get("id"), query.getPostedById()));
                 }
                 if (query.getConductorId() != null) {
-                    accountPredicates.add(cb.and(
-                            cb.equal(interviewersJoin.get("id"),
-                                    query.getConductorId())));
+                    Join<Interview, BusinessAccount> interviewersJoin = root.join("interviewers");
+                    accountPredicates.add(cb.equal(interviewersJoin.get("id"), query.getConductorId()));
                 }
                 predicates.add(cb.or(accountPredicates.toArray(new Predicate[0])));
             }

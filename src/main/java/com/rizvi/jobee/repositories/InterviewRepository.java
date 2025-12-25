@@ -25,8 +25,16 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
         Optional<Interview> findById(Long id);
 
         // Additional query methods can be defined here if needed
-        @Query("select i from Interview i where i.candidate.id = :candidateId")
-        List<Interview> findByCandidateId(Long candidateId, Sort sort);
+        @Query(value = """
+                        SELECT * FROM INTERVIEWS
+                        WHERE CANDIDATE_ID = :candidateId
+                        ORDER BY
+                        CASE WHEN status = 'SCHEDULED' THEN 0
+                        ELSE 1
+                        END,
+                        interview_date ASC, created_at DESC
+                        """, nativeQuery = true)
+        List<Interview> findByCandidateId(Long candidateId);
 
         @Query("select i from Interview i where i.job.id = :jobId and i.candidate.id = :candidateId")
         Interview findByJobIdAndCandidateId(Long jobId, Long candidateId);
