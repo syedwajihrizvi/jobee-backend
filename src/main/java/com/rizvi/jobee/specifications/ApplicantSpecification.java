@@ -12,7 +12,6 @@ import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.entities.UserSkill;
 import com.rizvi.jobee.enums.ApplicationStatus;
 import com.rizvi.jobee.queries.ApplicationQuery;
-import com.twilio.type.App;
 
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
@@ -84,6 +83,11 @@ public class ApplicantSpecification {
                 var status = query.getApplicationStatus();
                 if (status.equals(ApplicationStatus.INTERVIEW_COMPLETED)) {
                     predicates.add(cb.notEqual(root.get("status"), ApplicationStatus.INTERVIEW_SCHEDULED));
+                } else if (status.equals(ApplicationStatus.OFFER_MADE)) {
+                    predicates.add(cb.or(
+                            cb.equal(root.get("status"), ApplicationStatus.OFFER_ACCEPTED),
+                            cb.equal(root.get("status"), ApplicationStatus.OFFER_MADE),
+                            cb.equal(root.get("status"), ApplicationStatus.OFFER_REJECTED)));
                 } else {
                     predicates.add(cb.equal(root.get("status"), query.getApplicationStatus()));
                 }

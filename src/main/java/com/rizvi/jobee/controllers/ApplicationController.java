@@ -25,6 +25,7 @@ import com.rizvi.jobee.dtos.application.ApplicationSummaryDto;
 import com.rizvi.jobee.dtos.application.BatchQuickApplyDto;
 import com.rizvi.jobee.dtos.application.BatchQuickApplySuccessDto;
 import com.rizvi.jobee.dtos.application.CreateApplicationDto;
+import com.rizvi.jobee.dtos.application.JobOfferDto;
 import com.rizvi.jobee.dtos.job.JobApplicationStatusDto;
 import com.rizvi.jobee.dtos.job.PaginatedResponse;
 import com.rizvi.jobee.entities.Application;
@@ -163,6 +164,20 @@ public class ApplicationController {
                 hasMore, applicationDtos, totalApplications);
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id}/job-offer")
+    public ResponseEntity<JobOfferDto> getUnofficalJobOfferForApplication(@PathVariable Long id) {
+        var jobOffer = applicationService.getUnofficalJobOfferForApplication(id);
+        System.out.println("SYED-DEBUG: Fetched job offer for application id " + id);
+        return ResponseEntity.ok(applicationMapper.toJobOfferDto(jobOffer));
+    }
+
+    @PatchMapping("/{id}/job-offer")
+    public ResponseEntity<JobOfferDto> updateUnofficalJobOfferForApplication(@PathVariable Long id,
+            @RequestParam Boolean accepted) {
+        var jobOffer = applicationService.updateUnofficalJobOfferForApplication(id, accepted);
+        return ResponseEntity.ok(applicationMapper.toJobOfferDto(jobOffer));
     }
 
     // TODO: Update to /business/me

@@ -7,8 +7,10 @@ import com.rizvi.jobee.dtos.application.ApplicantSummaryForBusinessDto;
 import com.rizvi.jobee.dtos.application.ApplicationDetailsForBusinessDto;
 import com.rizvi.jobee.dtos.application.ApplicationDto;
 import com.rizvi.jobee.dtos.application.ApplicationSummaryDto;
+import com.rizvi.jobee.dtos.application.JobOfferDto;
 import com.rizvi.jobee.dtos.user.UserApplicationDto;
 import com.rizvi.jobee.entities.Application;
+import com.rizvi.jobee.entities.UnofficalJobOffer;
 
 @Mapper(componentModel = "spring", uses = { UserProfileMapper.class, JobMapper.class, UserDocumentMapper.class })
 public interface ApplicationMapper {
@@ -49,4 +51,7 @@ public interface ApplicationMapper {
     @Mapping(target = "interviewIds", expression = "java(application.getInterviewIds())")
     @Mapping(target = "userDocuments", source = "userDocuments")
     ApplicationDetailsForBusinessDto toApplicationDetailsForBusinessDto(Application application);
+
+    @Mapping(target = "offerMade", source = "jobOffer.createdAt")
+    JobOfferDto toJobOfferDto(UnofficalJobOffer jobOffer);
 }

@@ -8,6 +8,8 @@ import java.util.Set;
 import org.hibernate.annotations.CreationTimestamp;
 
 import com.rizvi.jobee.enums.ApplicationStatus;
+import com.rizvi.jobee.enums.InterviewDecisionResult;
+import com.rizvi.jobee.enums.InterviewStatus;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -76,6 +78,9 @@ public class Application {
     @OneToOne(mappedBy = "application", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private InterviewRejection rejection;
 
+    @OneToOne(mappedBy = "application", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private UnofficalJobOffer jobOffer;
+
     @OneToMany(mappedBy = "application", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private Set<Interview> interviews = new HashSet<>();
@@ -113,6 +118,24 @@ public class Application {
             this.interviews.remove(interview);
             if (this.equals(interview.getApplication())) {
                 interview.setApplication(null);
+            }
+        }
+    }
+
+    public void updateJobOfferStatus(Boolean status) {
+        if (this.jobOffer != null) {
+            this.jobOffer.setAccepted(status);
+            this.jobOffer.setUserAction(true);
+            if (status) {
+                this.status = ApplicationStatus.OFFER_ACCEPTED;
+                for (Interview interview : this.interviews) {
+                    interview.setDecisionResult(InterviewDecisionResult.OFFER_ACCEPTED);
+                }
+            } else {
+                this.status = ApplicationStatus.OFFER_REJECTED;
+                for (Interview interview : this.interviews) {
+                    interview.setDecisionResult(InterviewDecisionResult.OFFER_REJECTED);
+                }
             }
         }
     }

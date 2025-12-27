@@ -26,6 +26,7 @@ import com.rizvi.jobee.dtos.interview.InterviewDto;
 import com.rizvi.jobee.dtos.interview.InterviewPrepQuestionDto;
 import com.rizvi.jobee.dtos.interview.InterviewPreparationDto;
 import com.rizvi.jobee.dtos.interview.InterviewSummaryDto;
+import com.rizvi.jobee.dtos.interview.UnofficialJobOfferDto;
 import com.rizvi.jobee.dtos.interview.InterviewPrepFeedbackDto;
 import com.rizvi.jobee.dtos.job.PaginatedResponse;
 import com.rizvi.jobee.entities.Interview;
@@ -303,6 +304,16 @@ public class InterviewController {
         var reason = request.getReason();
         var feedback = request.getFeedback();
         var savedInterview = interviewService.rejectCandidateInterview(id, reason, feedback);
+        return ResponseEntity.ok(interviewMapper.toDto(savedInterview));
+    }
+
+    @PostMapping("{id}/send-unofficial-job-offer")
+    @Operation(summary = "Business can send an unofficial job offer to a candidate")
+    public ResponseEntity<InterviewDto> sendUnofficalJobOffer(
+            @PathVariable Long id,
+            @RequestBody @Valid UnofficialJobOfferDto request,
+            @AuthenticationPrincipal CustomPrincipal principal) {
+        var savedInterview = interviewService.sendUnofficalJobOffer(id, request.getOfferDetails());
         return ResponseEntity.ok(interviewMapper.toDto(savedInterview));
     }
 

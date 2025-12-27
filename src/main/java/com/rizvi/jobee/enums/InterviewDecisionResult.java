@@ -4,5 +4,8 @@ public enum InterviewDecisionResult {
     REJECTED,
     NEXT_ROUND,
     HIRED,
-    PENDING
+    OFFER_MADE,
+    PENDING,
+    OFFER_REJECTED,
+    OFFER_ACCEPTED
 }

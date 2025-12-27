@@ -211,4 +211,13 @@ public class RequestQueue {
     public void sendBusinessAccountVerificationEmail(String email, String verificationCode, String fullName) {
         emailSender.sendBusinessAccountVerificationEmail(email, verificationCode, fullName);
     }
+
+    @Async
+    public void sendUnofficialJobOfferEmailAndNotification(String candidateName, String candidateEmail,
+            String companyName, String jobTitle, Long candidateId, String offerDetails, Long jobId,
+            Long applicationId, Long companyId) {
+        userNotificationService.createUnofficialJobOfferNotificationAndSend(
+                candidateId, companyName, jobTitle, jobId, applicationId, companyId);
+        emailSender.sendUnofficialJobOfferEmail(companyName, jobTitle, candidateName, candidateEmail, offerDetails);
+    }
 }

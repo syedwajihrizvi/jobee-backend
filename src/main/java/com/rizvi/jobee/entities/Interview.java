@@ -216,8 +216,8 @@ public class Interview {
         }
     }
 
-    public void updateInterviewApplicationStatus() {
-        this.application.setStatus(ApplicationStatus.PENDING);
+    public void updateInterviewApplicationStatus(ApplicationStatus status) {
+        this.application.setStatus(status);
     }
 
     public String getCandidateEmail() {

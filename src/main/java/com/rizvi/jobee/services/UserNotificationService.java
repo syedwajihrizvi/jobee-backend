@@ -300,8 +300,25 @@ public class UserNotificationService {
         }
     }
 
+    public void createUnofficialJobOfferNotificationAndSend(Long candidateId, String companyName,
+            String jobTitle, Long jobId, Long applicationId, Long companyId) {
+        var message = "You have received an unofficial job offer for the position of "
+                + jobTitle + " at " + companyName + ". Please check your job offers for more details.";
+        CreateNotificationDto notificationDto = new CreateNotificationDto();
+        notificationDto.setRecipientType(MessagerUserType.USER);
+        notificationDto.setMessage(message);
+        notificationDto.setRecipientId(candidateId);
+        notificationDto.setNotificationType(NotificationType.UNOFFICIAL_JOB_OFFER);
+        notificationDto.setCompanyId(companyId);
+        notificationDto.setJobId(jobId);
+        notificationDto.setApplicationId(applicationId);
+        notificationDto.setJobTitle(jobTitle);
+        notificationDto.setCompanyId(null);
+        var savedNotification = saveNotification(notificationDto);
+        sendInAppNotification(savedNotification);
+    }
+
     public void createInterviewRescheduleRequestNotificationAndSend(Interview interview) {
-        // Notify interviewers and creator about reschedule request
         BusinessAccount creator = interview.getCreatedBy();
         String candidateName = interview.getCandidate().getFullName();
         String candidateProfileImageUrl = interview.getCandidate().getProfileImageUrl();

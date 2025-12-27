@@ -240,6 +240,18 @@ public class EmailSender {
     }
   }
 
+  public void sendUnofficialJobOfferEmail(
+      String companyName, String jobTitle, String candidateName, String candidateEmail, String offerDetails) {
+    String subject = "Unofficial Job Offer for " + jobTitle + " at " + companyName;
+    String htmlString = generateUnofficialJobOfferHtml(companyName, jobTitle, candidateName, offerDetails,
+        generateJobeeUrl());
+    try {
+      resendService.sendEmail(candidateEmail, subject, htmlString);
+    } catch (Exception e) {
+      System.out.println("Failed to send email: " + e.getMessage());
+    }
+  }
+
   public void sendInvitationEmail(
       String to, String companyName, String inviteeFullName, String invitationType,
       String companyCode, String inviteUrl, String qrCode) {
@@ -254,6 +266,49 @@ public class EmailSender {
 
   private String generateJobeeUrl() {
     return "https://jobee.com";
+  }
+
+  private String generateUnofficialJobOfferHtml(String companyName, String jobTitle, String candidateName,
+      String offerDetails, String jobeeUrl) {
+    String htmlString = """
+        <html>
+          <body style="font-family: Arial, sans-serif; background-color: #f6f9fc; padding: 40px; text-align: center;">
+            <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 40px;">
+              <h2 style="color: #2d3748;">Unofficial Job Offer for %s at %s</h2>
+              <p style="color: #4a5568;">Hello %s,</p>
+              <p style="color: #4a5568;">
+                We are excited to extend to you an unofficial job offer for the position of <strong>%s</strong> at <strong>%s</strong>.
+              </p>
+              <p style="color: #4a5568;">
+                Here are the details of your offer:
+              </p>
+              <div style="text-align: left; margin: 20px auto; max-width: 500px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f7fafc;">
+                %s
+              </div>
+              <p style="color: #4a5568;">
+                Please note that this is an unofficial offer and is subject to final approval. We will be in touch with you soon regarding the next steps. Please
+                respond to the offer on Jobee at your earliest convenience so we can proceed with further steps.
+              </p>
+            <a href="%s" style="
+                  display: inline-block;
+                  margin: 20px 0;
+                  padding: 14px 28px;
+                  background-color: #21c55e;
+                  color: white;
+                  font-weight: bold;
+                  border-radius: 6px;
+                  text-decoration: none;">
+                Join on Jobee
+              </a>
+              <p style="margin-top: 40px; font-size: 12px; color: #a0aec0;">
+                If you have any questions, feel free to reach out to us.
+              </p>
+            </div>
+          </body>
+        </html>
+        """
+        .formatted(companyName, jobTitle, candidateName, jobTitle, companyName, offerDetails, jobeeUrl);
+    return htmlString;
   }
 
   private String generateBusinessAccountVerificationEmailHtml(String fullName, String verificationCode) {

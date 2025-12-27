@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.rizvi.jobee.dtos.application.ApplicationDto;
 import com.rizvi.jobee.dtos.job.PaginatedResponse;
 import com.rizvi.jobee.entities.Application;
+import com.rizvi.jobee.entities.UnofficalJobOffer;
 import com.rizvi.jobee.enums.ApplicationStatus;
 import com.rizvi.jobee.exceptions.ApplicationNotFoundException;
 import com.rizvi.jobee.mappers.ApplicationMapper;
@@ -16,6 +17,7 @@ import com.rizvi.jobee.queries.ApplicationQuery;
 import com.rizvi.jobee.repositories.ApplicationRepository;
 import com.rizvi.jobee.specifications.ApplicantSpecification;
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -67,4 +69,31 @@ public class ApplicationService {
         return application;
     }
 
+    public Application addUnofficalJobOfferToApplication(Application application, String offerDetails) {
+        var unofficalJobOffer = UnofficalJobOffer.builder()
+                .offerDetails(offerDetails)
+                .application(application)
+                .build();
+        application.setJobOffer(unofficalJobOffer);
+        application.setStatus(ApplicationStatus.OFFER_MADE);
+        return applicationRepository.save(application);
+    }
+
+    public UnofficalJobOffer getUnofficalJobOfferForApplication(Long applicationId) {
+        var application = applicationRepository.findById(applicationId).orElse(null);
+        if (application == null) {
+            throw new ApplicationNotFoundException("Application not found with id: " + applicationId);
+        }
+        return application.getJobOffer();
+    }
+
+    @Transactional
+    public UnofficalJobOffer updateUnofficalJobOfferForApplication(Long applicationId, Boolean accepted) {
+        var application = applicationRepository.findById(applicationId).orElse(null);
+        if (application == null) {
+            throw new ApplicationNotFoundException("Application not found with id: " + applicationId);
+        }
+        application.updateJobOfferStatus(accepted);
+        return applicationRepository.save(application).getJobOffer();
+    }
 }

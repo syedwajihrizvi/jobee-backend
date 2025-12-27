@@ -54,8 +54,6 @@ import com.rizvi.jobee.repositories.InterviewPreparationQuestionRepository;
 import com.rizvi.jobee.repositories.InterviewPreparationRepository;
 import com.rizvi.jobee.repositories.InterviewRepository;
 import com.rizvi.jobee.specifications.InterviewSpecifications;
-
-import io.swagger.v3.oas.models.security.SecurityScheme.In;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -69,6 +67,7 @@ public class InterviewService {
     private final ApplicationRepository applicationRepository;
     private final AIService aiService;
     private final S3Service s3Service;
+    private final ApplicationService applicationService;
     private final RequestQueue requestQueue;
     private final UserNotificationService userNotificationService;
     private final ObjectMapper objectMapper;
@@ -488,7 +487,7 @@ public class InterviewService {
         interview.setStatus(InterviewStatus.CANCELLED);
         interview.setCancellationReason(reason);
         interview.setOnlineMeetingInformation(null);
-        interview.updateInterviewApplicationStatus();
+        interview.updateInterviewApplicationStatus(ApplicationStatus.PENDING);
         requestQueue.sendInterviewCancelledEmailsAndNotifications(interview);
         interviewRepository.save(interview);
     }
@@ -608,5 +607,31 @@ public class InterviewService {
     public InterviewPreparationFeedback getInterviewPrepFeedback(Long interviewId) {
         var interviewPrep = interviewPreparationFeedbackRepository.findByInterviewPreparationId(interviewId);
         return interviewPrep;
+    }
+
+    @Transactional
+    public Interview sendUnofficalJobOffer(Long id, String offerDetails) {
+        var interview = interviewRepository.findById(id).orElse(null);
+        if (interview == null) {
+            throw new InterviewNotFoundException("Interview not found with id: " + id);
+        }
+        var application = interview.getApplication();
+        applicationService.addUnofficalJobOfferToApplication(application, offerDetails);
+        interview.setDecisionResult(InterviewDecisionResult.OFFER_MADE);
+        var candidate = interview.getCandidate();
+        Long candidateId = candidate.getId();
+        String candidateEmail = candidate.getAccount().getEmail();
+        var job = interview.getJob();
+        Long jobId = job.getId();
+        String jobTitle = job.getTitle();
+        Long companyId = job.getCompany().getId();
+        String companyName = job.getCompany().getName();
+        String candidateName = candidate.getFullName();
+        Long applicationId = application.getId();
+        requestQueue.sendUnofficialJobOfferEmailAndNotification(candidateName, candidateEmail,
+                companyName, jobTitle, candidateId, offerDetails, jobId,
+                applicationId, companyId);
+        var savedInterview = interviewRepository.save(interview);
+        return savedInterview;
     }
 }
