@@ -12,6 +12,7 @@ import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.BusinessAccountVerification;
 import com.rizvi.jobee.entities.BusinessProfile;
 import com.rizvi.jobee.entities.Company;
+import com.rizvi.jobee.entities.WaitListEntry;
 import com.rizvi.jobee.enums.BusinessType;
 import com.rizvi.jobee.exceptions.AccountNotFoundException;
 import com.rizvi.jobee.exceptions.AlreadyRegisteredException;
@@ -19,6 +20,7 @@ import com.rizvi.jobee.queries.CompanyMemberQuery;
 import com.rizvi.jobee.repositories.BusinessAccountRepository;
 import com.rizvi.jobee.repositories.BusinessAccountVerificationRepository;
 import com.rizvi.jobee.repositories.CompanyRepository;
+import com.rizvi.jobee.repositories.WaitListRepository;
 import com.rizvi.jobee.specifications.CompanyMemberSpecification;
 
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,7 @@ public class BusinessAccountService {
     private final BusinessAccountVerificationRepository businessAccountVerificationRepository;
     private final CompanyRepository companyRepository;
     private final PasswordEncoder passwordEncoder;
+    private final WaitListRepository waitListRepository;
 
     public BusinessAccount createBusinessAccount(CreateBusinessAccountDto request) {
         var companyName = request.getCompanyName();
@@ -81,5 +84,17 @@ public class BusinessAccountService {
                 .build();
         businessAccountVerificationRepository.save(verification);
         // TODO: Send email with verification code
+    }
+
+    public Boolean addToBusinessWaitList(String email, String company) {
+        var existingEntries = waitListRepository.findByEmailAndCompany(email, company);
+        if (existingEntries.isEmpty()) {
+            var waitListEntry = new WaitListEntry();
+            waitListEntry.setEmail(email);
+            waitListEntry.setCompany(company);
+            waitListRepository.save(waitListEntry);
+            return true;
+        }
+        return false;
     }
 }

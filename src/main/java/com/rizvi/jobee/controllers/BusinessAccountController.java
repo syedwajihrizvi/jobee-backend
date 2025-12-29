@@ -22,6 +22,7 @@ import com.rizvi.jobee.dtos.user.CreateBusinessAccountDto;
 import com.rizvi.jobee.dtos.user.CreateBusinessAccountViaCodeDto;
 import com.rizvi.jobee.dtos.user.JwtDto;
 import com.rizvi.jobee.dtos.user.LoginDto;
+import com.rizvi.jobee.dtos.user.WaitListDto;
 import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.BusinessProfile;
 import com.rizvi.jobee.enums.BusinessType;
@@ -144,6 +145,18 @@ public class BusinessAccountController {
                 businessAccount.getProfile().getId(),
                 businessAccount.getCompany().getId());
         return ResponseEntity.ok(new JwtDto(jwtToken));
+    }
+
+    @PostMapping("/join-waitlist")
+    public ResponseEntity<Void> joinBusinessAccountWaitList(
+            @RequestBody WaitListDto request) {
+        var company = request.getCompany();
+        var email = request.getEmail();
+        var res = accountService.addToBusinessWaitList(email, company);
+        if (!res) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/me")
