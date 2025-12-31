@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.rizvi.jobee.dtos.socialMedia.SocialMediaDto;
+import com.rizvi.jobee.enums.CompanyVerificationStatus;
 
 import lombok.Data;
 
@@ -21,6 +22,7 @@ public class BusinessAccountDto {
     private String city;
     private String state;
     private String country;
+    private CompanyVerificationStatus companyVerified;
     private Boolean verified;
     private String profileImageUrl;
     private String role;

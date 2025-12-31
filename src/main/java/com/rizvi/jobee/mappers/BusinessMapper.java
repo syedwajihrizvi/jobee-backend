@@ -18,6 +18,7 @@ public interface BusinessMapper {
     @Mapping(target = "companyName", source = "company.name")
     @Mapping(target = "companyLogo", source = "company.logo")
     @Mapping(target = "companyId", source = "company.id")
+    @Mapping(target = "companyVerified", source = "company.verified")
     @Mapping(target = "title", source = "profile.title")
     @Mapping(target = "profileImageUrl", source = "profile.profileImageUrl")
     @Mapping(target = "verified", source = "profile.verified")

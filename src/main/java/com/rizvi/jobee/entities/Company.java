@@ -4,9 +4,13 @@ import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.rizvi.jobee.enums.CompanyVerificationStatus;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -39,6 +43,11 @@ public class Company {
 
     @Column(name = "website", nullable = true)
     private String website;
+
+    @Column(name = "verification_status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private CompanyVerificationStatus verified = CompanyVerificationStatus.PENDING;
 
     @Column(name = "hq_city", nullable = true)
     private String hqCity;
