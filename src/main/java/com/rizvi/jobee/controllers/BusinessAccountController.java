@@ -36,6 +36,7 @@ import com.rizvi.jobee.principals.CustomPrincipal;
 import com.rizvi.jobee.queries.CompanyMemberQuery;
 import com.rizvi.jobee.repositories.BusinessAccountRepository;
 import com.rizvi.jobee.services.BusinessAccountService;
+import com.rizvi.jobee.services.HiringTeamService;
 import com.rizvi.jobee.services.InvitationService;
 import com.rizvi.jobee.services.JwtService;
 
@@ -50,6 +51,7 @@ public class BusinessAccountController {
     private final BusinessAccountRepository businessAccountRepository;
     private final BusinessAccountService accountService;
     private final PasswordEncoder passwordEncoder;
+    private final HiringTeamService hiringTeamService;
     private final JwtService jwtService;
     private final BusinessMapper businessMapper;
     private final InvitationService invitationService;
@@ -124,6 +126,8 @@ public class BusinessAccountController {
         businessAccount.setProfile(businesProfile);
         var savedBusinessAccount = businessAccountRepository.save(businessAccount);
         invitationService.updateInvitationStatus(invitation, InvitationStatus.ACCEPTED);
+        // Should also update any hiring team members associated with this invitation
+        hiringTeamService.linkNonJobeeHiringTeamMemberWithBusinessAccount(savedBusinessAccount);
         var uri = uriComponentsBuilder.path("/business-accounts/{id}")
                 .buildAndExpand(savedBusinessAccount.getId()).toUri();
         return ResponseEntity.created(uri).body(businessMapper.toDto(savedBusinessAccount));

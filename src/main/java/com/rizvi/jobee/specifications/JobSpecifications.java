@@ -2,6 +2,7 @@ package com.rizvi.jobee.specifications;
 
 import com.rizvi.jobee.queries.JobQuery;
 
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 
@@ -22,35 +23,42 @@ public class JobSpecifications {
             List<Predicate> predicates = new ArrayList<>();
             Join<Job, BusinessAccount> businessAccountJoin = root.join("businessAccount");
             Join<BusinessAccount, Company> companyJoin = businessAccountJoin.join("company");
+            System.out.println("SYED-DEBUG: JobSpecifications withFilters called with query: " + query);
             if (query.getSearch() != null && !query.getSearch().isEmpty()) {
                 String search = query.getSearch().toLowerCase().trim();
                 String[] searchTerms = search.split("\\s+");
-
-                List<Predicate> titlePredicates = new ArrayList<>();
-                List<Predicate> descriptionPredicates = new ArrayList<>();
+                List<Predicate> termPredicates = new ArrayList<>();
 
                 for (String term : searchTerms) {
                     if (!term.isEmpty()) {
-                        titlePredicates.add(cb.like(cb.lower(root.get("title")), "%" + term + "%"));
-                        descriptionPredicates.add(cb.like(cb.lower(root.get("description")), "%" + term + "%"));
+                        Predicate titleLike = cb.like(cb.lower(root.get("title")), "%" + term + "%");
+                        Predicate descLike = cb.like(cb.lower(root.get("description")), "%" + term + "%");
+                        termPredicates.add(cb.or(titleLike, descLike));
                     }
                 }
+                if (!termPredicates.isEmpty()) {
+                    predicates.add(cb.and(termPredicates.toArray(new Predicate[0])));
+                }
 
-                predicates.add(cb.or(
-                        cb.and(titlePredicates.toArray(new Predicate[0])),
-                        cb.and(descriptionPredicates.toArray(new Predicate[0]))));
             }
             if (query.getLocations() != null && !query.getLocations().isEmpty()) {
                 List<Predicate> locationPredicates = new ArrayList<>();
                 for (String loc : query.getLocations()) {
+                    if (loc == null || loc.trim().isEmpty())
+                        continue;
                     String searchLoc = "%" + loc.toLowerCase().trim().replace(" ", "") + "%";
-                    locationPredicates.add(
-                            cb.like(
-                                    cb.lower(cb.function("replace", String.class, root.get("location"), cb.literal(" "),
-                                            cb.literal(""))),
-                                    searchLoc));
+                    Expression<String> normalizedCity = cb.lower(
+                            cb.function("replace", String.class, root.get("city"), cb.literal(" "), cb.literal("")));
+                    Expression<String> normalizedCountry = cb.lower(
+                            cb.function("replace", String.class, root.get("country"), cb.literal(" "), cb.literal("")));
+                    Predicate cityLike = cb.like(normalizedCity, searchLoc);
+                    Predicate countryLike = cb.like(normalizedCountry, searchLoc);
+                    locationPredicates.add(cb.or(cityLike, countryLike));
+
                 }
-                predicates.add(cb.or(locationPredicates.toArray(new Predicate[0])));
+                if (!locationPredicates.isEmpty()) {
+                    predicates.add(cb.or(locationPredicates.toArray(new Predicate[0])));
+                }
             }
             if (query.getCompanyId() != null) {
                 predicates.add(cb.equal(companyJoin.get("id"), query.getCompanyId()));

@@ -118,12 +118,15 @@ public class UserNotificationService {
         notificationRepository.deleteByRecipientIdAndRecipientTypeAndReadIsTrue(userId, type);
     }
 
-    public Notification createJobUpdatedViaAINotificationAndSend(Long jobId, Long recipientId) {
+    public Notification createJobUpdatedViaAINotificationAndSend(Long jobId, Long recipientId, Long companyId) {
+        System.out.println("SYED-DEBUG: Creating job updated via AI notification for jobId: " + jobId
+                + ", recipientId: " + recipientId + ", companyId: " + companyId);
         var message = "Jobee has add additional tags to your job posting to help with discoverability.";
         CreateNotificationDto notificationDto = new CreateNotificationDto();
         notificationDto.setRecipientType(MessagerUserType.BUSINESS);
         notificationDto.setRecipientId(recipientId);
         notificationDto.setMessage(message);
+        notificationDto.setCompanyId(companyId);
         notificationDto.setJobId(jobId);
         notificationDto.setNotificationType(NotificationType.JOB_UPDATED_VIA_AI);
         var savedNotification = saveNotification(notificationDto);

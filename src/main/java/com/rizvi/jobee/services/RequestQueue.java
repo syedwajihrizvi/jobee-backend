@@ -1,6 +1,5 @@
 package com.rizvi.jobee.services;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -9,26 +8,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.rizvi.jobee.dtos.interview.ConductorDto;
+import com.rizvi.jobee.dtos.invitations.HiringTeamInvite;
 import com.rizvi.jobee.entities.BusinessAccount;
-import com.rizvi.jobee.entities.Company;
 import com.rizvi.jobee.entities.HiringTeam;
 import com.rizvi.jobee.entities.Interview;
 import com.rizvi.jobee.entities.InterviewPreparation;
 import com.rizvi.jobee.entities.InterviewPreparationResource;
 import com.rizvi.jobee.entities.Job;
-import com.rizvi.jobee.entities.Tag;
 import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.enums.PreparationStatus;
 import com.rizvi.jobee.helpers.AISchemas.AICandidate;
 import com.rizvi.jobee.helpers.AISchemas.AICompany;
 import com.rizvi.jobee.helpers.AISchemas.AIInterview;
 import com.rizvi.jobee.helpers.AISchemas.AIJob;
-import com.rizvi.jobee.helpers.AISchemas.PostedJobInformationRequest;
 import com.rizvi.jobee.helpers.AISchemas.PrepareForInterviewRequest;
 import com.rizvi.jobee.helpers.AISchemas.PrepareForInterviewResponse;
 import com.rizvi.jobee.repositories.InterviewPreparationRepository;
-import com.rizvi.jobee.repositories.JobRepository;
-import com.rizvi.jobee.repositories.TagRepository;
 
 import lombok.AllArgsConstructor;
 
@@ -36,8 +31,6 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class RequestQueue {
     private final AIService aiService;
-    private final TagRepository tagRepository;
-    private final JobRepository jobRepository;
     private final InterviewPreparationRepository interviewPreparationRepository;
     private final UserNotificationService userNotificationService;
     private final EducationService userEducationService;
@@ -163,47 +156,27 @@ public class RequestQueue {
     }
 
     @Async
-    public void sendHiringTeamInvitationsForJob(Job job, Set<HiringTeam> jobeeTeamMembers,
-            Set<HiringTeam> nonJobeeTeamMembers) {
+    public void sendHiringTeamInvitationsForJob(Job job, Set<HiringTeam> jobeeTeamMembers) {
         for (HiringTeam member : jobeeTeamMembers) {
             invitationService.sendHiringTeamInvitationEmail(member.getBusinessAccount(),
                     member.getBusinessAccount(),
                     job);
             userNotificationService.createdAddedToHiringTeamNotificationAndSend(member.getBusinessAccount(), job);
         }
-        for (HiringTeam member : nonJobeeTeamMembers) {
-            invitationService.sendHiringTeamInvitationAndJoinJobeeEmail(member.getEmail(),
-                    job.getBusinessAccount(),
-                    job);
-        }
     }
 
     @Async
-    public void addMoreTagsToJob(Job job, Company company, List<String> existingTags) {
-        var request = PostedJobInformationRequest.builder()
-                .job(new AIJob(job))
-                .company(new AICompany(company))
-                .existingTags(existingTags)
-                .build();
-        try {
-            var response = aiService.generateMoreTagsForJob(request);
-            var newTags = response.getTags();
-            var tagEntities = new ArrayList<Tag>();
-            for (String tagName : newTags) {
-                var slugName = tagName.trim().replaceAll("[^a-zA-Z0-9 ]", "");
-                var tag = tagRepository.findBySlug(slugName);
-                if (tag == null) {
-                    tag = Tag.builder().name(tagName).slug(slugName).build();
-                    tag = tagRepository.save(tag);
-                }
-                tagEntities.add(tag);
-            }
-            job.addTags(tagEntities);
-            var savedJob = jobRepository.save(job);
-            userNotificationService.createJobUpdatedViaAINotificationAndSend(savedJob.getId(),
-                    job.getBusinessAccount().getId());
-        } catch (Exception e) {
-            System.out.println("SYED-DEBUG: Failed to generate more tags for job: " + e.getMessage());
+    public void sendHiringTeamInvitationsForJobForNonUsers(
+            List<HiringTeamInvite> invitesToSend, String jobTitle, String companyName, String senderName) {
+        for (HiringTeamInvite invite : invitesToSend) {
+            var hiringTeamMember = invite.hiringTeam();
+            var invitation = invite.invitation();
+            invitationService.sendHiringTeamInvitationAndJoinJobeeEmail(
+                    senderName,
+                    hiringTeamMember,
+                    invitation,
+                    jobTitle,
+                    companyName);
         }
     }
 
@@ -220,4 +193,5 @@ public class RequestQueue {
                 candidateId, companyName, jobTitle, jobId, applicationId, companyId);
         emailSender.sendUnofficialJobOfferEmail(companyName, jobTitle, candidateName, candidateEmail, offerDetails);
     }
+
 }

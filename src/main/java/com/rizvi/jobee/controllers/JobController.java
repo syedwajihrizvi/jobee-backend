@@ -350,8 +350,9 @@ public class JobController {
         if (businessAccount == null) {
             throw new BusinessNotFoundException();
         }
-        String aiJobDescription = jobService.generateAIJobDescription(request, businessAccount.getCompany());
-        return ResponseEntity.ok(new AIJobDescriptionResponse(aiJobDescription));
+        var enhancement = jobService.enhanceJobWithAI(request, businessAccount.getCompany());
+        String aiJobDescription = enhancement.getEnhancedJobDescription();
+        List<String> seoKeywords = enhancement.getSeoKeywords();
+        return ResponseEntity.ok(new AIJobDescriptionResponse(aiJobDescription, seoKeywords));
     }
-
 }

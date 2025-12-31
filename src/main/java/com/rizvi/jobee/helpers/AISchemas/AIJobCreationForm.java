@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.rizvi.jobee.dtos.job.CreateJobDto;
-import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.helpers.ListUtils;
 
 import lombok.Data;
@@ -33,6 +32,8 @@ public class AIJobCreationForm {
     private String setting;
     @JsonPropertyDescription("Street Address")
     private String streetAddress;
+    @JsonPropertyDescription("Existing Tags")
+    private List<String> existingTags;
 
     public AIJobCreationForm(CreateJobDto job) {
         this.title = job.getTitle();
@@ -46,13 +47,15 @@ public class AIJobCreationForm {
         this.country = job.getCountry();
         this.setting = job.getSetting().name();
         this.streetAddress = job.getStreetAddress();
+        this.existingTags = job.getTags();
     }
 
     public String toJsonString() {
         return """
-                {"title": "%s", "initialDescription": "%s", "department": "%s", "skills": [%s], "minSalary": %d, "maxSalary": %d, "experience": "%s", "city": "%s", "country": "%s", "setting": "%s", "streetAddress": "%s"}
+                {"title": "%s", "initialDescription": "%s", "department": "%s", "skills": [%s], "minSalary": %d, "maxSalary": %d, "experience": "%s", "city": "%s", "country": "%s", "setting": "%s", "streetAddress": "%s", "existingTags": [%s]}
                 """
                 .formatted(title, initialDescription, department, ListUtils.listToJsonArrayString(skills), minSalary,
-                        maxSalary, experience, city, country, setting, streetAddress);
+                        maxSalary, experience, city, country, setting, streetAddress,
+                        ListUtils.listToJsonArrayString(existingTags));
     }
 }

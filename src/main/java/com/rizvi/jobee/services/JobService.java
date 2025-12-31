@@ -13,18 +13,19 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.rizvi.jobee.dtos.invitations.HiringTeamInvite;
 import com.rizvi.jobee.dtos.job.CreateJobDto;
-import com.rizvi.jobee.dtos.job.HiringTeamMemberDto;
 import com.rizvi.jobee.dtos.job.PaginatedResponse;
 import com.rizvi.jobee.entities.AIJobInsight;
 import com.rizvi.jobee.entities.BusinessAccount;
 import com.rizvi.jobee.entities.Company;
 import com.rizvi.jobee.entities.HiringTeam;
+import com.rizvi.jobee.entities.Invitation;
 import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.entities.Tag;
 import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.exceptions.JobNotFoundException;
-import com.rizvi.jobee.helpers.AISchemas.AIJobDescriptionAnswer;
+import com.rizvi.jobee.helpers.AISchemas.AIJobEnhancementAnswer;
 import com.rizvi.jobee.helpers.AISchemas.AIJobInsightAnswer;
 import com.rizvi.jobee.helpers.AISchemas.GenerateAIInsightRequest;
 import com.rizvi.jobee.helpers.AISchemas.GenerateAIJobDescriptionRequest;
@@ -126,12 +127,14 @@ public class JobService {
             job.addTag(tag);
         }
         Set<HiringTeam> jobeeMembers = new HashSet<>();
-        Set<HiringTeam> nonJobeeMembers = new HashSet<>();
+        List<HiringTeamInvite> invitesToSend = new ArrayList<>();
+        String jobTitle = request.getTitle();
+        String companyName = company.getName();
+        String creatorName = businessAccount.getFullName();
         for (var memberDto : request.getHiringTeam()) {
             var email = memberDto.getEmail();
             var firstName = memberDto.getFirstName();
             var lastName = memberDto.getLastName();
-            // Create the hiring team member
             var hiringTeamMember = HiringTeam.builder().email(email).firstName(firstName).lastName(lastName).job(job)
                     .build();
             var hiringTeamMemberAccount = businessAccountRepository.findByEmail(email).orElse(null);
@@ -141,15 +144,17 @@ public class JobService {
                 jobeeMembers.add(hiringTeamMember);
             } else {
                 hiringTeamMember.setInvited(true);
-                nonJobeeMembers.add(hiringTeamMember);
+                var invitation = invitationService.createIntitationForHiringMember(hiringTeamMember, businessAccount);
+                invitesToSend.add(new HiringTeamInvite(hiringTeamMember, invitation));
             }
             job.addHiringTeamMember(hiringTeamMember);
         }
 
         var savedJob = jobRepository.save(job);
-        requestQueue.addMoreTagsToJob(savedJob, company, request.getTags());
-        requestQueue.sendHiringTeamInvitationsForJob(job, jobeeMembers,
-                nonJobeeMembers);
+        requestQueue.sendHiringTeamInvitationsForJob(job, jobeeMembers);
+        if (invitesToSend.size() > 0) {
+            requestQueue.sendHiringTeamInvitationsForJobForNonUsers(invitesToSend, jobTitle, companyName, creatorName);
+        }
         return savedJob;
 
     }
@@ -173,7 +178,7 @@ public class JobService {
         // Update the hiring team
         Set<HiringTeam> existingMembers = new HashSet<>(job.getHiringTeamMembers());
         Set<HiringTeam> brandNewJobeeMembersToSendInvites = new HashSet<>();
-        Set<HiringTeam> brandNewNonJobeeMemebersToSendInvites = new HashSet<>();
+        Set<HiringTeamInvite> brandNewNonJobeeMemebersToSendInvites = new HashSet<>();
         job.clearHiringTeamMembers();
         for (var memberDto : request.getHiringTeam()) {
             var email = memberDto.getEmail();
@@ -193,12 +198,17 @@ public class JobService {
                 hiringTeamMember.setInvited(true);
                 if (!existingMembers.stream()
                         .anyMatch(member -> member.getEmail().equalsIgnoreCase(email))) {
-                    brandNewNonJobeeMemebersToSendInvites.add(hiringTeamMember);
+                    var invitation = invitationService.createIntitationForHiringMember(hiringTeamMember,
+                            job.getBusinessAccount());
+                    brandNewNonJobeeMemebersToSendInvites.add(new HiringTeamInvite(hiringTeamMember, invitation));
                 }
             }
             job.addHiringTeamMember(hiringTeamMember);
         }
 
+        String jobTitle = request.getTitle();
+        String companyName = job.getCompany().getName();
+        String creatorName = job.getBusinessAccount().getFullName();
         job.setTitle(request.getTitle());
         job.setDescription(request.getDescription());
         job.setLocation(request.getLocation());
@@ -216,8 +226,12 @@ public class JobService {
         job.setLevel(request.getExperience());
         var savedJob = jobRepository.save(job);
         // Send invitations to members
-        requestQueue.sendHiringTeamInvitationsForJob(job, brandNewJobeeMembersToSendInvites,
-                brandNewNonJobeeMemebersToSendInvites);
+        requestQueue.sendHiringTeamInvitationsForJob(job, brandNewJobeeMembersToSendInvites);
+        if (brandNewNonJobeeMemebersToSendInvites.size() > 0) {
+            requestQueue.sendHiringTeamInvitationsForJobForNonUsers(
+                    new ArrayList<>(brandNewNonJobeeMemebersToSendInvites), jobTitle, companyName, creatorName);
+        }
+
         return savedJob;
 
     }
@@ -369,7 +383,6 @@ public class JobService {
 
         var createNewInsight = existingInsight == null || existingInsight.getUpdatedAt().isBefore(jobUpdatedAt);
         if (createNewInsight) {
-            System.out.println("SYED-DEBUG: Generating new AI Job Insight for job ID " + job.getId());
             GenerateAIInsightRequest request = new GenerateAIInsightRequest(job, company);
             AIJobInsightAnswer aiAnswer = aiService.generateAIJobInsight(request);
             if (existingInsight != null) {
@@ -388,10 +401,10 @@ public class JobService {
         return existingInsight;
     }
 
-    public String generateAIJobDescription(CreateJobDto request, Company company) {
-
+    public AIJobEnhancementAnswer enhanceJobWithAI(CreateJobDto request, Company company) {
+        System.out.println(request);
         var aiRequest = new GenerateAIJobDescriptionRequest(request, company);
-        AIJobDescriptionAnswer aiDescription = aiService.generateAIJobDescription(aiRequest);
-        return aiDescription.getAnswer();
+        AIJobEnhancementAnswer aiDescription = aiService.enhanceJobCreation(aiRequest);
+        return aiDescription;
     }
 }

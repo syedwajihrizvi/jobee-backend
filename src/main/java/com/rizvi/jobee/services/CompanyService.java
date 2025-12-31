@@ -82,8 +82,8 @@ public class CompanyService {
     public Company updateCompanyLogo(Long companyId, MultipartFile profileImage) throws AmazonS3Exception {
         Company company = companyRepository.findById(companyId).orElseThrow(() -> new CompanyNotFoundException());
         try {
-            s3Service.uploadCompanyLogo(companyId, profileImage);
-            company.setLogo(companyId.toString());
+            var logoUrl = s3Service.uploadCompanyLogo(companyId, profileImage);
+            company.setLogo(logoUrl);
             return companyRepository.save(company);
         } catch (Exception e) {
             throw new AmazonS3Exception("Failed to upload profile image", e);

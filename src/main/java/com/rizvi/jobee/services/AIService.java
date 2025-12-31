@@ -25,7 +25,7 @@ import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.exceptions.InvalidDocumentException;
 import com.rizvi.jobee.helpers.Prompts;
 import com.rizvi.jobee.helpers.AISchemas.AICandidate;
-import com.rizvi.jobee.helpers.AISchemas.AIJobDescriptionAnswer;
+import com.rizvi.jobee.helpers.AISchemas.AIJobEnhancementAnswer;
 import com.rizvi.jobee.helpers.AISchemas.AIJobInsightAnswer;
 import com.rizvi.jobee.helpers.AISchemas.AIJobTagsResponse;
 import com.rizvi.jobee.helpers.AISchemas.AIProfessionalSummaryAnswer;
@@ -204,24 +204,20 @@ public class AIService {
         }
     }
 
-    public AIJobDescriptionAnswer generateAIJobDescription(GenerateAIJobDescriptionRequest request) {
-        System.out.println("Generating AI Job Description for job");
-        System.out.println(request.toJsonString());
+    public AIJobEnhancementAnswer enhanceJobCreation(GenerateAIJobDescriptionRequest request) {
         String inputJson = request.toJsonString();
-        String prompt = Prompts.JOB_DESCRIPTION_GENERATION.replace("{inputJSON}", inputJson);
-
+        String prompt = Prompts.JOB_CREATION_ENHANCE.replace("{inputJSON}", inputJson);
+        System.out.println(inputJson);
         try {
-            StructuredChatCompletionCreateParams<AIJobDescriptionAnswer> params = ChatCompletionCreateParams.builder()
+            StructuredChatCompletionCreateParams<AIJobEnhancementAnswer> params = ChatCompletionCreateParams.builder()
                     .model(ChatModel.GPT_5_NANO)
                     .addSystemMessage("You are a helpful assistant that generates job descriptions.")
                     .addUserMessage(prompt)
-                    .responseFormat(AIJobDescriptionAnswer.class)
+                    .responseFormat(AIJobEnhancementAnswer.class)
                     .build();
-            System.out.println("Calling OpenAI for job description...");
-            Optional<AIJobDescriptionAnswer> result = openAIClient.chat().completions().create(params).choices()
+            Optional<AIJobEnhancementAnswer> result = openAIClient.chat().completions().create(params).choices()
                     .stream()
                     .flatMap(choice -> choice.message().content().stream()).findFirst();
-            System.out.println("Received job description from OpenAI.");
             return result.orElse(null);
         } catch (Exception e) {
             System.out.println("Error during generating job description: " + e.getMessage());
@@ -246,20 +242,5 @@ public class AIService {
             System.out.println("Error during generating professional summary: " + e.getMessage());
             return null;
         }
-    }
-
-    public AIJobTagsResponse generateMoreTagsForJob(PostedJobInformationRequest request) throws IOException {
-        String inputJson = request.toJsonString();
-        String prompt = Prompts.JOB_TAG_GENERATION.replace("{inputJSON}", inputJson);
-        System.out.println("SYED-DEBUG: Generating more tags for job with input JSON: " + inputJson);
-        StructuredChatCompletionCreateParams<AIJobTagsResponse> params = ChatCompletionCreateParams.builder()
-                .model(ChatModel.GPT_5)
-                .addSystemMessage("You are a person working for a company that is posting a job listing.")
-                .addUserMessage(prompt).responseFormat(AIJobTagsResponse.class).build();
-        Optional<AIJobTagsResponse> result = openAIClient.chat().completions().create(params).choices()
-                .stream()
-                .flatMap(choice -> choice.message().content().stream()).findFirst();
-        System.out.println("SYED-DEBUG: Received tags from OpenAI: " + result);
-        return result.orElse(null);
     }
 }

@@ -65,4 +65,8 @@ public class HiringTeam {
     public Boolean isVerified() {
         return this.businessAccount != null && this.businessAccount.getProfile().getVerified();
     }
+
+    public String getFullName() {
+        return this.firstName + " " + this.lastName;
+    }
 }

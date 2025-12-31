@@ -225,18 +225,17 @@ public class EmailSender {
   }
 
   public void sendHiringTeamInvitationAndJoinJobeeEmail(
-      String to, String companyName, BusinessAccount sender, String companyCode, String jobTitle,
-      String inviteUrl, String qrCode) {
+      String to, String companyName, String senderName, String companyCode, String jobTitle,
+      String qrCode, String recipientName) {
 
     try {
-      String inviteeFullName = sender.getFullName();
       String subject = "You're invited to join the hiring team for " + jobTitle + " at " + companyName
-          + " on Jobee!";
+          + " on Jobee! Please join.";
       String htmlString = generateHiringTeamInvitationAndJoinJobeeHtml(
-          companyName, inviteeFullName, jobTitle, inviteUrl, companyCode, qrCode);
+          companyName, senderName, jobTitle, companyCode, qrCode, recipientName);
       resendService.sendEmail(to, subject, htmlString);
     } catch (Exception e) {
-      // TODO: handle exception
+      System.out.println("Failed to send hiring team invitation email: " + e.getMessage());
     }
   }
 
@@ -430,14 +429,14 @@ public class EmailSender {
   }
 
   private String generateHiringTeamInvitationAndJoinJobeeHtml(
-      String companyName, String inviteeFullName, String jobTitle, String inviteUrl, String companyCode,
-      String qrCodeUrl) {
+      String companyName, String senderName, String jobTitle, String companyCode, String qrCodeUrl,
+      String recipientName) {
     String htmlString = """
         <html>
           <body style="font-family: Arial, sans-serif; background-color: #f6f9fc; padding: 40px; text-align: center;">
             <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 40px;">
               <h2 style="color: #2d3748;">You're invited to join the hiring team for %s at %s on Jobee!</h2>
-              <p style="color: #4a5568;">Hello,</p>
+              <p style="color: #4a5568;">Hello %s,</p>
               <p style="color: #4a5568;">
                 <strong>%s</strong> has invited you to join %s's hiring team on <strong>Jobee</strong>. You need to make an account first.
               </p>
@@ -473,10 +472,11 @@ public class EmailSender {
         .formatted(
             jobTitle,
             companyName,
-            inviteeFullName,
+            recipientName,
+            senderName,
             companyName,
             companyCode,
-            inviteUrl,
+            generateJobeeUrl(),
             qrCodeUrl != null ? "<img src=\"" + qrCodeUrl
                 + "\" alt=\"QR Code\" style=\"margin-top: 20px; width: 150px; height: 150px;\"/>" : "");
 

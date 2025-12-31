@@ -18,4 +18,7 @@ public interface HiringTeamRepository extends JpaRepository<HiringTeam, Long> {
     @EntityGraph(attributePaths = { "job" })
     @Query("select ht from HiringTeam ht where ht.businessAccount.id = :businessAccountId and lower(ht.job.title) like lower(concat('%', :search, '%'))")
     List<HiringTeam> findByBusinessAccountIdAndJobTitle(Long businessAccountId, String jobTitle, Sort sort);
+
+    @Query("select ht from HiringTeam ht where ht.businessAccount IS NULL and ht.email = :email")
+    List<HiringTeam> findNonJobeeMembersByEmail(String email);
 }

@@ -501,12 +501,15 @@ public class Prompts {
       {inputJSON}
       """;
 
-  public static final String JOB_DESCRIPTION_GENERATION = """
+  public static final String JOB_CREATION_ENHANCE = """
       # Role Objective
       You are an AI Assistant that generates comprehensive job descriptions based on structured job details provided in JSON format.
       Your task is to create a well-written, engaging, and informative job description that accurately reflects the responsibilities,
       requirements, and benefits of the position. The description will be put on an app and will be reviewed by candidates on the job
-      details page. You will be provided with information on the job as well as the company.
+      details page. You will be provided with information on the job as well as the company. Once you have created a job description,
+      you're next task is to generate a list of keywords/tags relevant to the job description that can be used for SEO purposes. Tags such as
+      "Java", "Spring Boot", "Remote", "Full-time", "AWS", "Docker", "AutoCAD", "Automation", "Finance", "Marketing", etc. Any tags that are relevant to the job should be included.
+      Have a good mix of technical skills, job characteristics, company traits, industry-related tags. About 15-25 tags in total will be sufficient. Please do not include any tags which are already present in the input job details JSON.
 
       # Instructions
       - Parse the provided job information and company information from the input JSON
@@ -528,7 +531,10 @@ public class Prompts {
       5. The length of the description should be similar to typical job descriptions found on job posting sites.
 
       # Output Format
-      Return a String containing the job description divided into the following sections.
+      The output format will have two sections: The first section will be a string of the enhanced job description. following
+      the format below. The second section will be a list of keywords/tags relevant to the job description that can be used for SEO purposes.
+      Here is the format for the job description below...
+      The job description divided into the following sections.
       All section titles MUST be bolded using Markdown syntax (**Section Title**):
 
       - **Job Title - Setting(Remote/On-site/Hybrid) - Location**
@@ -539,6 +545,21 @@ public class Prompts {
       - **Nice to have**
       - **Location and Compensation**
       - **Join Us**
+
+      Then the second section will be a list of keywords/tags relevant to the job description that can be used for SEO purposes.
+      The keywords/tags should be in a JSON array format like below:
+      A list of strings in JSON array format:
+      [
+        "keyword1",
+        "keyword2",
+        ...
+      ]
+
+      In totality, here is what the final output should look like:
+      {
+        "enhancedJobDescription": "<The enhanced job description as a single string following the format described above>",
+        "seoKeywords": [string] // A list of keywords/tags relevant to the job description that can be used for SEO purposes
+      }
 
       # Input Schema
       {
@@ -552,14 +573,16 @@ public class Prompts {
           "level": string, // e.g., "Internship", "Entry Level", "Mid Level", "Senior Level", "Director", "Executive"
           "city": string,
           "country": string,
-          "setting": string // e.g., "remote", "on-site", "hybrid"
+          "setting": string // e.g., "remote", "on-site", "hybrid",
+          "existingTags": [string], // e.g., ["Spring Boot", "AWS", "Docker"]
           "streetAddress": string}
         },
         "Company": {
           "name": string,
           "description": string,
+          "foundedYear": integer,
+          "numEmployees": integer,
           "industry": string, // e.g., "Technology", "Finance", "Healthcare"
-          "size": string // e.g., "1-10 employees", "11-50 employees", "51-200 employees"
         }
       }
 
@@ -651,46 +674,4 @@ public class Prompts {
       Here is the input JSON to analyze:
       {inputJSON}
         """;
-
-  public static final String JOB_TAG_GENERATION = """
-      # Role Objective
-      You are posting a job listing on a website such as Indeed, Glassdoor, or Linkedin. You will receive structured JSON input containing job and company details.
-      You will also receive a list of existing tags associated with the job posting. Your task is to analyze this input and generate a JSON output adhering strictly to the schema provided below. Do not include any explanations or text outside of the JSON object.
-      Use a professional and concise tone. All you have to do is generate any additional tags that would be relevant to the job posting that are not already included in the existing tags.
-      Begin with a concise checklist (3-7 bullets) of the sub-tasks you will perform before generating your response; keep these conceptual, not implementation-level.
-      After preparing your output, validate that all required output schema fields are present, all lists are properly formed, and the JSON is strictly valid.
-      If any field cannot be filled due to missing input data, leave the corresponding output field as an empty list.
-
-      # Input Schema
-      {
-        "Job": {
-          "title": string,
-          "description": string,
-          "setting": string, // e.g., "remote", "on-site", "hybrid"
-          "skills": [string],
-          "minSalary": integer,
-          "maxSalary": integer,
-          "experience": integer,
-          "location": string
-        },
-        "Company": {
-          "name": string,
-          "description": string
-        },
-        "ExistingTags": [string] // List of existing tags associated with the job posting
-      }
-
-      # Output Schema
-      {
-        "tags": [string]
-      }
-
-      # Instructions
-      1. Analyze the existing job details.
-      2. Analyze the company details.
-      3. Come up with 10-12 tags that would be relevant to the job posting and are not already included in the existing tags.
-
-            Here is the input JSON formatted as specified
-            {inputJSON}
-                              """;
 }

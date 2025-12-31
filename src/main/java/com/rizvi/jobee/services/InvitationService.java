@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.rizvi.jobee.entities.BusinessAccount;
+import com.rizvi.jobee.entities.HiringTeam;
 import com.rizvi.jobee.entities.Invitation;
 import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.enums.BusinessType;
@@ -22,6 +23,20 @@ public class InvitationService {
     private final S3Service s3Service;
     @Autowired
     private EmailSender emailSender;
+
+    public Invitation createIntitationForHiringMember(HiringTeam teamMember, BusinessAccount invitedBy) {
+        Invitation invitation = new Invitation();
+        invitation.setEmail(teamMember.getEmail());
+        invitation.setInvitationType(BusinessType.EMPLOYEE);
+        invitation.setInvitedBy(invitedBy);
+        invitation.setCompany(invitedBy.getCompany());
+
+        String companyName = invitedBy.getCompany().getName();
+        String companyCode = generateCompanyCode(companyName);
+        invitation.setCompanyCode(companyCode);
+        var savedInvitation = invitationRepository.save(invitation);
+        return savedInvitation;
+    }
 
     private String generateCompanyCode(String companyName) {
         // Implement your company code generation logic here
@@ -87,20 +102,22 @@ public class InvitationService {
         emailSender.sendHiringTeamInvitationEmail(to, from, job);
     }
 
-    public void sendHiringTeamInvitationAndJoinJobeeEmail(String to, BusinessAccount from,
-            Job job) {
-        var companyName = from.getCompany().getName();
-        var companyCode = generateCompanyCode(companyName);
+    public void sendHiringTeamInvitationAndJoinJobeeEmail(String senderName,
+            HiringTeam hiringTeamMember, Invitation invitation, String jobTitle, String companyName) {
+        var companyCode = invitation.getCompanyCode();
         var inviteLink = generateInviteLink(companyCode);
-        var jobTitle = job.getTitle();
         String qrCode = null;
+        String s3Url = null;
         try {
             qrCode = generateQRCodeUrl(inviteLink);
+            s3Url = s3Service.uploadQRCodeViaURL(invitation.getId(), qrCode);
         } catch (Exception e) {
-            System.out.println("Error generating QR code: " + e.getMessage());
+            System.out.println("SYED-ERROR: Error generating QR code: " + e.getMessage());
         }
+        String to = hiringTeamMember.getEmail();
+        String recipientName = hiringTeamMember.getFullName();
         emailSender.sendHiringTeamInvitationAndJoinJobeeEmail(
-                to, companyName, from, companyCode, jobTitle, inviteLink, qrCode);
+                to, companyName, senderName, companyCode, jobTitle, s3Url, recipientName);
     }
 
 }

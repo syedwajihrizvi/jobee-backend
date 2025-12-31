@@ -97,8 +97,9 @@ public class S3Service {
                                                 profileImage.getSize()));
         }
 
-        public void uploadCompanyLogo(Long companyId, MultipartFile logoImage) throws IOException {
-                final String key = "company-logos/" + companyId;
+        public String uploadCompanyLogo(Long companyId, MultipartFile logoImage) throws IOException {
+                String imageName = logoImage.getOriginalFilename();
+                final String key = "company-logos/" + companyId + "/" + imageName;
                 s3Client.putObject(
                                 PutObjectRequest.builder()
                                                 .bucket(awsProperties.getBucket())
@@ -107,6 +108,7 @@ public class S3Service {
                                 software.amazon.awssdk.core.sync.RequestBody.fromInputStream(
                                                 logoImage.getInputStream(),
                                                 logoImage.getSize()));
+                return key;
         }
 
         public String uploadDocumentPreviewImage(
