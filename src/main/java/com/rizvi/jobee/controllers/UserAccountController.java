@@ -16,6 +16,7 @@ import com.rizvi.jobee.mappers.UserMapper;
 import com.rizvi.jobee.entities.UserAccount;
 import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.enums.Role;
+import com.rizvi.jobee.exceptions.AlreadyRegisteredException;
 import com.rizvi.jobee.exceptions.IncorrectEmailOrPasswordException;
 import com.rizvi.jobee.repositories.UserAccountRepository;
 import com.rizvi.jobee.services.JwtService;
@@ -40,6 +41,11 @@ public class UserAccountController {
             UriComponentsBuilder uriComponentsBuilder) {
 
         var password = passwordEncoder.encode(request.getPassword());
+        // Ensure email does not already exist
+        var exists = userAccountRepository.existsByEmail(request.getEmail());
+        if (exists) {
+            throw new AlreadyRegisteredException("An account with this email already exists.");
+        }
         var userAccount = UserAccount.builder().email(request.getEmail()).password(password).build();
         var userProfile = UserProfile.builder().firstName(request.getFirstName())
                 .lastName(request.getLastName()).age(request.getAge()).account(userAccount).build();

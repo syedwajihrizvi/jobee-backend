@@ -282,59 +282,166 @@ public class JobService {
 
     public Long checkJobMatch(Long jobId, UserProfile userProfile) {
         var job = getJobById(jobId);
-        var score = 0;
-        var maxScore = 100;
-        var userSkills = userProfile.getSkills().stream()
-                .map(skill -> skill.getSkillSlug().toLowerCase())
-                .toList();
-        var jobTags = job.getTags().stream()
-                .map(tag -> tag.getSlug().toLowerCase())
-                .toList();
-
-        if (!jobTags.isEmpty()) {
-            long matchingSkills = userSkills.stream()
-                    .mapToLong(userSkill -> jobTags.contains(userSkill) ? 1 : 0)
-                    .sum();
-            score += (int) ((matchingSkills * 40) / jobTags.size());
-        }
-        var totalExperience = userProfile.getExperiences().stream()
+        int score = 0;
+        int maxScore = 100;
+        long totalExperience = userProfile.getExperiences().stream()
                 .mapToLong(exp -> {
-                    String fromYear = exp.getFrom().replace(" ", "").toLowerCase();
-                    String toYear = exp.getTo() != null ? exp.getTo().replace(" ", "").toLowerCase() : "present";
-                    if (fromYear != null && toYear != null && !toYear.equals("present")) {
-                        return Long.parseLong(toYear) - Long.parseLong(fromYear);
-                    } else if (toYear == null || toYear.equals("present")) {
-                        var currentYear = String.valueOf(java.time.LocalDate.now().getYear());
-                        return Long.parseLong(currentYear) - Long.parseLong(fromYear);
+                    try {
+                        String fromYear = exp.getFrom().replaceAll("\\s+", "");
+                        String toYear = exp.getTo() != null
+                                ? exp.getTo().replaceAll("\\s+", "")
+                                : "present";
+
+                        int from = Integer.parseInt(fromYear);
+                        int to = toYear.equalsIgnoreCase("present")
+                                ? java.time.LocalDate.now().getYear()
+                                : Integer.parseInt(toYear);
+
+                        return Math.max(0, to - from);
+                    } catch (Exception e) {
+                        return 0L;
                     }
-                    return 0L;
                 })
                 .sum();
 
-        var experienceScore = job.getUserMatchWithExperience(totalExperience);
-        score += (experienceScore * 30) / 100;
+        int userLevel;
+        if (totalExperience < 1)
+            userLevel = 1; // INTERN
+        else if (totalExperience < 3)
+            userLevel = 2; // JUNIOR
+        else if (totalExperience < 6)
+            userLevel = 3; // MID
+        else if (totalExperience < 9)
+            userLevel = 4; // SENIOR
+        else
+            userLevel = 5; // LEAD
+
+        int jobLevel;
+        int minJobYears = job.convertLevelToInteger();
+
+        if (minJobYears <= 1)
+            jobLevel = 2;
+        else if (minJobYears <= 3)
+            jobLevel = 3;
+        else if (minJobYears <= 6)
+            jobLevel = 4;
+        else
+            jobLevel = 5;
+
+        if (userLevel >= jobLevel)
+            score += 20;
+        else if (userLevel == jobLevel - 1)
+            score += 14;
+        else if (userLevel == jobLevel - 2)
+            score += 8;
+
+        var userSkills = userProfile.getSkills().stream()
+                .map(s -> s.getSkillSlug().toLowerCase())
+                .toList();
+
+        var jobSkills = job.getTags().stream()
+                .map(t -> t.getSlug().toLowerCase())
+                .toList();
+        int skillScore = 0;
+        double skillMatchRatio = 0;
+
+        if (!jobSkills.isEmpty() && !userSkills.isEmpty()) {
+            long matches = 0;
+            for (String userSkill : userSkills) {
+                if (jobSkills.stream()
+                        .anyMatch(jobSkill -> jobSkill.contains(userSkill) || userSkill.contains(jobSkill))) {
+                    matches++;
+                }
+
+            }
+
+            // Prevent dilution for senior jobs
+            int divisor = Math.min(jobSkills.size(), 10);
+            skillMatchRatio = (double) matches / divisor;
+
+            skillScore = (int) Math.round(skillMatchRatio * 35);
+        }
+        score += skillScore;
+
+        // -----------------------------
+        // 6. EXPERIENCE FIT (30)
+        // -----------------------------
+        int experienceScore = 0;
+
+        if (totalExperience >= minJobYears + 3)
+            experienceScore = 30;
+        else if (totalExperience >= minJobYears)
+            experienceScore = 25;
+        else if (totalExperience >= minJobYears - 1)
+            experienceScore = 18;
+        else if (totalExperience >= minJobYears - 3)
+            experienceScore = 10;
+
+        // Bonus if user is more senior than job
+        if (userLevel > jobLevel)
+            experienceScore += 3;
+
+        System.out.println("Experience Score: " + experienceScore);
+
+        score += Math.min(experienceScore, 30);
+
+        // -----------------------------
+        // 7. LOCATION / REMOTE (10)
+        // -----------------------------
+        int locationScore = 0;
         var jobLocation = job.getLocation();
+
         List<String> userLocations = new ArrayList<>();
-        userLocations.addAll(userProfile.getExperiences().stream()
-                .map(exp -> exp.getCity() + ", " + exp.getCountry())
-                .toList());
         userLocations.add(userProfile.getLocation());
-        if (job.getSetting() != null && job.getSetting().toString().equalsIgnoreCase("REMOTE")) {
-            score += 20;
-        } else if (jobLocation != null && userLocations.stream()
-                .anyMatch(userLoc -> userLoc != null &&
-                        userLoc.toLowerCase().contains(jobLocation.toLowerCase()))) {
-            score += 20;
+        userLocations.addAll(
+                userProfile.getExperiences().stream()
+                        .map(exp -> exp.getCity() + ", " + exp.getCountry())
+                        .toList());
+
+        if (job.getSetting() != null &&
+                job.getSetting().toString().equalsIgnoreCase("REMOTE")) {
+            locationScore = 10;
+        } else if (jobLocation != null &&
+                userLocations.stream()
+                        .anyMatch(loc -> loc != null && loc.toLowerCase().contains(jobLocation.toLowerCase()))) {
+            locationScore = 10;
         }
-        var hasRelevantEducation = userProfile.getEducation().stream()
-                .anyMatch(edu -> edu.getLevel() != null &&
-                        (edu.getLevel().toString().toLowerCase().contains("bachelor") ||
-                                edu.getLevel().toString().toLowerCase().contains("master") ||
-                                edu.getLevel().toString().toLowerCase().contains("phd")));
-        if (hasRelevantEducation) {
-            score += 10;
+        System.out.println("Location Score: " + locationScore);
+        score += locationScore;
+
+        // -----------------------------
+        // 8. EDUCATION (5)
+        // -----------------------------
+        int educationScore = 0;
+
+        boolean hasBachelor = userProfile.getEducation().stream()
+                .anyMatch(e -> e.getLevel() != null &&
+                        e.getLevel().toString().toLowerCase().contains("bachelor"));
+
+        boolean hasMasterOrPhd = userProfile.getEducation().stream()
+                .anyMatch(e -> e.getLevel() != null &&
+                        (e.getLevel().toString().toLowerCase().contains("master") ||
+                                e.getLevel().toString().toLowerCase().contains("phd")));
+
+        if (hasMasterOrPhd)
+            educationScore = 5;
+        else if (hasBachelor)
+            educationScore = 3;
+        score += educationScore;
+
+        // -----------------------------
+        // 9. HARD CAP: INSUFFICIENT SKILLS
+        // -----------------------------
+        if (skillMatchRatio < 0.5) {
+            score = Math.min(score, 60);
         }
-        return Long.valueOf(Math.min(score, maxScore));
+
+        // -----------------------------
+        // 10. NORMALIZE
+        // -----------------------------
+        score = Math.min(score, maxScore);
+
+        return (long) score;
     }
 
     public Map<UserProfile, Integer> findCandidatesForJob(Long jobId) {

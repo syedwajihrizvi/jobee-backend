@@ -53,7 +53,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AlreadyRegisteredException.class)
     public ResponseEntity<Map<String, String>> handleAlreadyRegisteredException(AlreadyRegisteredException ex) {
-        return ResponseEntity.badRequest().body(Map.of("Error", "Already registered: " + ex.getMessage()));
+        return ResponseEntity.badRequest().body(Map.of("Error", ex.getMessage()));
     }
 
     @ExceptionHandler(InvalidDocumentURLLinkException.class)

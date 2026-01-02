@@ -249,4 +249,22 @@ public class Job {
         }
         return locationBuilder.toString();
     }
+
+    public Integer convertLevelToInteger() {
+        switch (this.level) {
+            case INTERN:
+            case ENTRY:
+                return 1;
+            case JUNIOR_LEVEL:
+                return 2;
+            case MID_LEVEL:
+                return 3;
+            case SENIOR_LEVEL:
+                return 4;
+            case LEAD:
+                return 5;
+            default:
+                return 0;
+        }
+    }
 }
