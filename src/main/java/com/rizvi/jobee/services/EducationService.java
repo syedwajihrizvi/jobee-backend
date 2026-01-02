@@ -43,6 +43,7 @@ public class EducationService {
                 .institution(request.getInstitution())
                 .fromYear(request.getFromYear())
                 .toYear(request.getToYear())
+                .level(request.getEducationLevel())
                 .userProfile(userProfile).build();
         userProfile.addEducation(education);
         var savedEducation = educationRepository.save(education);
@@ -96,6 +97,7 @@ public class EducationService {
         education.setInstitution(request.getInstitution());
         education.setFromYear(request.getFromYear());
         education.setToYear(request.getToYear());
+        education.setLevel(request.getEducationLevel());
         return educationRepository.save(education);
     }
 }

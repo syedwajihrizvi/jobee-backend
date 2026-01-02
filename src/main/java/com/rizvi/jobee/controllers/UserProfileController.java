@@ -334,8 +334,6 @@ public class UserProfileController {
                 var existingSummary = existingSummaryDto != null ? existingSummaryDto.getSummary() : null;
                 var aiSummary = userProfileService.generateAIProfessionalSummary(userProfileId,
                                 existingSummary);
-                System.out.println(
-                                "SYED-DEBUG: Generated AI Professional Summary: " + aiSummary.getProfessionalSummary());
                 return ResponseEntity.ok().body(aiSummary);
         }
 

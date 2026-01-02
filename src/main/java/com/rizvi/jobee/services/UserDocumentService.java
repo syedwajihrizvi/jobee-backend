@@ -162,9 +162,18 @@ public class UserDocumentService {
         }
         var userDocument = UserDocument.builder().documentType(documentType)
                 .documentUrl(result).title(title).user(userProfile).build();
-        userProfile.addDocument(userDocument);
+        var savedDocument = userDocumentRepository.save(userDocument);
+        byte[] previewBytes;
+        try {
+            previewBytes = renderPdfPreview(multipartFile);
+            String previewImageUrl = s3Service.uploadDocumentPreviewImage(savedDocument.getId(), previewBytes);
+            savedDocument.setPreviewUrl(previewImageUrl);
+        } catch (Exception e) {
+            System.out.println("SYED-DEBUG: Error generating PDF preview: " + e.getMessage());
+        }
+        userProfile.addDocument(savedDocument);
         userProfileRepository.save(userProfile);
-        return userDocument;
+        return savedDocument;
     }
 
     public UserDocument updateUserDocument(
