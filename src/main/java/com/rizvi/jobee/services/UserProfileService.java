@@ -36,7 +36,6 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class UserProfileService {
     private final UserProfileRepository userProfileRepository;
-    private final UserNotificationService userNotificationService;
     private final UserAccountRepository userAccountRepository;
     private final QuickApplyTSRepository quickApplyTSRepository;
     private final CompanyRepository companyRepository;

@@ -81,6 +81,10 @@ public class UserProfile {
     @Builder.Default
     private Integer profileViews = 0;
 
+    @Column(name = "experience_level", nullable = false)
+    @Builder.Default
+    private Integer experienceLevel = 0;
+
     @OneToOne(optional = false)
     @JoinColumn(name = "account_id", nullable = false, unique = true)
     private UserAccount account;
@@ -238,4 +242,17 @@ public class UserProfile {
                 || this.experiences != null || !this.experiences.isEmpty() || this.skills != null
                 || !this.skills.isEmpty() || this.projects != null && !this.projects.isEmpty();
     }
+
+    public void addExperienceYears(Integer years) {
+        if (years != null && years > 0) {
+            this.experienceLevel += years;
+        }
+    }
+
+    public void removeExperienceYears(Integer years) {
+        if (years != null && years > 0 && this.experienceLevel - years >= 0) {
+            this.experienceLevel -= years;
+        }
+    }
+
 }

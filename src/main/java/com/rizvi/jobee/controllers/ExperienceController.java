@@ -75,7 +75,6 @@ public class ExperienceController {
                     return 0;
                 })
                 .toList();
-        System.out.println(experiences);
         return ResponseEntity.ok(experiences);
     }
 

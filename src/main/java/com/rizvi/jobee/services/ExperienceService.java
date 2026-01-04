@@ -11,13 +11,15 @@ import com.rizvi.jobee.exceptions.ExperienceNotFoundException;
 import com.rizvi.jobee.exceptions.UnauthorizedException;
 import com.rizvi.jobee.helpers.AISchemas.AIExperience;
 import com.rizvi.jobee.repositories.ExperienceRepository;
-
+import com.rizvi.jobee.repositories.UserProfileRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @Service
 public class ExperienceService {
+
+    private final UserProfileRepository userProfileRepository;
     private final ExperienceRepository experienceRepository;
 
     public List<Experience> getAllExperiences() {
@@ -36,6 +38,12 @@ public class ExperienceService {
         if (!experience.getUserProfile().getId().equals(userId)) {
             throw new UnauthorizedException("You are not authorized to delete this experience");
         }
+        var years = experience.getDurationInYears();
+        var userProfile = userProfileRepository.findById(userId).orElse(null);
+        if (userProfile != null) {
+            userProfile.removeExperienceYears(years);
+            userProfileRepository.save(userProfile);
+        }
         experienceRepository.deleteById(experienceId);
         return true;
     }
@@ -47,6 +55,9 @@ public class ExperienceService {
                 .state(request.getState())
                 .to(request.getTo()).description(request.getDescription())
                 .userProfile(userProfile).build();
+        var years = experience.getDurationInYears();
+        userProfile.addExperienceYears(years);
+        userProfileRepository.save(userProfile);
         return experienceRepository.save(experience);
     }
 
@@ -54,7 +65,6 @@ public class ExperienceService {
     public boolean addExperiencesForUserFromAISchemas(
             List<AIExperience> experiences, UserProfile userProfile) {
         for (AIExperience experience : experiences) {
-            System.out.println("Processing AIExperience: " + experience);
             var id = experience.id;
             String fromYear = experience.getFromYear() != null && !experience.getFromYear().trim().isEmpty()
                     ? experience.getFromYear()
@@ -91,7 +101,10 @@ public class ExperienceService {
                         .to(toYear)
                         .userProfile(userProfile)
                         .build();
-                experienceRepository.save(newExperience);
+                var savedExperience = experienceRepository.save(newExperience);
+                var years = savedExperience.getDurationInYears();
+                userProfile.addExperienceYears(years);
+                userProfileRepository.save(userProfile);
             }
         }
         return true;
@@ -99,6 +112,7 @@ public class ExperienceService {
 
     public Experience updateExperience(CreateExperienceDto request, Long id) {
         var experience = experienceRepository.findById(id).orElseThrow(() -> new ExperienceNotFoundException(id));
+        Integer years = experience.getDurationInYears();
         experience.setTitle(request.getTitle());
         experience.setCompany(request.getCompany());
         experience.setCity(request.getCity());
@@ -107,6 +121,13 @@ public class ExperienceService {
         experience.setFrom(request.getFrom());
         experience.setTo(request.getTo());
         experience.setDescription(request.getDescription());
+        // Update the experience as well
+        var userProfile = userProfileRepository.findById(experience.getUserProfile().getId()).orElse(null);
+        if (userProfile != null) {
+            userProfile.removeExperienceYears(years);
+            userProfile.addExperienceYears(experience.getDurationInYears());
+            userProfileRepository.save(userProfile);
+        }
         return experienceRepository.save(experience);
     }
 

@@ -2,6 +2,7 @@ package com.rizvi.jobee.specifications;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.jpa.domain.Specification;
 
@@ -11,6 +12,8 @@ import com.rizvi.jobee.entities.Job;
 import com.rizvi.jobee.entities.UserProfile;
 import com.rizvi.jobee.entities.UserSkill;
 import com.rizvi.jobee.enums.ApplicationStatus;
+import com.rizvi.jobee.enums.EducationLevel;
+import com.rizvi.jobee.enums.JobLevel;
 import com.rizvi.jobee.queries.ApplicationQuery;
 
 import jakarta.persistence.criteria.Join;
@@ -18,7 +21,7 @@ import jakarta.persistence.criteria.Predicate;
 
 public class ApplicantSpecification {
     public static Specification<Application> withFilters(ApplicationQuery query) {
-        System.out.println(query.getApplicationStatus());
+        System.out.println(query);
         return (root, _, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             Join<Application, Job> jobJoin = root.join("job");
@@ -50,6 +53,18 @@ public class ApplicantSpecification {
             if (query.getUserProfileId() != null) {
                 predicates.add(cb.equal(userProfileJoin.get("id"), query.getUserProfileId()));
             }
+            if (query.getExperiences() != null && !query.getExperiences().isEmpty()) {
+                try {
+                    JobLevel jobLevel = JobLevel.valueOf(query.getExperiences().toUpperCase());
+                    int minimumRequiredYears = getMinRequiredYearsForLevel(jobLevel);
+                    int maximumRequiredYears = getMaxRequiredYearsForLevel(jobLevel);
+                    predicates.add(cb.and(
+                            cb.greaterThanOrEqualTo(userProfileJoin.get("experienceLevel"), minimumRequiredYears),
+                            cb.lessThanOrEqualTo(userProfileJoin.get("experienceLevel"), maximumRequiredYears)));
+                } catch (IllegalArgumentException e) {
+                    System.out.println("Invalid job level: " + query.getExperiences());
+                }
+            }
             if (query.getSkills() != null && !query.getSkills().isEmpty()) {
                 List<Predicate> skillPredicates = new ArrayList<>();
                 for (String skill : query.getSkills()) {
@@ -60,10 +75,16 @@ public class ApplicantSpecification {
                 predicates.add(cb.or(skillPredicates.toArray(new Predicate[0])));
             }
             if (query.getEducationLevel() != null && !query.getEducationLevel().isEmpty()) {
-                Join<UserProfile, Education> educationJoin = userProfileJoin.join("education");
-                predicates.add(cb.equal(
-                        cb.lower(educationJoin.get("level")),
-                        query.getEducationLevel().toLowerCase().trim()));
+                try {
+                    EducationLevel educationLevel = EducationLevel.valueOf(query.getEducationLevel());
+                    Set<EducationLevel> encompassingLevels = getEducationLevelsOfAtleast(educationLevel);
+                    System.out.println(query.getEducationLevel());
+                    System.out.println("Encompassing Levels: " + encompassingLevels);
+                    Join<UserProfile, Education> educationJoin = userProfileJoin.join("education");
+                    predicates.add(educationJoin.get("level").in(encompassingLevels));
+                } catch (IllegalArgumentException e) {
+                    System.out.println("Invalid education level: " + query.getEducationLevel());
+                }
             }
             if (query.getApplicationDateRange() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(
@@ -71,7 +92,7 @@ public class ApplicantSpecification {
                         cb.literal(java.time.LocalDateTime.now().minusDays(query.getApplicationDateRange()))));
             }
             if (query.getHasCoverLetter() != null) {
-                predicates.add(cb.isNotNull(root.get("coverLetter")).in(query.getHasCoverLetter()));
+                predicates.add(cb.isNotNull(root.get("coverLetterDocument")).in(query.getHasCoverLetter()));
             }
             if (query.getHasVideoIntro() != null) {
                 predicates.add(cb.isNotNull(userProfileJoin.get("videoIntroUrl")).in(query.getHasVideoIntro()));
@@ -93,6 +114,46 @@ public class ApplicantSpecification {
                 }
             }
             return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    private static int getMinRequiredYearsForLevel(JobLevel level) {
+        return switch (level) {
+            case INTERN, ENTRY -> 0;
+            case JUNIOR_LEVEL -> 1;
+            case MID_LEVEL -> 3;
+            case SENIOR_LEVEL -> 7;
+            case LEAD -> 10;
+            default -> 0;
+        };
+    }
+
+    private static int getMaxRequiredYearsForLevel(JobLevel level) {
+        return switch (level) {
+            case INTERN, ENTRY -> 2;
+            case JUNIOR_LEVEL -> 4;
+            case MID_LEVEL -> 7;
+            case SENIOR_LEVEL -> Integer.MAX_VALUE;
+            case LEAD -> Integer.MAX_VALUE;
+            default -> 0;
+        };
+    }
+
+    private static Set<EducationLevel> getEducationLevelsOfAtleast(EducationLevel level) {
+        return switch (level) {
+            case HIGH_SCHOOL -> Set.of(EducationLevel.HIGH_SCHOOL, EducationLevel.DIPLOMA, EducationLevel.ASSOCIATES,
+                    EducationLevel.BACHELORS, EducationLevel.MASTERS, EducationLevel.PHD,
+                    EducationLevel.POSTDOCTORATE);
+            case DIPLOMA -> Set.of(EducationLevel.DIPLOMA, EducationLevel.ASSOCIATES, EducationLevel.BACHELORS,
+                    EducationLevel.MASTERS, EducationLevel.PHD, EducationLevel.POSTDOCTORATE);
+            case ASSOCIATES -> Set.of(EducationLevel.ASSOCIATES, EducationLevel.BACHELORS, EducationLevel.MASTERS,
+                    EducationLevel.PHD, EducationLevel.POSTDOCTORATE);
+            case BACHELORS -> Set.of(EducationLevel.BACHELORS, EducationLevel.MASTERS, EducationLevel.PHD,
+                    EducationLevel.POSTDOCTORATE);
+            case MASTERS -> Set.of(EducationLevel.MASTERS, EducationLevel.PHD, EducationLevel.POSTDOCTORATE);
+            case PHD -> Set.of(EducationLevel.PHD, EducationLevel.POSTDOCTORATE);
+            case POSTDOCTORATE -> Set.of(EducationLevel.POSTDOCTORATE);
+            default -> Set.of();
         };
     }
 }

@@ -115,4 +115,24 @@ public class Experience {
         return location.toString();
     }
 
+    public Integer getDurationInYears() {
+        try {
+            int fromYear = Integer.parseInt(this.from);
+            int toYear;
+            if (this.to.toLowerCase().replace(" ", "").equals("present")) {
+                toYear = java.time.Year.now().getValue();
+            } else {
+                toYear = Integer.parseInt(this.to);
+            }
+            if (toYear < fromYear) {
+                return 0;
+            }
+            if (toYear == fromYear) {
+                return 1;
+            }
+            return toYear - fromYear;
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
 }

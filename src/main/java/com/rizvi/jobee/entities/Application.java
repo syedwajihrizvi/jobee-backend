@@ -9,7 +9,6 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import com.rizvi.jobee.enums.ApplicationStatus;
 import com.rizvi.jobee.enums.InterviewDecisionResult;
-import com.rizvi.jobee.enums.InterviewStatus;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
