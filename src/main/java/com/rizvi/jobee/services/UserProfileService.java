@@ -36,6 +36,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class UserProfileService {
     private final UserProfileRepository userProfileRepository;
+    private final UserNotificationService userNotificationService;
     private final UserAccountRepository userAccountRepository;
     private final QuickApplyTSRepository quickApplyTSRepository;
     private final CompanyRepository companyRepository;
@@ -322,7 +323,8 @@ public class UserProfileService {
         }
         GenerateAIProfessionalSummaryRequest request = new GenerateAIProfessionalSummaryRequest(userProfile,
                 existingSummaryDto);
-        return aiService.generateAIProfessionalSummary(request);
+        AIProfessionalSummaryAnswer answer = aiService.generateAIProfessionalSummary(request);
+        return answer;
     }
 
 }

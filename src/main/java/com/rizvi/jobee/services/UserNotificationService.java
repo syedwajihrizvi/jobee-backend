@@ -76,6 +76,9 @@ public class UserNotificationService {
         if (notificationDto.getCandidateProfileImageUrl() != null) {
             context.setCandidateProfileImageUrl(notificationDto.getCandidateProfileImageUrl());
         }
+        if (notificationDto.getUserSummary() != null) {
+            context.setUserSummary(notificationDto.getUserSummary());
+        }
         notification.setContext(context);
         return notificationRepository.save(notification);
     }
@@ -463,6 +466,18 @@ public class UserNotificationService {
         notificationDto.setMessage(message);
         notificationDto.setRecipientId(userId);
         notificationDto.setNotificationType(NotificationType.AI_RESUME_REVIEW_COMPLETE);
+        var savedNotification = saveNotification(notificationDto);
+        sendInAppNotification(savedNotification);
+    }
+
+    public void sendInAppNotificationForSummaryGeneration(Long userId, String userSummary) {
+        var message = "Your AI-generated professional summary is ready. Please review and update your profile.";
+        CreateNotificationDto notificationDto = new CreateNotificationDto();
+        notificationDto.setRecipientType(MessagerUserType.USER);
+        notificationDto.setMessage(message);
+        notificationDto.setRecipientId(userId);
+        notificationDto.setNotificationType(NotificationType.AI_PROFESSIONAL_SUMMARY_READY);
+        notificationDto.setUserSummary(userSummary);
         var savedNotification = saveNotification(notificationDto);
         sendInAppNotification(savedNotification);
     }

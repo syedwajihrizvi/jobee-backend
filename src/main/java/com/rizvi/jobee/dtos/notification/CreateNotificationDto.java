@@ -19,4 +19,5 @@ public class CreateNotificationDto {
     private Long interviewId;
     private String candidateProfileImageUrl;
     private String fullName;
+    private String userSummary;
 }

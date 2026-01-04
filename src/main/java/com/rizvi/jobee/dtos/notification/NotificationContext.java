@@ -13,4 +13,5 @@ public class NotificationContext {
     private Long applicationId;
     private Long interviewId;
     private String fullName;
+    private String userSummary;
 }

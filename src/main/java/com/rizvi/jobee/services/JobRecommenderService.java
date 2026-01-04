@@ -31,6 +31,9 @@ public class JobRecommenderService {
             if (job.hasUserApplied(user.getId())) {
                 continue;
             }
+            if (matchScore < 50) {
+                continue;
+            }
             recommendedJobs.put(job, matchScore);
         }
         return recommendedJobs;
